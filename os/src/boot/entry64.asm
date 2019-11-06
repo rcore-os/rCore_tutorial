@@ -27,11 +27,8 @@ bootstacktop:
 	.section .data
     .align 12   # page align
 boot_page_table_sv39:
-    # 0x00000000_80000000 -> 0x80000000 (1G)
-    # 0xffffffff_c0000000 -> 0x80000000 (1G)
-    .quad 0
-    .quad 0
-    .quad (0x80000 << 10) | 0xcf # VRWXAD
-	#.quad 0
-    .zero 8 * 508
+	# 0xffffffff80000000 -> 0x80000000 (1GB)
+	# 0xffffffffc0000000 -> 0x80000000 (1GB)
+    .zero 8 * 510
+	.quad (0x80000 << 10) | 0xcf
     .quad (0x80000 << 10) | 0xcf # VRWXAD
