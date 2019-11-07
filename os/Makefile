@@ -2,8 +2,12 @@ target := riscv64-os
 mode := debug
 kernel := target/$(target)/$(mode)/os
 bin := target/$(target)/$(mode)/kernel.bin
-
-kernel:
+xbuild_args := --target $(target).json
+export USER_IMG = user_img
+rust:
+	@cd usr/rust && cargo xbuild --target $(target).json
+	@cp usr/rust/target/$(target)/$(mode)/rust ./user_img
+kernel: rust
 	@cargo xbuild --target $(target).json
 $(bin): kernel
 	@riscv64-unknown-elf-objcopy $(kernel) --strip-all -O binary $@

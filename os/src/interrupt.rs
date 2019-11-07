@@ -88,3 +88,21 @@ pub fn restore(flags: usize) {
     }
 }
 
+pub const SYS_WRITE: usize = 64;
+pub const SYS_EXIT: usize = 93;
+
+fn syscall(tf: &mut TrapFrame) {
+    tf.sepc += 4;
+    match tf.x[17] {
+        SYS_WRITE => {
+            print!("{}", tf.x[10] as u8 as char);
+        },
+        SYS_EXIT => {
+            println!("process exited!");
+            crate::process::exit(tf.x[10]);
+        },
+        _ => {
+            panic!("unknown user syscall!");
+        }
+    }
+}

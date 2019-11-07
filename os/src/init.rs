@@ -16,12 +16,29 @@ use crate::alloc::{
 
 global_asm!(include_str!("boot/entry64.asm"));
 
+global_asm!(concat!(
+    r#"
+	.section .data
+	.global _user_img_start
+	.global _user_img_end
+_user_img_start:
+    .incbin ""#,
+    env!("USER_IMG"),
+    r#""
+_user_img_end:
+"#
+));
+
 #[no_mangle]
 pub extern "C" fn rust_main() -> ! {
     extern "C" {
         fn end();
+        fn _user_img_start();
+        fn _user_img_end();
     }
     println!("kernel end vaddr = 0x{:x}", end as usize);
+    println!("user_img is at [{:#x}, {:#x})", _user_img_start as usize, _user_img_end as usize);
+    loop {}
     println!(
         "free physical memory ppn = [0x{:x}, 0x{:x})",
         ((end as usize - KERNEL_BEGIN_VADDR + KERNEL_BEGIN_PADDR) >> 12) + 1,

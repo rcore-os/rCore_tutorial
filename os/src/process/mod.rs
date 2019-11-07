@@ -46,3 +46,7 @@ static CPU: Processor = Processor::new();
 pub fn tick() {
     CPU.tick();
 }
+
+pub fn exit(code: usize) {
+    CPU.exit(code);
+}
