@@ -33,9 +33,12 @@ pub extern "C" fn rust_main() -> ! {
         ((end as usize - KERNEL_BEGIN_VADDR + KERNEL_BEGIN_PADDR) >> 12) + 1,
         PHYSICAL_MEMORY_END >> 12
     );
-    print_frame_status();
-    frame_allocating_test();
-    dynamic_allocating_test();
+    //print_frame_status();
+    //frame_allocating_test();
+    //dynamic_allocating_test();
+    //write_readonly_test();
+    //execute_unexecutable_test();
+    //read_invalid_test();
     crate::timer::init();
 
     unsafe {
@@ -72,4 +75,27 @@ fn dynamic_allocating_test() {
     println!("vec assertion successfully!");
     println!("vec is at {:p}", vec.as_slice());
 
+}
+
+fn write_readonly_test() {
+    extern "C" {
+        fn srodata();
+    }
+    unsafe {
+        let ptr = srodata as usize as *mut u8;
+        *ptr = 0xab;
+    }
+}
+
+fn execute_unexecutable_test() {
+    extern "C" {
+        fn sbss();
+    }
+    unsafe {
+        asm!("jr $0" :: "r"(sbss as usize) :: "volatile");
+    }
+}
+
+fn read_invalid_test() {
+    println!("{}", unsafe { *(0x12345678 as usize as *const u8) });
 }
