@@ -6,28 +6,30 @@ use crate::alloc::alloc::{
 };
 use crate::consts::*;
 use riscv::register::satp;
+use crate::process::{ Tid, ExitCode };
+use crate::alloc::boxed::Box;
 
 pub struct Thread {
     pub context: Context,
     pub kstack: KernelStack,
 }
 impl Thread {
-    pub fn new_idle() -> Thread {
+    pub fn new_idle() -> Box<Thread> {
         unsafe {
-            Thread {
+            Box::new(Thread {
                 context: Context::null(),
                 kstack: KernelStack::new(),
-            }
+            })
         }
     }
 
-    pub fn new_kernel(entry: extern "C" fn(usize) -> !, arg: usize) -> Thread {
+    pub fn new_kernel(entry: extern "C" fn(usize) -> !, arg: usize) -> Box<Thread> {
         unsafe {
             let kstack_ = KernelStack::new();
-            Thread {
+            Box::new(Thread {
                 context: Context::new_kernel_thread(entry, arg, kstack_.top(), satp::read().bits()),
                 kstack: kstack_,
-            }
+            })
         }
     }
     pub fn switch_to(&mut self, target: &mut Thread) {
@@ -61,3 +63,10 @@ impl Drop for KernelStack {
     }
 }
 
+#[derive(Clone)]
+pub enum Status {
+    Ready,
+    Running(Tid),
+    Sleeping,
+    Exited(ExitCode),
+}

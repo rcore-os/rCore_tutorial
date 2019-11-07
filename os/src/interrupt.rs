@@ -15,6 +15,8 @@ use crate::timer::{
     TICKS,
     clock_set_next_event
 };
+use crate::process::tick;
+
 global_asm!(include_str!("trap/trap.asm"));
 
 pub fn init() {
@@ -55,9 +57,34 @@ fn super_timer() {
     clock_set_next_event();
     unsafe {
         TICKS += 1;
-        if (TICKS == 100) {
+        if TICKS == 100 {
             TICKS = 0;
             println!("* 100 ticks *");
         }
     }
+    tick();
 }
+
+#[inline(always)]
+pub fn enable_and_wfi() {
+    unsafe {
+        asm!("csrsi sstatus, 1 << 1; wfi" :::: "volatile");
+    }
+}
+
+#[inline(always)]
+pub fn disable_and_store() -> usize {
+    let sstatus: usize;
+    unsafe {
+        asm!("csrsi sstatus, 1 << 1" : "=r"(sstatus) ::: "volatile");
+    }
+    sstatus & (1 << 1)
+}
+
+#[inline(always)]
+pub fn restore(flags: usize) {
+    unsafe {
+        asm!("csrs sstatus, $0" :: "r"(flags) :: "volatile");
+    }
+}
+
