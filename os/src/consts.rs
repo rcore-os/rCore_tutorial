@@ -13,3 +13,5 @@ pub const PAGE_SIZE: usize = 4096;
 pub const KERNEL_HEAP_SIZE: usize = 0x800000;
 
 pub const PAGE_TABLE_ENTRY_COUNT: usize = 512;
+
+pub const KERNEL_STACK_SIZE: usize = 0x8000;

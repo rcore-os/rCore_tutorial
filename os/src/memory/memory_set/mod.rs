@@ -75,7 +75,7 @@ impl MemorySet {
         );
     }
     pub fn push(&mut self, start: usize, end: usize, attr: MemoryAttr, handler: impl MemoryHandler) {
-        println!("in push: [{:#x},{:#x})", start, end);
+        //println!("in push: [{:#x},{:#x})", start, end);
         assert!(start <= end, "invalid memory area!");
         assert!(self.test_free_area(start, end), "memory area overlap!");
         let area = MemoryArea::new(start, end, Box::new(handler), attr);

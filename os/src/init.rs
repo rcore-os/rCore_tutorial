@@ -41,13 +41,16 @@ pub extern "C" fn rust_main() -> ! {
     //read_invalid_test();
     crate::timer::init();
 
-    unsafe {
-        asm!("ebreak"::::"volatile");
-    }
+    crate::process::init(); 
     panic!("end of rust_main");
     loop {}
 }
 
+fn ebreak_test() {
+    unsafe {
+        asm!("ebreak" :::: "volatile");
+    }
+}
 fn frame_allocating_test() {
     println!("alloc {:#x?}", alloc_frame());
     let f = alloc_frame();
@@ -99,3 +102,4 @@ fn execute_unexecutable_test() {
 fn read_invalid_test() {
     println!("{}", unsafe { *(0x12345678 as usize as *const u8) });
 }
+

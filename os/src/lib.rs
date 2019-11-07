@@ -2,6 +2,7 @@
 #![feature(asm)]
 #![feature(global_asm)]
 #![feature(alloc_error_handler)]
+#![feature(naked_functions)]
 
 #[macro_use]
 mod io;
@@ -27,3 +28,5 @@ fn alloc_error_handler(_: core::alloc::Layout) -> ! {
 }
 
 extern crate alloc;
+
+mod process;
