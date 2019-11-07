@@ -3,10 +3,12 @@ mode := debug
 kernel := target/$(target)/$(mode)/os
 bin := target/$(target)/$(mode)/kernel.bin
 xbuild_args := --target $(target).json
-export USER_IMG = user_img
+
+export USER_IMG = target/user_img
 rust:
 	@cd usr/rust && cargo xbuild --target $(target).json
-	@cp usr/rust/target/$(target)/$(mode)/rust ./user_img
+	@cp usr/rust/target/$(target)/$(mode)/rust target/user_img
+
 kernel: rust
 	@cargo xbuild --target $(target).json
 $(bin): kernel
