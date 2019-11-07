@@ -3,7 +3,8 @@ use crate::sbi;
 use crate::consts::*;
 use crate::memory::{
     alloc_frame,
-    dealloc_frame
+    dealloc_frame,
+    print_frame_status,
 };
 use crate::alloc::{
     boxed::Box,
@@ -32,6 +33,7 @@ pub extern "C" fn rust_main() -> ! {
         ((end as usize - KERNEL_BEGIN_VADDR + KERNEL_BEGIN_PADDR) >> 12) + 1,
         PHYSICAL_MEMORY_END >> 12
     );
+    print_frame_status();
     frame_allocating_test();
     dynamic_allocating_test();
     crate::timer::init();

@@ -23,9 +23,18 @@ impl SegmentTreeAllocator {
         while self.m < self.n + 2 {
             self.m = self.m << 1;
         }
-        for i in (1..(self.m << 1)) { self.a[i] = 1; }
-        for i in (1..self.n) { self.a[self.m + i] = 0; }
+        for i in 1..(self.m << 1) { self.a[i] = 1; }
+        for i in 1..(self.n + 1) { self.a[self.m + i] = 0; }
         for i in (1..self.m).rev() { self.a[i] = self.a[i << 1] & self.a[(i << 1) | 1]; }
+    }
+    pub fn print_allocating_status(&self) {
+        let mut free_frames = 0;
+        for i in 1..(self.n + 1) {
+            if self.a[self.m + i] == 0 {
+                free_frames += 1;
+            }
+        }
+        println!("frame allocated {}/{}, ratio = {}%", self.n - free_frames, self.n, 100.0 - 100.0 * free_frames as f32 / self.n as f32);
     }
     pub fn alloc(&mut self) -> usize {
         // assume that we never run out of physical memory
