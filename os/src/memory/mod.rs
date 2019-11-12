@@ -16,12 +16,15 @@ use riscv::addr::{
     Frame
 };
 use crate::consts::*;
-
+use riscv::register::sstatus;
 pub fn access_pa_via_va(pa: usize) -> usize {
     pa + PHYSICAL_MEMORY_OFFSET
 }
 
 pub fn init(l: usize, r: usize) {
+    unsafe {
+        sstatus::set_sum();
+    }
     FRAME_ALLOCATOR.lock().init(l, r);
     init_heap();
     kernel_remap();
@@ -53,13 +56,15 @@ pub fn kernel_remap() {
         fn bootstack();
         fn bootstacktop();
     }
+    /*
     memory_set.push(
         bootstack as usize,
         bootstacktop as usize,
         MemoryAttr::new(),
         Linear::new(PHYSICAL_MEMORY_OFFSET),
+        None,
     );
-
+    */
     unsafe {
         memory_set.activate();
     }

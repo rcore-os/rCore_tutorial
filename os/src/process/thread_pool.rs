@@ -70,7 +70,10 @@ impl ThreadPool {
     }
 
     pub fn tick(&mut self) -> bool {
-        self.scheduler.tick()
+        //println!("thread_pool.tick() starts.");
+        let ret = self.scheduler.tick();
+        //println!("thread_pool.tick() ends.");
+        ret
     }
 
     pub fn exit(&mut self, tid: Tid, code: usize) {

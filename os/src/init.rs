@@ -33,12 +33,15 @@ _user_img_end:
 pub extern "C" fn rust_main() -> ! {
     extern "C" {
         fn end();
+        fn bootstack();
+        fn bootstacktop();
         fn _user_img_start();
         fn _user_img_end();
     }
     println!("kernel end vaddr = 0x{:x}", end as usize);
+    println!("bootstack is {:#x}, {:#x}", bootstack as usize, bootstacktop as usize);
     println!("user_img is at [{:#x}, {:#x})", _user_img_start as usize, _user_img_end as usize);
-    loop {}
+    //loop {}
     println!(
         "free physical memory ppn = [0x{:x}, 0x{:x})",
         ((end as usize - KERNEL_BEGIN_VADDR + KERNEL_BEGIN_PADDR) >> 12) + 1,
@@ -56,9 +59,12 @@ pub extern "C" fn rust_main() -> ! {
     //write_readonly_test();
     //execute_unexecutable_test();
     //read_invalid_test();
+    
+    crate::process::init(); 
+
     crate::timer::init();
 
-    crate::process::init(); 
+    crate::process::run();
     panic!("end of rust_main");
     loop {}
 }

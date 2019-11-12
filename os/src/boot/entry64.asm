@@ -20,7 +20,7 @@ _start:
 	.align 12
 	.global bootstack
 bootstack:
-	.space 4096 * 4
+	.space 4096 * 32
 	.global bootstacktop
 bootstacktop:
 

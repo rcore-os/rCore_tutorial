@@ -10,3 +10,8 @@ edition = "2018"
 riscv = { git = "https://github.com/rcore-os/riscv", features = ["inline-asm"]  }
 spin = "0.5.2"
 buddy_system_allocator = "0.3"
+xmas-elf = "0.6"
+
+[dependencies.lazy_static]
+version = "1.0"
+features = ["spin_no_std"]

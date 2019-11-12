@@ -8,7 +8,8 @@ use riscv::register::{
     sepc,
     stvec,
     sscratch,
-    sstatus
+    sstatus,
+    sie,
 };
 use crate::context::TrapFrame;
 use crate::timer::{
@@ -33,13 +34,15 @@ pub fn init() {
 
 #[no_mangle]
 pub fn rust_trap(tf: &mut TrapFrame) {
+    //println!("rust_trap sepc = {:#x} scause = {:?}", tf.sepc, tf.scause.cause());
     match tf.scause.cause() {
         Trap::Exception(Exception::Breakpoint) => breakpoint(&mut tf.sepc),
         Trap::Exception(Exception::InstructionPageFault) => page_fault(tf),
         Trap::Exception(Exception::LoadPageFault) => page_fault(tf),
         Trap::Exception(Exception::StorePageFault) => page_fault(tf),
-        Trap::Interrupt(Interrupt::SupervisorTimer) => super_timer(),
-        _ => panic!("undefined trap!")
+        Trap::Exception(Exception::UserEnvCall) => syscall(tf),
+        Trap::Interrupt(Interrupt::SupervisorTimer) => super_timer(tf),
+        _ => panic!("trap {:?} not handled!", tf.scause.cause())
     }
 }
 
@@ -49,11 +52,19 @@ fn breakpoint(sepc: &mut usize) {
 }
 
 fn page_fault(tf: &mut TrapFrame) {
-    println!("{:?} {:#x}", tf.scause.cause(), tf.stval);
+    println!("{:?} va = {:#x} instruction = {:#x}", tf.scause.cause(), tf.stval, tf.sepc);
     panic!("page fault!");
 }
 
-fn super_timer() {
+fn super_timer(tf: &mut TrapFrame) {
+    //unsafe { sie::clear_stimer(); }
+    //println!("in super_timer()!");
+    /*
+    match tf.sstatus.spp() {
+        sstatus::SPP::User => println!("\ntimer from user mode!"),
+        sstatus::SPP::Supervisor => println!("\ntimer from supervisor mode!"),
+    }
+    */
     clock_set_next_event();
     unsafe {
         TICKS += 1;
@@ -62,7 +73,12 @@ fn super_timer() {
             println!("* 100 ticks *");
         }
     }
+    //println!("ready tick()...");
     tick();
+    //println!("super_timer ends.");
+    
+    //println!("out super_timer()!");
+    //unsafe { sie::set_stimer(); }
 }
 
 #[inline(always)]
@@ -76,7 +92,7 @@ pub fn enable_and_wfi() {
 pub fn disable_and_store() -> usize {
     let sstatus: usize;
     unsafe {
-        asm!("csrsi sstatus, 1 << 1" : "=r"(sstatus) ::: "volatile");
+        asm!("csrci sstatus, 1 << 1" : "=r"(sstatus) ::: "volatile");
     }
     sstatus & (1 << 1)
 }
@@ -92,6 +108,7 @@ pub const SYS_WRITE: usize = 64;
 pub const SYS_EXIT: usize = 93;
 
 fn syscall(tf: &mut TrapFrame) {
+    //println!("handling user syscall!");
     tf.sepc += 4;
     match tf.x[17] {
         SYS_WRITE => {

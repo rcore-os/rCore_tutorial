@@ -18,7 +18,7 @@ pub struct TrapFrame {
 
 #[repr(C)]
 pub struct Context {
-    content_addr: usize,
+    pub content_addr: usize,
 }
 impl Context {
     pub unsafe fn null() -> Context {
@@ -26,13 +26,22 @@ impl Context {
     }
 
     pub unsafe fn new_kernel_thread(
-        entry: extern "C" fn(usize) -> !,
+        entry: usize,
         arg: usize,
         kstack_top: usize,
         satp: usize
         ) -> Context {
 
         ContextContent::new_kernel_thread(entry, arg, kstack_top, satp).push_at(kstack_top)
+    }
+
+    pub unsafe fn new_user_thread(
+        entry: usize,
+        ustack_top: usize,
+        kstack_top: usize,
+        satp: usize
+    ) -> Self {
+        ContextContent::new_user_thread(entry, ustack_top, satp).push_at(kstack_top)
     }
 
     #[naked]
@@ -43,31 +52,80 @@ impl Context {
 }
 
 #[repr(C)]
-struct ContextContent {
-    ra: usize,
+pub struct ContextContent {
+    pub ra: usize,
     satp: usize,
     s: [usize; 12],
+    tf: TrapFrame,
+}
+
+extern "C" {
+    fn __trapret();
 }
 
 impl ContextContent {
     fn new_kernel_thread(
-        entry: extern "C" fn(usize) -> !,
+        //entry: extern "C" fn(usize) -> !,
+        entry: usize,
         arg: usize,
         kstack_top: usize,
         satp: usize,
         ) -> ContextContent {
         
+        let mut content = ContextContent {
+            ra: __trapret as usize,
+            satp,
+            s: [0; 12],
+            tf: {
+                let mut tf: TrapFrame = unsafe { zeroed() };
+                tf.x[2] = kstack_top;
+                tf.x[10] = arg;
+                //tf.sepc = entry as usize;
+                tf.sepc = entry;
+                tf.sstatus = sstatus::read();
+                tf.sstatus.set_spp(sstatus::SPP::Supervisor);
+                tf.sstatus.set_spie(true);
+                tf.sstatus.set_sie(false);
+                tf
+            }
+        };
+        content
+
+        /*
         let mut content: ContextContent = unsafe { zeroed() };
         content.ra = entry as usize;
         content.satp = satp;
         content.s[0] = arg;
         let mut sstatus_ = sstatus::read();
         sstatus_.set_spp(sstatus::SPP::Supervisor);
-        //content.s[1] = status_.bits();
+        sstatus_.set_sie(true);
         unsafe {
             asm!("csrr $0, sstatus" : "=r"(content.s[1]) ::: "volatile");
         }
         content
+        */
+    }
+
+    fn new_user_thread(
+        entry: usize,
+        ustack_top: usize,
+        satp: usize
+    ) -> Self {
+        ContextContent {
+            ra: __trapret as usize,
+            satp,
+            s: [0; 12],
+            tf: {
+                let mut tf: TrapFrame = unsafe { zeroed() };
+                tf.x[2] = ustack_top;
+                tf.sepc = entry;
+                tf.sstatus = sstatus::read();
+                tf.sstatus.set_spie(true);
+                tf.sstatus.set_sie(false);
+                tf.sstatus.set_spp(sstatus::SPP::User);
+                tf
+            }
+        }
     }
 
     unsafe fn push_at(self, stack_top: usize) -> Context {

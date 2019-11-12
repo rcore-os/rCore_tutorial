@@ -27,6 +27,7 @@
     ld sp, 0(a1)
     Load s11, 1
     csrw satp, s11
+    sfence.vma
     Load ra, 0
     Load s0, 2
     Load s1, 3
@@ -40,7 +41,6 @@
     Load s9, 11
     Load s10, 12
     Load s11, 13
-    mv a0, s0
     addi sp, sp, 14*XLENB
 
     sd zero, 0(a1)

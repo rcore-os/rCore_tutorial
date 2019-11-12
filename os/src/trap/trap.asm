@@ -67,9 +67,8 @@ _to_user:
 	addi s0, sp, 36*XLENB
 	csrw sscratch, s0
 _to_kernel:
-	csrw sstatus, s1
-	csrw sepc, s2
-
+    csrw sstatus, s1
+    csrw sepc, s2
 	LOAD x1, 1
 	LOAD x3, 3
     LOAD x4, 4

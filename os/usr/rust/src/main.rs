@@ -6,5 +6,7 @@ extern crate rust;
 
 #[no_mangle]
 pub fn main() {
-    println!("Hello world! from user mode program");
+    for _ in 0..10 {
+        println!("Hello world! from user mode program!");
+    }
 }
