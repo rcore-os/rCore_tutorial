@@ -60,6 +60,8 @@ pub extern "C" fn rust_main() -> ! {
     //execute_unexecutable_test();
     //read_invalid_test();
     
+    crate::fs::init();
+
     crate::process::init(); 
 
     crate::timer::init();

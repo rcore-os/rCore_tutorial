@@ -13,7 +13,10 @@ use crate::alloc::{
 };
 use lazy_static::lazy_static;
 use core::cell::UnsafeCell;
-
+use crate::fs::{
+    ROOT_INODE,
+    INodeExt
+};
 
 pub fn init() {
     /*
@@ -26,13 +29,16 @@ pub fn init() {
     CPU.init(Thread::new_idle(), Box::new(thread_pool));
     println!("CPU init successfully!");
 
+    /*
     println!("hello_thread is at {:#x}", hello_thread as usize);
     for i in 0..5 {
         CPU.add_thread(
             Thread::new_kernel(hello_thread as usize, i)
         );
     }
+    */
 
+    /*
     extern "C" {
         fn _user_img_start();
         fn _user_img_end();
@@ -44,6 +50,15 @@ pub fn init() {
         )
     };
     let user_thread = unsafe { Thread::new_user(data) };
+    CPU.add_thread(user_thread);
+    */
+    let data = ROOT_INODE
+        .lookup("rust/hello_world")
+        .unwrap()
+        .read_as_vec()
+        .unwrap();
+    println!("size of program {:#x}", data.len());
+    let user_thread = unsafe { Thread::new_user(data.as_slice()) };
     CPU.add_thread(user_thread);
     println!("++++ setup process!   ++++");
 }

@@ -5,13 +5,11 @@ kernel_asm := target/$(target)/$(mode)/os.asm
 bin := target/$(target)/$(mode)/kernel.bin
 xbuild_args := --target $(target).json
 
-export USER_IMG = target/user_img
-rust:
-	@cd usr/rust && cargo xbuild --target $(target).json
-	@mkdir target -p
-	@\cp usr/rust/target/$(target)/$(mode)/rust target/user_img
+.PHONY: kernel objdump build qemu run clean
 
-kernel: rust
+export USER_IMG = usr/build/riscv64.img
+
+kernel:
 	@cargo xbuild --target $(target).json
 objdump: kernel
 	@riscv64-unknown-elf-objdump -d $(kernel) > $(kernel_asm)
@@ -24,7 +22,7 @@ qemu:
 	@qemu-system-riscv64 \
 		-machine virt \
 		-nographic \
-		-kernel opensbi/opensbi_rv64.elf \
+		-bios opensbi/opensbi_rv64.elf \
 		-device loader,file=$(bin),addr=0x80200000
 run: build qemu
 clean:

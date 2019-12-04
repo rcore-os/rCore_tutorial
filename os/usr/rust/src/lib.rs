@@ -3,7 +3,7 @@
 #![feature(lang_items)]
 #![feature(panic_info_message)]
 #![feature(linkage)]
-#![feature(compiler_builtins_lib)]
+//#![feature(compiler_builtins_lib)]
 
 extern crate alloc;
 
