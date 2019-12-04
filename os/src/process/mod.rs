@@ -52,14 +52,17 @@ pub fn init() {
     let user_thread = unsafe { Thread::new_user(data) };
     CPU.add_thread(user_thread);
     */
+
+    /*
     let data = ROOT_INODE
-        .lookup("rust/hello_world")
+        .lookup("rust/user_shell")
         .unwrap()
         .read_as_vec()
         .unwrap();
     println!("size of program {:#x}", data.len());
     let user_thread = unsafe { Thread::new_user(data.as_slice()) };
     CPU.add_thread(user_thread);
+    */
     println!("++++ setup process!   ++++");
 }
 
@@ -100,4 +103,16 @@ pub fn tick() {
 
 pub fn exit(code: usize) {
     CPU.exit(code);
+}
+
+pub fn yield_now() {
+    CPU.yield_now();
+}
+
+pub fn wake_up(tid: Tid) {
+    CPU.wake_up(tid);
+}
+
+pub fn current_tid() -> usize {
+    CPU.current_tid()
 }

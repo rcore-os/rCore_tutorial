@@ -1,4 +1,4 @@
-use crate::syscall::sys_write;
+use crate::syscall::{ sys_write, sys_read };
 use core::fmt::{self, Write};
 
 pub fn putchar(ch: char) {
@@ -36,3 +36,18 @@ impl fmt::Write for Stdout {
 pub fn _print(args: fmt::Arguments) {
     Stdout.write_fmt(args).unwrap();
 }
+
+pub const STDIN: usize = 0;
+
+pub fn getc() -> u8 {
+    let mut c = 0u8;
+    loop {
+        let len = sys_read(STDIN, &mut c, 1);
+        match len {
+            1 => return c,
+            0 => continue,
+            _ => panic!("read stdin len = {}", len),
+        }
+    }
+}
+

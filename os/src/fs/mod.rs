@@ -4,6 +4,7 @@ use rcore_fs_sfs::SimpleFileSystem;
 use alloc::{ sync::Arc, vec::Vec };
 
 mod device;
+pub mod stdio;
 
 lazy_static! {
     pub static ref ROOT_INODE: Arc<INode> = {
@@ -40,9 +41,12 @@ impl INodeExt for INode {
 }
 
 pub fn init() {
+    println!("available programs in rust/ are:");
     let mut id = 0;
-    while let Ok(name) = ROOT_INODE.get_entry(id) {
+    let mut rust_dir = ROOT_INODE.lookup("rust").unwrap(); 
+    while let Ok(name) = rust_dir.get_entry(id) {
         id += 1;
         println!("{}", name);
     }
+    println!("++++ setup fs!        ++++")
 }

@@ -1,3 +1,4 @@
 target
 os/target
+os/usr/build
 Cargo.lock

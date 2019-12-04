@@ -17,7 +17,9 @@ endif
 
 rust:
 	@cd rust && cargo xbuild --target $(target)-os.json
+	@echo targets includes $(rust_targets)
 	@rm -rf $(out_dir)/rust && mkdir -p $(out_dir)/rust
+	@rm -f $(sfsimg)
 	@cp $(rust_targets) $(out_dir)/rust
 	
 $(sfsimg): rcore-fs-fuse rust

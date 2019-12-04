@@ -128,4 +128,37 @@ impl Processor {
 
         loop {}
     }
+
+    pub fn yield_now(&self) {
+        let inner = self.inner();
+        if !inner.current.is_none() {
+            unsafe {
+                let flags = disable_and_store();
+                let tid = inner.current.as_mut().unwrap().0;
+                let thread_info = inner.pool.threads[tid].as_mut().expect("thread not existed when yielding");
+                if thread_info.present {
+                    thread_info.status = Status::Sleeping;
+                }
+                else {
+                    panic!("try to sleep an null thread!");
+                }
+                inner.current
+                    .as_mut()
+                    .unwrap()
+                    .1
+                    .switch_to(&mut *inner.idle);
+
+                restore(flags);
+            }
+        }
+    }
+
+    pub fn wake_up(&self, tid: Tid) {
+        let inner = self.inner();
+        inner.pool.wakeup(tid);
+    }
+
+    pub fn current_tid(&self) -> usize {
+        self.inner().current.as_mut().unwrap().0 as usize
+    }
 }

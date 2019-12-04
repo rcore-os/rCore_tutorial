@@ -22,7 +22,7 @@ qemu:
 	@qemu-system-riscv64 \
 		-machine virt \
 		-nographic \
-		-bios opensbi/opensbi_rv64.elf \
+		-kernel opensbi/opensbi_rv64.elf \
 		-device loader,file=$(bin),addr=0x80200000
 run: build qemu
 clean:

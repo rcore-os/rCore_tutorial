@@ -17,6 +17,7 @@ use crate::timer::{
     clock_set_next_event
 };
 use crate::process::tick;
+use crate::sbi::console_getchar;
 
 global_asm!(include_str!("trap/trap.asm"));
 
@@ -28,13 +29,16 @@ pub fn init() {
         sscratch::write(0);
         stvec::write(__alltraps as usize, stvec::TrapMode::Direct);
         sstatus::set_sie();
+
+        // enable external interrupt
+        sie::set_sext();
     }
     println!("++++ setup interrupt! ++++");
 }
 
 #[no_mangle]
 pub fn rust_trap(tf: &mut TrapFrame) {
-    //println!("rust_trap sepc = {:#x} scause = {:?}", tf.sepc, tf.scause.cause());
+    // println!("rust_trap sepc = {:#x} scause = {:?}", tf.sepc, tf.scause.cause());
     match tf.scause.cause() {
         Trap::Exception(Exception::Breakpoint) => breakpoint(&mut tf.sepc),
         Trap::Exception(Exception::InstructionPageFault) => page_fault(tf),
@@ -42,6 +46,7 @@ pub fn rust_trap(tf: &mut TrapFrame) {
         Trap::Exception(Exception::StorePageFault) => page_fault(tf),
         Trap::Exception(Exception::UserEnvCall) => syscall(tf),
         Trap::Interrupt(Interrupt::SupervisorTimer) => super_timer(tf),
+        Trap::Interrupt(Interrupt::SupervisorExternal) => external(),
         _ => panic!("trap {:?} not handled!", tf.scause.cause())
     }
 }
@@ -81,6 +86,12 @@ fn super_timer(tf: &mut TrapFrame) {
     //unsafe { sie::set_stimer(); }
 }
 
+fn external() {
+    //crate::fs::stdio::STDIN.push(console_getchar() as u8 as char);
+    //println!("{}", console_getchar() as u8 as char);
+    panic!("in external!");
+}
+
 #[inline(always)]
 pub fn enable_and_wfi() {
     unsafe {
@@ -104,11 +115,11 @@ pub fn restore(flags: usize) {
     }
 }
 
+/*
 pub const SYS_WRITE: usize = 64;
 pub const SYS_EXIT: usize = 93;
 
 fn syscall(tf: &mut TrapFrame) {
-    //println!("handling user syscall!");
     tf.sepc += 4;
     match tf.x[17] {
         SYS_WRITE => {
@@ -122,4 +133,15 @@ fn syscall(tf: &mut TrapFrame) {
             panic!("unknown user syscall!");
         }
     }
+}
+*/
+
+fn syscall(tf: &mut TrapFrame) {
+    tf.sepc += 4;
+    let ret = crate::syscall::syscall(
+        tf.x[17],
+        [tf.x[10], tf.x[11], tf.x[12]],
+        tf
+    );
+    tf.x[10] = ret as usize;
 }

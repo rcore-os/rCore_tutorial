@@ -30,4 +30,6 @@ fn alloc_error_handler(_: core::alloc::Layout) -> ! {
 extern crate alloc;
 
 mod process;
+mod sync;
 mod fs;
+mod syscall;
