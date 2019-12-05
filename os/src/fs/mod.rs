@@ -46,7 +46,7 @@ pub fn init() {
     let mut rust_dir = ROOT_INODE.lookup("rust").unwrap(); 
     while let Ok(name) = rust_dir.get_entry(id) {
         id += 1;
-        println!("{}", name);
+        println!("  {}", name);
     }
     println!("++++ setup fs!        ++++")
 }

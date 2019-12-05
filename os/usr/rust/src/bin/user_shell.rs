@@ -25,6 +25,7 @@ pub fn main() {
            LF | CR => {
                println!("");
                if !line.is_empty() {
+                   println!("searching for program {}", line);
                    sys_exec(line.as_ptr());
                    line.clear();
                }

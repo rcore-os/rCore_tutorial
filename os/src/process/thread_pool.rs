@@ -46,7 +46,7 @@ impl ThreadPool {
             }
         );
         self.scheduler.push(tid);
-        println!("tid to alloc: {}", tid);
+        // println!("tid to alloc: {}", tid);
     }
 
     pub fn acquire(&mut self) -> Option<(Tid, Box<Thread>)> {
@@ -61,6 +61,9 @@ impl ThreadPool {
     }
 
     pub fn retrieve(&mut self, tid: Tid, thread: Box<Thread>) {
+        if self.threads[tid].is_none() {
+            return;
+        }
         let mut thread_info = self.threads[tid].as_mut().expect("thread not exist!");
         if thread_info.present {
             thread_info.thread = Some(thread);
@@ -98,13 +101,7 @@ impl ThreadPool {
     }
 
     pub fn exit(&mut self, tid: Tid, code: usize) {
-        self.threads[tid] = Some(
-            ThreadInfo {
-                status: Status::Ready,
-                present: false,
-                thread: None,
-            }
-        );
+        self.threads[tid] = None;
         self.scheduler.exit(tid);
     }
 }

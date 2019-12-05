@@ -4,7 +4,7 @@ use core::alloc::Layout;
 
 #[linkage = "weak"]
 #[no_mangle]
-fn main() {
+fn main() -> usize {
     panic!("No main() linked");
 }
 
@@ -33,8 +33,7 @@ fn panic(_info: &PanicInfo) -> ! {
 #[no_mangle]
 pub extern "C" fn _start(_args: isize, _argv: *const u8) -> ! {
     init_heap();
-    main();
-    sys_exit(0)
+    sys_exit(main())
 }
 
 #[no_mangle]

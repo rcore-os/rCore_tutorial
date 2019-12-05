@@ -59,7 +59,7 @@ impl Thread {
 
         match elf.header.pt2.type_().as_type() {
             header::Type::Executable => {
-                println!("it really a executable!");
+                // println!("it really a executable!");
             },
             header::Type::SharedObject => {
                 panic!("shared object is not supported!");
@@ -70,7 +70,7 @@ impl Thread {
         }
 
         let entry_addr = elf.header.pt2.entry_point() as usize;
-        println!("user entry addr = {:#x}", entry_addr);
+        // println!("user entry addr = {:#x}", entry_addr);
         let mut vm = elf.make_memory_set();
 
         let mut ustack_top = {
@@ -84,11 +84,11 @@ impl Thread {
             );
             ustack_top
         };
-        println!("ustack = {:#x}, {:#x}", USER_STACK_OFFSET, ustack_top);
+        // println!("ustack = {:#x}, {:#x}", USER_STACK_OFFSET, ustack_top);
 
 
         let kstack = KernelStack::new();
-        println!("kstack top = {:#x}", kstack.top());
+        // println!("kstack top = {:#x}", kstack.top());
 
         Box::new(
             Thread {
@@ -157,7 +157,7 @@ trait ElfExt {
 impl ElfExt for ElfFile<'_> {
     fn make_memory_set(&self) -> MemorySet {
         let mut memory_set = MemorySet::new();
-        println!("new memory set initialized!");
+        // println!("new memory set initialized!");
         for ph in self.program_iter() {
             if ph.get_type() != Ok(Type::Load) {
                 continue;
@@ -168,7 +168,7 @@ impl ElfExt for ElfFile<'_> {
                 SegmentData::Undefined(data) => data,
                 _ => unreachable!(),
             };
-            println!("user segment vaddr[{:#x}, {:#x}) link in {:#x} length = {:#x}", vaddr, vaddr + mem_size, data.as_ptr() as usize, data.len()); 
+            // println!("user segment vaddr[{:#x}, {:#x}) link in {:#x} length = {:#x}", vaddr, vaddr + mem_size, data.as_ptr() as usize, data.len()); 
             memory_set.push(
                 vaddr,
                 vaddr + mem_size,

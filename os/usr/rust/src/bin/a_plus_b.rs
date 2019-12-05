@@ -9,8 +9,8 @@ extern crate rust;
 
 #[no_mangle]
 pub fn main() -> usize {
-    for _ in 0..10 {
-        println!("Hello world! from user mode program!");
-    }
+    let a = 1;
+    let b = 2;
+    println!("a + b = {}", a + b);
     0
 }

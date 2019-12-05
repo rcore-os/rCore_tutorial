@@ -19,7 +19,7 @@ impl MemoryArea {
     }
 
     pub fn page_copy(&self, pt: &mut PageTableImpl, src: usize, length: usize) {
-        println!("page_copy start = {:#x}, end = {:#x}, src = {:#x}, length = {:#x}", self.start, self.end, src, length);
+        // println!("page_copy start = {:#x}, end = {:#x}, src = {:#x}, length = {:#x}", self.start, self.end, src, length);
         let mut l = length;
         let mut s = src;
         for page in PageRange::new(self.start, self.end) {

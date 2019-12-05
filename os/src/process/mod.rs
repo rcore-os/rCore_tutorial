@@ -27,7 +27,7 @@ pub fn init() {
     let scheduler = RRScheduler::new(1);
     let thread_pool = ThreadPool::new(100, Box::new(scheduler));
     CPU.init(Thread::new_idle(), Box::new(thread_pool));
-    println!("CPU init successfully!");
+    //println!("CPU init successfully!");
 
     /*
     println!("hello_thread is at {:#x}", hello_thread as usize);
@@ -91,6 +91,7 @@ pub fn execute(path: &str, host_tid: Option<Tid>) -> bool {
     //println!("size of program {:#x}", data.len());
     let user_thread = unsafe { Thread::new_user(data.as_slice(), host_tid) };
     CPU.add_thread(user_thread);
+    true
     */
 }
 pub fn run() {

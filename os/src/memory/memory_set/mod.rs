@@ -31,7 +31,7 @@ impl MemorySet {
         memory_set
     }
     pub fn map_kernel_and_physical_memory(&mut self) {
-        println!("map_kernel_and_physical_memory!");
+        // println!("map_kernel_and_physical_memory!");
         extern "C" {
             fn stext();
             fn etext();
@@ -46,7 +46,7 @@ impl MemorySet {
             fn end();
         }
         let offset = PHYSICAL_MEMORY_OFFSET;
-        println!(".section .text");
+        // println!(".section .text");
         self.push(
             stext as usize,
             etext as usize,
@@ -54,7 +54,7 @@ impl MemorySet {
             Linear::new(offset),
             None,
         );
-        println!(".section .rodata");
+        // println!(".section .rodata");
         self.push(
             srodata as usize,
             erodata as usize,
@@ -62,7 +62,7 @@ impl MemorySet {
             Linear::new(offset),
             None,
         );
-        println!(".section .data");
+        // println!(".section .data");
         self.push(
             sdata as usize,
             edata as usize,
@@ -70,7 +70,7 @@ impl MemorySet {
             Linear::new(offset),
             None,
         );
-        println!(".section .bss");
+        // println!(".section .bss");
         self.push(
             sbss as usize,
             ebss as usize,
@@ -78,7 +78,7 @@ impl MemorySet {
             Linear::new(offset),
             None,
         );
-        println!(".section .physical memory");
+        // println!(".section .physical memory");
         self.push(
             (end as usize / PAGE_SIZE + 1) * PAGE_SIZE, 
             access_pa_via_va(PHYSICAL_MEMORY_END),
@@ -86,7 +86,7 @@ impl MemorySet {
             Linear::new(offset),
             None,
         );
-        println!(".section .bootstack");
+        // println!(".section .bootstack");
         self.push(
             bootstack as usize,
             bootstacktop as usize,
@@ -94,17 +94,26 @@ impl MemorySet {
             Linear::new(offset),
             None
         );
-        println!(".section .mmio");
+        // println!(".section .mmio.init_external_interrupt");
         self.push(
-            access_pa_via_va(0x0),
-            access_pa_via_va(0x2000_0000),
+            access_pa_via_va(0x0c00_2000),
+            access_pa_via_va(0x0c00_3000),
             MemoryAttr::new(),
             Linear::new(offset),
             None
         );
+        // println!(".section .mmio.enable_serial_interrupt");
+        self.push(
+            access_pa_via_va(0x1000_0000),
+            access_pa_via_va(0x1000_1000),
+            MemoryAttr::new(),
+            Linear::new(offset),
+            None
+        );
+
     }
     pub fn push(&mut self, start: usize, end: usize, attr: MemoryAttr, handler: impl MemoryHandler, data: Option<(usize, usize)>) {
-        println!("in push: [{:#x},{:#x})", start, end);
+        // println!("in push: [{:#x},{:#x})", start, end);
         assert!(start <= end, "invalid memory area!");
         assert!(self.test_free_area(start, end), "memory area overlap!");
         let area = MemoryArea::new(start, end, Box::new(handler), attr);
