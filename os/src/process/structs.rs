@@ -27,6 +27,7 @@ pub struct Thread {
     pub context: Context,
     pub kstack: KernelStack,
     pub proc: Option<Arc<Process>>,
+    pub wait: Option<Tid>,
 }
 impl Thread {
     pub fn new_idle() -> Box<Thread> {
@@ -36,6 +37,7 @@ impl Thread {
                 context: Context::null(),
                 kstack,
                 proc: None,
+                wait: None
             })
         }
     }
@@ -47,11 +49,12 @@ impl Thread {
                 context: Context::new_kernel_thread(entry, arg, kstack_.top(), satp::read().bits()),
                 kstack: kstack_,
                 proc: None,
+                wait: None
             })
         }
     }
 
-    pub unsafe fn new_user(data: &[u8]) -> Box<Thread> {
+    pub unsafe fn new_user(data: &[u8], wait_thread: Option<Tid>) -> Box<Thread> {
         let elf = ElfFile::new(data).expect("failed to analyse elf!");
 
         match elf.header.pt2.type_().as_type() {
@@ -98,6 +101,7 @@ impl Thread {
                         }
                     ),
                 ),
+                wait: wait_thread
             }
         )
     }

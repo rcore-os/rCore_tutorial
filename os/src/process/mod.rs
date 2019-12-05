@@ -53,6 +53,7 @@ pub fn init() {
     CPU.add_thread(user_thread);
     */
 
+    /*
     let data = ROOT_INODE
         .lookup("rust/user_shell")
         .unwrap()
@@ -61,9 +62,37 @@ pub fn init() {
     println!("size of program {:#x}", data.len());
     let user_thread = unsafe { Thread::new_user(data.as_slice()) };
     CPU.add_thread(user_thread);
+    */
+    execute("rust/user_shell", None);
     println!("++++ setup process!   ++++");
 }
 
+pub fn execute(path: &str, host_tid: Option<Tid>) -> bool {
+    let find_result = ROOT_INODE.lookup(path);
+    match find_result {
+        Ok(inode) => {
+            let data = inode.read_as_vec().unwrap();
+            //println!("size of program: {:#x}", data.len());
+            let user_thread = unsafe { Thread::new_user(data.as_slice(), host_tid) };
+            CPU.add_thread(user_thread);
+            true
+        },
+        Err(_) => {
+            println!("command not found!");
+            false
+        }
+    }
+    /*
+    let data = ROOT_INODE
+        .lookup(path)
+        .unwrap()
+        .read_as_vec()
+        .unwrap();
+    //println!("size of program {:#x}", data.len());
+    let user_thread = unsafe { Thread::new_user(data.as_slice(), host_tid) };
+    CPU.add_thread(user_thread);
+    */
+}
 pub fn run() {
     CPU.run();
 }

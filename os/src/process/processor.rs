@@ -118,6 +118,10 @@ impl Processor {
 
         inner.pool.exit(tid, code);
         println!("thread {} exited, exit code = {}", tid, code);
+
+        if let Some(wait) = inner.current.as_ref().unwrap().1.wait {
+            inner.pool.wakeup(wait);
+        }
         //println!("satp = {:#x}", riscv::register::satp::read().bits());
         //println!("inner.idle.context_addr = {:#x}", inner.idle.context.content_addr);
         //println!("idle ra = {:#x}", unsafe { (*(inner.idle.context.content_addr as *const ContextContent)).ra });
