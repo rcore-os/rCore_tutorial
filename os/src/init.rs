@@ -31,7 +31,6 @@ _user_img_end:
 
 #[no_mangle]
 pub extern "C" fn rust_main() -> ! {
-    crate::interrupt::init();
     extern "C" {
         fn end();
         fn bootstack();
@@ -60,14 +59,15 @@ pub extern "C" fn rust_main() -> ! {
     //execute_unexecutable_test();
     //read_invalid_test();
     
-    crate::fs::init();
-
-    crate::process::init(); 
-
+    crate::interrupt::init();
     crate::timer::init();
 
-    //crate::process::run();
-    //panic!("end of rust_main");
+    crate::process::init();
+
+    crate::fs::init();
+
+    crate::process::run();
+    panic!("end of rust_main");
     loop {}
 }
 

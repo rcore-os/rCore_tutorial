@@ -94,6 +94,14 @@ impl MemorySet {
             Linear::new(offset),
             None
         );
+        println!(".section .mmio");
+        self.push(
+            access_pa_via_va(0x0),
+            access_pa_via_va(0x2000_0000),
+            MemoryAttr::new(),
+            Linear::new(offset),
+            None
+        );
     }
     pub fn push(&mut self, start: usize, end: usize, attr: MemoryAttr, handler: impl MemoryHandler, data: Option<(usize, usize)>) {
         println!("in push: [{:#x},{:#x})", start, end);

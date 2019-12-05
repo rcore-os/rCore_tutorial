@@ -53,7 +53,6 @@ pub fn init() {
     CPU.add_thread(user_thread);
     */
 
-    /*
     let data = ROOT_INODE
         .lookup("rust/user_shell")
         .unwrap()
@@ -62,7 +61,6 @@ pub fn init() {
     println!("size of program {:#x}", data.len());
     let user_thread = unsafe { Thread::new_user(data.as_slice()) };
     CPU.add_thread(user_thread);
-    */
     println!("++++ setup process!   ++++");
 }
 

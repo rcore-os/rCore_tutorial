@@ -54,7 +54,7 @@ impl Processor {
         loop {
             if let Some(thread) = inner.pool.acquire() {
                 inner.current = Some(thread);
-                println!("\n>>>> will switch_to thread {} in CPU.run()!", inner.current.as_mut().unwrap().0);
+                // println!("\n>>>> will switch_to thread {} in CPU.run()!", inner.current.as_mut().unwrap().0);
                 //println!("current content = {:#x}", &(inner.current.as_mut().unwrap().1.context) as *const _ as usize);
                 //println!("current content_addr = {:#x}", inner.current.as_mut().unwrap().1.context.content_addr);
 
@@ -66,7 +66,8 @@ impl Processor {
                     &mut *inner.current.as_mut().unwrap().1
                 );
                 
-                println!("<<<< switch_back to idle in CPU.run()!");
+                // println!("<<<< switch_back to idle in CPU.run()!");
+
                 let (tid, thread) = inner.current.take().unwrap();
                 //println!("thread {} is switched out!", tid);
 
@@ -94,7 +95,7 @@ impl Processor {
                 //println!("idle context = {:#x}", &inner.idle.context as *const _ as usize);
                 //println!("idle content_addr = {:#x}", inner.idle.context.content_addr);
                 //println!("current satp = {:#x}", riscv::register::satp::read().bits());
-                println!("");
+                // println!("");
                 inner.current
                     .as_mut()
                     .unwrap()

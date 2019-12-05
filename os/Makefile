@@ -4,6 +4,7 @@ kernel := target/$(target)/$(mode)/os
 kernel_asm := target/$(target)/$(mode)/os.asm
 bin := target/$(target)/$(mode)/kernel.bin
 xbuild_args := --target $(target).json
+user_img := usr/build/riscv64.img
 
 .PHONY: kernel objdump build qemu run clean
 
