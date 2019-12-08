@@ -60,12 +60,12 @@ pub extern "C" fn rust_main() -> ! {
     //read_invalid_test();
     
     crate::interrupt::init();
-    crate::timer::init();
 
     crate::process::init();
 
     crate::fs::init();
 
+    crate::timer::init();
     crate::process::run();
     panic!("end of rust_main");
     loop {}
