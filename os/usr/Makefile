@@ -1,7 +1,7 @@
 target := riscv64
 mode := debug
 rust_src_dir := rust/src/bin
-rust_target_dir := rust/target/$(target)-os/$(mode)
+rust_target_dir := rust/target/$(target)-rust/$(mode)
 rust_srcs := $(wildcard $(rust_src_dir)/*.rs)
 rust_targets := $(patsubst $(rust_src_dir)/%.rs, $(rust_target_dir)/%, $(rust_srcs))
 out_dir := build/$(target)
@@ -16,7 +16,7 @@ ifeq ($(shell which rcore-fs-fuse),)
 endif
 
 rust:
-	@cd rust && cargo xbuild --target $(target)-os.json
+	@cd rust && cargo xbuild --target $(target)-rust.json
 	@echo targets includes $(rust_targets)
 	@rm -rf $(out_dir)/rust && mkdir -p $(out_dir)/rust
 	@rm -f $(sfsimg)
