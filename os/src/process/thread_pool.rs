@@ -8,7 +8,7 @@ use crate::process::Tid;
 
 pub struct ThreadInfo {
     pub status: Status,
-    pub present: bool,
+    //pub present: bool,
     pub thread: Option<Box<Thread>>,
 }
 
@@ -41,7 +41,7 @@ impl ThreadPool {
         self.threads[tid] = Some(
             ThreadInfo {
                 status: Status::Ready,
-                present: true,
+                //present: true,
                 thread: Some(_thread),
             }
         );
@@ -65,7 +65,7 @@ impl ThreadPool {
             return;
         }
         let mut thread_info = self.threads[tid].as_mut().expect("thread not exist!");
-        if thread_info.present {
+        //if thread_info.present {
             thread_info.thread = Some(thread);
             /*
             thread_info.status = Status::Ready;
@@ -79,18 +79,18 @@ impl ThreadPool {
 
                 },
             }
-        }
+        //}
     }
 
     pub fn wakeup(&mut self, tid: Tid) {
         let proc = self.threads[tid].as_mut().expect("thread not exist when waking up");
-        if proc.present {
+        //if proc.present {
             proc.status = Status::Ready;
             self.scheduler.push(tid);
-        }
-        else {
-            panic!("try to wake up an null thread!");
-        }
+        //}
+        //else {
+        //    panic!("try to wake up an null thread!");
+        //}
     }
 
     pub fn tick(&mut self) -> bool {
@@ -100,7 +100,7 @@ impl ThreadPool {
         ret
     }
 
-    pub fn exit(&mut self, tid: Tid, code: usize) {
+    pub fn exit(&mut self, tid: Tid) {
         self.threads[tid] = None;
         self.scheduler.exit(tid);
     }

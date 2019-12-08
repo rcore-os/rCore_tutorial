@@ -34,6 +34,7 @@ impl Processor {
                     current: None,
                 }
             );
+            
         }
     }
 
@@ -116,7 +117,7 @@ impl Processor {
         let inner = self.inner();
         let tid = inner.current.as_ref().unwrap().0;
 
-        inner.pool.exit(tid, code);
+        inner.pool.exit(tid);
         println!("thread {} exited, exit code = {}", tid, code);
 
         if let Some(wait) = inner.current.as_ref().unwrap().1.wait {
@@ -141,12 +142,12 @@ impl Processor {
                 let flags = disable_and_store();
                 let tid = inner.current.as_mut().unwrap().0;
                 let thread_info = inner.pool.threads[tid].as_mut().expect("thread not existed when yielding");
-                if thread_info.present {
+                //if thread_info.present {
                     thread_info.status = Status::Sleeping;
-                }
-                else {
-                    panic!("try to sleep an null thread!");
-                }
+                //}
+                //else {
+                //    panic!("try to sleep an null thread!");
+                //}
                 inner.current
                     .as_mut()
                     .unwrap()
