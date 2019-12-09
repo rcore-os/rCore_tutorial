@@ -2,6 +2,7 @@
 #![feature(asm)]
 #![feature(global_asm)]
 #![feature(alloc_error_handler)]
+#![feature(naked_functions)]
 
 extern crate alloc;
 
@@ -16,7 +17,7 @@ mod context;
 mod timer;
 mod consts;
 mod memory;
-
+mod process;
 use buddy_system_allocator::LockedHeap;
 
 #[global_allocator]
