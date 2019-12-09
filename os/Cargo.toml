@@ -14,4 +14,5 @@ panic = "abort"
 [dependencies]
 riscv = { git = "https://github.com/rcore-os/riscv", features = ["inline-asm"] }
 spin = "0.5.2"
+buddy_system_allocator = "0.3"
 
