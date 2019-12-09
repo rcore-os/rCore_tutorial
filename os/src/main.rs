@@ -1,5 +1,6 @@
 #![no_std]
 #![no_main]
+#![feature(global_asm)]
 
 use core::panic::PanicInfo;
 
@@ -9,6 +10,13 @@ fn panic(_: &PanicInfo) -> ! {
 }
 
 #[no_mangle]
-extern "C" fn _start() {
+extern "C" fn abort() -> ! {
+    panic!("abort!");
+}
+
+global_asm!(include_str!("boot/entry64.asm"));
+
+#[no_mangle]
+pub extern "C" fn rust_main() -> ! {
     loop {}
 }
