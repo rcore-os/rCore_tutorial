@@ -10,15 +10,16 @@ use crate::memory::{
 pub extern "C" fn rust_main() -> ! {
     crate::interrupt::init();
 
-	extern "C" {
-		fn end();
-	}
-	crate::memory::init(
+    extern "C" {
+        fn end();
+    }
+    crate::memory::init(
         ((end as usize - KERNEL_BEGIN_VADDR + KERNEL_BEGIN_PADDR) >> 12) + 1,
         PHYSICAL_MEMORY_END >> 12
     );
-	crate::process::init();
+    crate::process::init();
     crate::timer::init();
+    crate::process::run();
     loop {}
 }
 
