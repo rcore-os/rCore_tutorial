@@ -1,2 +1,3 @@
 os/target
+usr/rust/target
 Cargo.lock
