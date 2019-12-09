@@ -13,7 +13,7 @@ env:
 	rustup component add llvm-tools-preview rustfmt
 	rustup target add $(target)
 
-export USER_IMG = ../usr/rust/target/$(target)/debug/hello_world
+export USER_IMG = ../usr/build/riscv64.img
 
 kernel:
 	cargo build
