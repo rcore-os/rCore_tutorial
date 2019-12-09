@@ -20,21 +20,12 @@ impl Condvar {
     }
 
     pub fn notify(&self) {
-        /*
         let tid = self.wait_queue.lock().pop_front();
         if let Some(tid) = tid {
-            wait_up(tid);
-            yield_now();
-        }
-        */
-        let mut queue = self.wait_queue.lock();
-        if let Some(tid) = queue.pop_front() {
             wake_up(tid);
-            drop(queue);
             yield_now();
         }
-        else {
-            drop(queue);
-        }
+        
+	
     }
 }
