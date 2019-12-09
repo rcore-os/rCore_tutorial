@@ -5,6 +5,8 @@ bin := target/$(target)/$(mode)/kernel.bin
 
 .PHONY: kernel build clean qemu run
 
+export USER_IMG = usr/rust/target/riscv64-rust/debug/hello_world
+
 kernel:
 	@cargo xbuild --target $(target).json
 $(bin): kernel

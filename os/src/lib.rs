@@ -18,6 +18,8 @@ mod timer;
 mod consts;
 mod memory;
 mod process;
+mod syscall;
+
 use buddy_system_allocator::LockedHeap;
 
 #[global_allocator]

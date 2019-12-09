@@ -6,6 +6,18 @@ use crate::memory::{
     dealloc_frame
 };
 
+global_asm!(concat!(
+    r#"
+    .section .data
+    .global _user_img_start
+    .global _user_img_end
+_user_img_start:
+    .incbin ""#,
+    env!("USER_IMG"),
+    r#""
+_user_img_end:
+"#
+));
 
 #[no_mangle]
 pub extern "C" fn rust_main() -> ! {
