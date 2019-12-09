@@ -1,3 +1,4 @@
 os/target
 os/usr/rust/target
+os/usr/build
 Cargo.lock

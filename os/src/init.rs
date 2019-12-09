@@ -30,6 +30,7 @@ pub extern "C" fn rust_main() -> ! {
         ((end as usize - KERNEL_BEGIN_VADDR + KERNEL_BEGIN_PADDR) >> 12) + 1,
         PHYSICAL_MEMORY_END >> 12
     );
+	crate::fs::init();
     crate::process::init();
     crate::timer::init();
     crate::process::run();
