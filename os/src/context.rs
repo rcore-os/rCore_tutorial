@@ -46,7 +46,15 @@ impl Context {
         contextContent.tf.x[11] = args[1];
         contextContent.tf.x[12] = args[2];
     }
-
+	
+	pub unsafe fn new_user_thread(
+        entry: usize,
+        ustack_top: usize,
+        kstack_top: usize,
+        satp: usize
+    ) -> Self {
+        ContextContent::new_user_thread(entry, ustack_top, satp).push_at(kstack_top)
+    }
 }
 
 #[repr(C)]
@@ -84,6 +92,28 @@ impl ContextContent {
             }
         };
         content
+    }
+
+	fn new_user_thread(
+        entry: usize,
+        ustack_top: usize,
+        satp: usize
+    ) -> Self {
+        ContextContent {
+            ra: __trapret as usize,
+            satp,
+            s: [0; 12],
+            tf: {
+                let mut tf: TrapFrame = unsafe { zeroed() };
+                tf.x[2] = ustack_top;
+                tf.sepc = entry;
+                tf.sstatus = sstatus::read();
+                tf.sstatus.set_spie(true);
+                tf.sstatus.set_sie(false);
+                tf.sstatus.set_spp(sstatus::SPP::User);
+                tf
+            }
+        }
     }
 
 	unsafe fn push_at(self, stack_top: usize) -> Context {

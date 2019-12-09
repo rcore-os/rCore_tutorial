@@ -13,3 +13,6 @@ pub const PHYSICAL_MEMORY_OFFSET: usize = 0xffffffff40000000;
 pub const PAGE_SIZE: usize = 4096;
 
 pub const KERNEL_STACK_SIZE: usize = 0x80000;
+
+pub const USER_STACK_SIZE: usize = 0x80000;
+pub const USER_STACK_OFFSET: usize = 0xffffffff00000000;

@@ -1,3 +1,4 @@
 os/target
 usr/rust/target
+os/src/link_user.S
 Cargo.lock

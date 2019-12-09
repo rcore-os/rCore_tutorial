@@ -8,6 +8,17 @@ use crate::consts::*;
 use riscv::register::satp;
 use alloc::boxed::Box;
 use super::{ Tid, ExitCode };
+use xmas_elf::{
+    header,
+    program::{ Flags, SegmentData, Type },
+    ElfFile,
+};
+use crate::memory::memory_set::{
+    MemorySet,
+    handler::ByFrame,
+    attr::MemoryAttr,
+};
+use core::str;
 
 #[derive(Clone)]
 pub enum Status {
@@ -51,6 +62,45 @@ impl Thread {
             self.context.append_initial_arguments(args);
         } 
     }
+	
+	pub unsafe fn new_user(data: &[u8]) -> Box<Thread> {
+        let elf = ElfFile::new(data).expect("failed to analyse elf!");
+
+        match elf.header.pt2.type_().as_type() {
+            header::Type::Executable => {
+                println!("it really a executable!");
+            },
+            header::Type::SharedObject => {
+                panic!("shared object is not supported!");
+            },
+            _ => {
+                panic!("unsupported elf type!");
+            }
+        }
+        let entry_addr = elf.header.pt2.entry_point() as usize;
+        let mut vm = elf.make_memory_set();
+
+        let mut ustack_top = {
+            let (ustack_bottom, ustack_top) = (USER_STACK_OFFSET, USER_STACK_OFFSET + USER_STACK_SIZE);
+            vm.push(
+                ustack_bottom,
+                ustack_top,
+                MemoryAttr::new().set_user(),
+                ByFrame::new(),
+                None,
+            );
+            ustack_top
+        };
+
+        let kstack = KernelStack::new();
+
+        Box::new(
+            Thread {
+                context: Context::new_user_thread(entry_addr, ustack_top, kstack.top(), vm.token()),
+                kstack: kstack,
+            }
+        )
+    }
 }
 
 pub struct KernelStack(usize);
@@ -84,3 +134,45 @@ impl Drop for KernelStack {
     }
 }
 
+trait ElfExt {
+    fn make_memory_set(&self) -> MemorySet;
+}
+
+impl ElfExt for ElfFile<'_> {
+    fn make_memory_set(&self) -> MemorySet {
+        let mut memory_set = MemorySet::new();
+        for ph in self.program_iter() {
+            if ph.get_type() != Ok(Type::Load) {
+                continue;
+            }
+            let vaddr = ph.virtual_addr() as usize;
+            let mem_size = ph.mem_size() as usize;
+            let data = match ph.get_data(self).unwrap() {
+                SegmentData::Undefined(data) => data,
+                _ => unreachable!(),
+            };
+
+            memory_set.push(
+                vaddr,
+                vaddr + mem_size,
+                ph.flags().to_attr(),
+                ByFrame::new(),
+                Some((data.as_ptr() as usize, data.len())),
+            );
+        }
+        memory_set
+    }
+}
+
+trait ToMemoryAttr {
+    fn to_attr(&self) -> MemoryAttr;
+}
+impl ToMemoryAttr for Flags {
+    fn to_attr(&self) -> MemoryAttr {
+        let mut flags = MemoryAttr::new().set_user();
+        if self.is_execute() {
+            flags = flags.set_execute();
+        }
+        flags
+    }
+}
