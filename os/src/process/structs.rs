@@ -7,6 +7,15 @@ use crate::alloc::alloc::{
 use crate::consts::*;
 use riscv::register::satp;
 use alloc::boxed::Box;
+use super::{ Tid, ExitCode };
+
+#[derive(Clone)]
+pub enum Status {
+    Ready,
+    Running(Tid),
+    Sleeping,
+    Exited(ExitCode),
+}
 
 pub struct Thread {
     pub context: Context,

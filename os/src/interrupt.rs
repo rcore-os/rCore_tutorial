@@ -14,8 +14,8 @@ use crate::timer::{
     TICKS,
     clock_set_next_event
 };
-
 use crate::context::TrapFrame;
+use crate::process::tick;
 
 global_asm!(include_str!("trap/trap.asm"));
 
@@ -51,16 +51,32 @@ fn breakpoint(sepc: &mut usize) {
 
 fn super_timer() {
     clock_set_next_event();
-    unsafe {
-        TICKS += 1;
-        if TICKS == 100 {
-            TICKS = 0;
-            println!("* 100 ticks *");
-        }
-    }
+    tick();
 }
-
 fn page_fault(tf: &mut TrapFrame) {
     println!("{:?} va = {:#x} instruction = {:#x}", tf.scause.cause(), tf.stval, tf.sepc);
     panic!("page fault!");
+}
+
+#[inline(always)]
+pub fn disable_and_store() -> usize {
+    let sstatus: usize;
+    unsafe {
+        asm!("csrci sstatus, 1 << 1" : "=r"(sstatus) ::: "volatile");
+    }
+    sstatus
+}
+
+#[inline(always)]
+pub fn restore(flags: usize) {
+    unsafe {
+        asm!("csrs sstatus, $0" :: "r"(flags) :: "volatile");
+    }
+}
+
+#[inline(always)]
+pub fn enable_and_wfi() {
+    unsafe {
+        asm!("csrsi sstatus, 1 << 1; wfi" :::: "volatile");
+    }
 }
