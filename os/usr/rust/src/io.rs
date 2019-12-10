@@ -1,5 +1,6 @@
 use crate::syscall::sys_write;
 use core::fmt::{self, Write};
+use crate::syscall::sys_read;
 
 pub fn putchar(ch: char) {
     sys_write(ch as u8);
@@ -35,4 +36,12 @@ impl fmt::Write for Stdout {
 
 pub fn _print(args: fmt::Arguments) {
     Stdout.write_fmt(args).unwrap();
+}
+
+pub const STDIN: usize = 0;
+
+pub fn getc() -> u8 {
+    let mut c = 0u8;
+    assert_eq!(sys_read(STDIN, &mut c, 1), 1);
+    c
 }

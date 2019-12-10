@@ -1,4 +1,5 @@
 mod device;
+pub mod stdio;
 
 use lazy_static::*;
 use rcore_fs::vfs::*;

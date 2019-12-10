@@ -20,6 +20,7 @@ mod memory;
 mod process;
 mod syscall;
 mod fs;
+mod sync;
 
 use buddy_system_allocator::LockedHeap;
 

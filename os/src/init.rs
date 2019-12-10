@@ -21,8 +21,6 @@ _user_img_end:
 
 #[no_mangle]
 pub extern "C" fn rust_main() -> ! {
-    crate::interrupt::init();
-
     extern "C" {
         fn end();
     }
@@ -30,6 +28,7 @@ pub extern "C" fn rust_main() -> ! {
         ((end as usize - KERNEL_BEGIN_VADDR + KERNEL_BEGIN_PADDR) >> 12) + 1,
         PHYSICAL_MEMORY_END >> 12
     );
+	crate::interrupt::init();
 	crate::fs::init();
     crate::process::init();
     crate::timer::init();
