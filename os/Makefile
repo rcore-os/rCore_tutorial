@@ -15,6 +15,11 @@ env:
 
 export USER_IMG = ../usr/rust/target/$(target)/debug/hello_world
 
+usr:
+	cd ../usr/rust
+	cargo build
+	cd ../..
+
 kernel:
 	cargo build
 
@@ -24,7 +29,7 @@ $(bin): kernel
 asm:
 	$(objdump) -d $(kernel) | less
 
-build: $(bin)
+build: $(bin) usr
 
 clean:
 	cargo clean
