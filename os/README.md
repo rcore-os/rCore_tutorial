@@ -11,6 +11,14 @@ make env
 make build
 ```
 
-执行如下命令在rv模拟器上运行最小独立内核，显示“OK”字符串
+执行如下命令在rv模拟器上运行最小独立内核，
 ```
 make run
+```
+显示如下字符串
+```
+_start vaddr = 0x80200000
+bootstacktop vaddr = 0x80208000
+hello world!
+panicked at 'you want to do nothing!', src/init.rs:15:5
+```
