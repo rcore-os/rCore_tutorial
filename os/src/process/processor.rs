@@ -96,6 +96,10 @@ impl Processor {
         inner.pool.exit(tid);
         println!("thread {} exited, exit code = {}", tid, code);
 
+		if let Some(wait) = inner.current.as_ref().unwrap().1.wait {
+            inner.pool.wakeup(wait);
+        }
+
         inner.current
             .as_mut()
             .unwrap()
