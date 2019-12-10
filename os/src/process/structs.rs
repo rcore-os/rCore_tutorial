@@ -31,6 +31,7 @@ pub enum Status {
 pub struct Thread {
     pub context: Context,
     pub kstack: KernelStack,
+	pub wait: Option<Tid>,
 }
 
 impl Thread {
@@ -46,6 +47,7 @@ impl Thread {
             Box::new(Thread {
                 context: Context::new_kernel_thread(entry, kstack_.top(), satp::read().bits()),
                 kstack: kstack_,
+				wait: None
             })
         }
     }
@@ -54,6 +56,7 @@ impl Thread {
         Box::new(Thread {
             context: Context::null(),
             kstack: KernelStack::new_empty(),
+			wait: None
         })
     }
 
@@ -63,12 +66,12 @@ impl Thread {
         } 
     }
 	
-	pub unsafe fn new_user(data: &[u8]) -> Box<Thread> {
+	pub unsafe fn new_user(data: &[u8], wait_thread: Option<Tid>) -> Box<Thread> {
         let elf = ElfFile::new(data).expect("failed to analyse elf!");
 
         match elf.header.pt2.type_().as_type() {
             header::Type::Executable => {
-                println!("it really a executable!");
+                // println!("it really a executable!");
             },
             header::Type::SharedObject => {
                 panic!("shared object is not supported!");
@@ -98,6 +101,7 @@ impl Thread {
             Thread {
                 context: Context::new_user_thread(entry_addr, ustack_top, kstack.top(), vm.token()),
                 kstack: kstack,
+				wait: wait_thread
             }
         )
     }

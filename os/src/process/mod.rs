@@ -26,38 +26,26 @@ pub fn init() {
     idle.append_initial_arguments([&CPU as *const Processor as usize, 0, 0]);
     CPU.init(idle, Box::new(thread_pool));
 
-	/*
-    for i in 0..5 {
-        CPU.add_thread({
-            let thread = Thread::new_kernel(hello_thread as usize);
-            thread.append_initial_arguments([i, 0, 0]);
-            thread
-        });
-    }
-	*/
-
-	let data = ROOT_INODE
-        .lookup("rust/notebook")
-        .unwrap()
-        .read_as_vec()
-        .unwrap();
-    let user_thread = unsafe { Thread::new_user(data.as_slice()) };
-    CPU.add_thread(user_thread);
+	execute("rust/user_shell", None);
 
     println!("++++ setup process!   ++++");
 }
 
-#[no_mangle]
-pub extern "C" fn hello_thread(arg: usize) -> ! {
-    println!("begin of thread {}", arg);
-    for i in 0..800 {
-        print!("{}", arg);
-	}
-    println!("\nend  of thread {}", arg);
-    CPU.exit(0);
-    loop {}
+pub fn execute(path: &str, host_tid: Option<Tid>) -> bool {
+    let find_result = ROOT_INODE.lookup(path);
+    match find_result {
+        Ok(inode) => {
+            let data = inode.read_as_vec().unwrap();
+            let user_thread = unsafe { Thread::new_user(data.as_slice(), host_tid) };
+            CPU.add_thread(user_thread);
+            true
+        },
+        Err(_) => {
+            println!("command not found!");
+            false
+        }
+    }
 }
-
 
 pub fn tick() {
     CPU.tick();
