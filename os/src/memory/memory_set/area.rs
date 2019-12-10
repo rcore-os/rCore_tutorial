@@ -39,4 +39,19 @@ impl MemoryArea {
             attr : attr,
         }
     }
+
+	pub fn page_copy(&self, pt: &mut PageTableImpl, src: usize, length: usize) { 
+        let mut l = length;
+        let mut s = src;
+        for page in PageRange::new(self.start, self.end) {
+            self.handler.page_copy(
+                pt,
+                page,
+                s,
+                if l < PAGE_SIZE { l } else { PAGE_SIZE },
+            );
+            s += PAGE_SIZE;
+            if l >= PAGE_SIZE { l -= PAGE_SIZE; }
+        }
+    }
 }

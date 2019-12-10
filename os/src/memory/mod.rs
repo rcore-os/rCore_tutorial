@@ -57,6 +57,7 @@ pub fn kernel_remap() {
         bootstacktop as usize,
         MemoryAttr::new(),
         Linear::new(PHYSICAL_MEMORY_OFFSET),
+	None,
     );
 
     unsafe {

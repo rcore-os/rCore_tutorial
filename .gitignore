@@ -1,6 +1,7 @@
 os/target
 os/usr/build
 usr/rust/target
+os/src/link_user.S
 Cargo.lock
 .idea
 .vscode

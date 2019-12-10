@@ -21,7 +21,7 @@ use crate::memory::{
     access_pa_via_va
 };
 
-pub struct PageEntry(&'static mut PageTableEntry, Page);
+pub struct PageEntry(pub &'static mut PageTableEntry, Page);
 
 impl PageEntry {
     pub fn update(&mut self) {
@@ -115,7 +115,7 @@ impl PageTableImpl {
         flush.flush();
     }
 
-    fn get_entry(&mut self, va: usize) -> Option<&mut PageEntry> {
+    pub fn get_entry(&mut self, va: usize) -> Option<&mut PageEntry> {
         let page = Page::of_addr(VirtAddr::new(va));
         if let Ok(e) = self.page_table.ref_entry(page.clone()) {
             let e = unsafe { &mut *(e as *mut PageTableEntry) };
