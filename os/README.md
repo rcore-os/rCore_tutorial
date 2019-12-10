@@ -1,4 +1,4 @@
-对应rCore_tutorial_doc的cha3-pa5
+对应rCore_tutorial_doc的cha4-pa1
 
 # 建立开发环境
 第一次编译需要先建立开发环境
