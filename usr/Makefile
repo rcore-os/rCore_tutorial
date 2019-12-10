@@ -12,7 +12,7 @@ sfsimg := build/riscv64.img
 rcore-fs-fuse:
 ifeq ($(shell which rcore-fs-fuse),)
 	@echo Installing rcore-fs-fuse
-	@cargo install rcore-fs-fuse --git https://github.com/rcore-os/rcore-fs --rev c611248
+	@cargo install rcore-fs-fuse --git https://github.com/rcore-os/rcore-fs --rev d8d6119
 endif
 
 rust:
