@@ -26,6 +26,7 @@ pub fn init() {
     idle.append_initial_arguments([&CPU as *const Processor as usize, 0, 0]);
     CPU.init(idle, Box::new(thread_pool));
 
+	/*
     for i in 0..5 {
         CPU.add_thread({
             let thread = Thread::new_kernel(hello_thread as usize);
@@ -33,9 +34,10 @@ pub fn init() {
             thread
         });
     }
+	*/
 
 	let data = ROOT_INODE
-        .lookup("rust/hello_world")
+        .lookup("rust/notebook")
         .unwrap()
         .read_as_vec()
         .unwrap();
@@ -67,4 +69,15 @@ pub fn run() {
 
 pub fn exit(code: usize) {
     CPU.exit(code);
+}
+
+pub fn yield_now() {
+    CPU.yield_now();
+}
+
+pub fn wake_up(tid: Tid) {
+    CPU.wake_up(tid);
+}
+pub fn current_tid() -> usize {
+    CPU.current_tid()
 }

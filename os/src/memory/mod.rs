@@ -16,8 +16,12 @@ use memory_set::{
     attr::MemoryAttr,
     handler::Linear
 };
+use riscv::register::sstatus;
 
 pub fn init(l: usize, r: usize) {
+    unsafe {
+        sstatus::set_sum();
+    }
     FRAME_ALLOCATOR.lock().init(l, r);
     init_heap();
     kernel_remap();
@@ -57,7 +61,21 @@ pub fn kernel_remap() {
         bootstacktop as usize,
         MemoryAttr::new(),
         Linear::new(PHYSICAL_MEMORY_OFFSET),
-	None,
+		None,
+    );
+	memory_set.push(
+        access_pa_via_va(0x0c00_2000),
+        access_pa_via_va(0x0c00_3000),
+        MemoryAttr::new(),
+        Linear::new(PHYSICAL_MEMORY_OFFSET),
+        None
+    );
+    memory_set.push(
+        access_pa_via_va(0x1000_0000),
+        access_pa_via_va(0x1000_1000),
+        MemoryAttr::new(),
+        Linear::new(PHYSICAL_MEMORY_OFFSET),
+        None
     );
 
     unsafe {
