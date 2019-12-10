@@ -8,7 +8,10 @@ use processor::Processor;
 use scheduler::RRScheduler;
 use thread_pool::ThreadPool;
 use alloc::boxed::Box;
-
+use crate::fs::{
+    ROOT_INODE,
+    INodeExt
+};
 
 pub type Tid = usize;
 pub type ExitCode = usize;
@@ -17,7 +20,7 @@ pub type ExitCode = usize;
 static CPU: Processor = Processor::new();
 
 pub fn init() {
-    let scheduler = RRScheduler::new(2);
+    let scheduler = RRScheduler::new(1);
     let thread_pool = ThreadPool::new(100, Box::new(scheduler));
     let idle = Thread::new_kernel(Processor::idle_main as usize);
     idle.append_initial_arguments([&CPU as *const Processor as usize, 0, 0]);
@@ -31,17 +34,12 @@ pub fn init() {
         });
     }
 
-	extern "C" {
-        fn _user_img_start();
-        fn _user_img_end();
-    }
-    let data = unsafe {
-        core::slice::from_raw_parts(
-            _user_img_start as *const u8,
-            _user_img_end as usize - _user_img_start as usize,
-        )
-    };
-    let user_thread = unsafe { Thread::new_user(data) };
+	let data = ROOT_INODE
+        .lookup("rust/hello_world")
+        .unwrap()
+        .read_as_vec()
+        .unwrap();
+    let user_thread = unsafe { Thread::new_user(data.as_slice()) };
     CPU.add_thread(user_thread);
 
     println!("++++ setup process!   ++++");
