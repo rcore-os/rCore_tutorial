@@ -1,5 +1,6 @@
 os/target
-os/usr/build/
+os/usr/build
+usr/rust/target
 Cargo.lock
 .idea
 .vscode
