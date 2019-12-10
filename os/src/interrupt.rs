@@ -16,6 +16,8 @@ use crate::timer::{
 };
 use crate::context::TrapFrame;
 use crate::process::tick;
+use crate::memory::access_pa_via_va;
+use riscv::register::sie;
 
 global_asm!(include_str!("trap/trap.asm"));
 
@@ -27,9 +29,29 @@ pub fn init() {
         sscratch::write(0);
         stvec::write(__alltraps as usize, stvec::TrapMode::Direct);
 
-	sstatus::set_sie();
+		sstatus::set_sie();
+
+		// enable external interrupt
+		sie::set_sext();
+
+		// closed by OpenSBI, so we open them manually
+		// see https://github.com/rcore-os/rCore/blob/54fddfbe1d402ac1fafd9d58a0bd4f6a8dd99ece/kernel/src/arch/riscv32/board/virt/mod.rs#L4
+		init_external_interrupt();
+		enable_serial_interrupt();
     }
     println!("++++ setup interrupt! ++++");
+}
+
+pub unsafe fn init_external_interrupt() {
+    let HART0_S_MODE_INTERRUPT_ENABLES: *mut u32 = access_pa_via_va(0x0c00_2080) as *mut u32;
+    const SERIAL: u32 = 0xa;
+    HART0_S_MODE_INTERRUPT_ENABLES.write_volatile(1 << SERIAL);
+}
+
+pub unsafe fn enable_serial_interrupt() {
+    let UART16550: *mut u8 = access_pa_via_va(0x10000000) as *mut u8;
+    UART16550.add(4).write_volatile(0x0B);
+    UART16550.add(1).write_volatile(0x01);
 }
 
 #[no_mangle]
@@ -41,6 +63,7 @@ pub fn rust_trap(tf: &mut TrapFrame) {
         Trap::Exception(Exception::LoadPageFault) => page_fault(tf),
         Trap::Exception(Exception::StorePageFault) => page_fault(tf),
 		Trap::Exception(Exception::UserEnvCall) => syscall(tf),
+		Trap::Interrupt(Interrupt::SupervisorExternal) => external(),
         _ => panic!("undefined trap!")
     }
 }
@@ -67,6 +90,25 @@ fn syscall(tf: &mut TrapFrame) {
         tf
     );
     tf.x[10] = ret as usize;
+}
+
+fn external() {
+    let _ = try_serial();
+}
+
+fn try_serial() -> bool {
+    match super::io::getchar_option() {
+        Some(ch) => {
+            if (ch == '\r') {
+                crate::fs::stdio::STDIN.push('\n');
+            }
+            else {
+                crate::fs::stdio::STDIN.push(ch);
+            }
+            true
+        },
+        None => false
+    }
 }
 
 #[inline(always)]
