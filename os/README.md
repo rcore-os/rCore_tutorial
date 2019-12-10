@@ -1,5 +1,16 @@
-对应rCore_tutorial_doc的chapter1
-执行如下命令通过对最小独立可执行程序的编译
+对应rCore_tutorial_doc的cha2-pa7
+
+# 建立开发环境
+第一次编译需要先建立开发环境
 ```
-./build.sh
+make env
 ```
+
+执行如下命令通过对最小独立内核的编译
+```
+make build
+```
+
+执行如下命令在rv模拟器上运行最小独立内核，显示“OK”字符串
+```
+make run
