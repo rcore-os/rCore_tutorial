@@ -1,4 +1,4 @@
-target
 os/target
 os/usr/build/
+os/usr/rust/target
 Cargo.lock

@@ -144,7 +144,7 @@ pub fn disable_and_store() -> usize {
     unsafe {
         asm!("csrci sstatus, 1 << 1" : "=r"(sstatus) ::: "volatile");
     }
-    sstatus & (1 << 1)
+    sstatus
 }
 
 #[inline(always)]
