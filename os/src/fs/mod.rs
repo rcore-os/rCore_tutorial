@@ -7,7 +7,7 @@ mod device;
 pub mod stdio;
 
 lazy_static! {
-    pub static ref ROOT_INODE: Arc<INode> = {
+    pub static ref ROOT_INODE: Arc<dyn INode> = {
         let device = {
             extern "C" {
                 fn _user_img_start();
@@ -28,7 +28,7 @@ pub trait INodeExt {
     fn read_as_vec(&self) -> Result<Vec<u8>>;
 }
 
-impl INodeExt for INode {
+impl INodeExt for dyn INode {
     fn read_as_vec(&self) -> Result<Vec<u8>> {
         let size = self.metadata()?.size;
         let mut buf = Vec::with_capacity(size);
