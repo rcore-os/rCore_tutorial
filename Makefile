@@ -1,4 +1,4 @@
-DOCKER_NAME ?= rcoretutorial
+DOCKER_NAME ?= panqinglin/tutorial
 .PHONY: docker build_docker
 
 docker:
