@@ -1,9 +1,8 @@
-use crate::memory::paging::PageTableImpl;
 use super::attr::MemoryAttr;
-use crate::memory::alloc_frame; 
-use core::fmt::Debug;
+use crate::memory::alloc_frame;
+use crate::memory::paging::PageTableImpl;
 use alloc::boxed::Box;
-
+use core::fmt::Debug;
 
 pub trait MemoryHandler: Debug + 'static {
     fn box_clone(&self) -> Box<dyn MemoryHandler>;
@@ -12,20 +11,25 @@ pub trait MemoryHandler: Debug + 'static {
 }
 
 impl Clone for Box<dyn MemoryHandler> {
-    fn clone(&self) -> Box<dyn MemoryHandler> { self.box_clone() }
+    fn clone(&self) -> Box<dyn MemoryHandler> {
+        self.box_clone()
+    }
 }
 
-
 #[derive(Debug, Clone)]
-pub struct Linear { offset: usize }
+pub struct Linear {
+    offset: usize,
+}
 
 impl Linear {
     pub fn new(off: usize) -> Self {
-        Linear { offset: off, }
+        Linear { offset: off }
     }
 }
 impl MemoryHandler for Linear {
-    fn box_clone(&self) -> Box<dyn MemoryHandler> { Box::new(self.clone()) }
+    fn box_clone(&self) -> Box<dyn MemoryHandler> {
+        Box::new(self.clone())
+    }
     fn map(&self, pt: &mut PageTableImpl, va: usize, attr: &MemoryAttr) {
         attr.apply(pt.map(va, va - self.offset));
     }

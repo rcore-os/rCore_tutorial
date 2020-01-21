@@ -1,18 +1,7 @@
+use crate::timer::{clock_set_next_event, TICKS};
 use riscv::register::{
-    scause::{
-        self,
-        Trap,
-        Exception,
-        Interrupt
-    },
-    sepc,
-    stvec,
-    sscratch,
-    sstatus
-};
-use crate::timer::{
-    TICKS,
-    clock_set_next_event
+    scause::{self, Exception, Interrupt, Trap},
+    sepc, sscratch, sstatus, stvec,
 };
 
 use crate::context::TrapFrame;
@@ -23,11 +12,11 @@ pub fn init() {
     unsafe {
         extern "C" {
             fn __alltraps();
-        }        
+        }
         sscratch::write(0);
         stvec::write(__alltraps as usize, stvec::TrapMode::Direct);
 
-	sstatus::set_sie();
+        sstatus::set_sie();
     }
     println!("++++ setup interrupt! ++++");
 }
@@ -40,7 +29,7 @@ pub fn rust_trap(tf: &mut TrapFrame) {
         Trap::Exception(Exception::InstructionPageFault) => page_fault(tf),
         Trap::Exception(Exception::LoadPageFault) => page_fault(tf),
         Trap::Exception(Exception::StorePageFault) => page_fault(tf),
-        _ => panic!("undefined trap!")
+        _ => panic!("undefined trap!"),
     }
 }
 
@@ -61,6 +50,11 @@ fn super_timer() {
 }
 
 fn page_fault(tf: &mut TrapFrame) {
-    println!("{:?} va = {:#x} instruction = {:#x}", tf.scause.cause(), tf.stval, tf.sepc);
+    println!(
+        "{:?} va = {:#x} instruction = {:#x}",
+        tf.scause.cause(),
+        tf.stval,
+        tf.sepc
+    );
     panic!("page fault!");
 }

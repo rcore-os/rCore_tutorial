@@ -1,20 +1,14 @@
+pub mod area;
 pub mod attr;
 pub mod handler;
-pub mod area; 
 
+use crate::consts::*;
+use crate::memory::access_pa_via_va;
+use crate::memory::paging::PageTableImpl;
+use alloc::{boxed::Box, vec::Vec};
 use area::MemoryArea;
 use attr::MemoryAttr;
-use crate::memory::paging::PageTableImpl;
-use crate::consts::*;
-use handler::{
-    MemoryHandler,
-    Linear
-};
-use alloc::{
-    boxed::Box,
-    vec::Vec
-};
-use crate::memory::access_pa_via_va;
+use handler::{Linear, MemoryHandler};
 
 pub struct MemorySet {
     areas: Vec<MemoryArea>,
@@ -22,13 +16,19 @@ pub struct MemorySet {
 }
 
 impl MemorySet {
-    pub fn push(&mut self, start: usize, end: usize, attr: MemoryAttr, handler: impl MemoryHandler) {
+    pub fn push(
+        &mut self,
+        start: usize,
+        end: usize,
+        attr: MemoryAttr,
+        handler: impl MemoryHandler,
+    ) {
         assert!(start <= end, "invalid memory area!");
         assert!(self.test_free_area(start, end), "memory area overlap!");
         let area = MemoryArea::new(start, end, Box::new(handler), attr);
         area.map(&mut self.page_table);
         self.areas.push(area);
-    } 
+    }
     fn test_free_area(&self, start: usize, end: usize) -> bool {
         self.areas
             .iter()
@@ -38,7 +38,7 @@ impl MemorySet {
     pub unsafe fn activate(&self) {
         self.page_table.activate();
     }
-	pub fn new() -> Self {
+    pub fn new() -> Self {
         let mut memory_set = MemorySet {
             areas: Vec::new(),
             page_table: PageTableImpl::new_bare(),
@@ -79,18 +79,18 @@ impl MemorySet {
             sdata as usize,
             edata as usize,
             MemoryAttr::new(),
-            Linear::new(offset)
+            Linear::new(offset),
         );
         // .bss R|W
         self.push(
             sbss as usize,
             ebss as usize,
             MemoryAttr::new(),
-            Linear::new(offset)
+            Linear::new(offset),
         );
         // 物理内存 R|W
         self.push(
-            (end as usize / PAGE_SIZE + 1) * PAGE_SIZE, 
+            (end as usize / PAGE_SIZE + 1) * PAGE_SIZE,
             access_pa_via_va(PHYSICAL_MEMORY_END),
             MemoryAttr::new(),
             Linear::new(offset),

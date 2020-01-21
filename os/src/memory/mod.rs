@@ -1,21 +1,12 @@
 mod frame_allocator;
-pub mod paging;
 pub mod memory_set;
+pub mod paging;
 
+use crate::consts::*;
 use buddy_system_allocator::LockedHeap;
 use frame_allocator::SEGMENT_TREE_ALLOCATOR as FRAME_ALLOCATOR;
-use riscv::addr::{
-    VirtAddr,
-    PhysAddr,
-    Page,
-    Frame
-};
-use crate::consts::*;
-use memory_set::{
-    MemorySet,
-    attr::MemoryAttr,
-    handler::Linear
-};
+use memory_set::{attr::MemoryAttr, handler::Linear, MemorySet};
+use riscv::addr::Frame;
 
 pub fn init(l: usize, r: usize) {
     FRAME_ALLOCATOR.lock().init(l, r);
