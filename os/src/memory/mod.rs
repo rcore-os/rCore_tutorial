@@ -1,12 +1,11 @@
 mod frame_allocator;
-pub mod memory_set;
-pub mod paging;
 
 use crate::consts::*;
 use buddy_system_allocator::LockedHeap;
 use frame_allocator::SEGMENT_TREE_ALLOCATOR as FRAME_ALLOCATOR;
-use memory_set::{attr::MemoryAttr, handler::Linear, MemorySet};
 use riscv::addr::Frame;
+use riscv::register::satp;
+use zircon_object::vm::*;
 
 pub fn init(l: usize, r: usize) {
     FRAME_ALLOCATOR.lock().init(l, r);
@@ -16,10 +15,13 @@ pub fn init(l: usize, r: usize) {
 }
 
 pub fn alloc_frame() -> Option<Frame> {
-    Some(Frame::of_ppn(FRAME_ALLOCATOR.lock().alloc()))
+    let ret = Some(Frame::of_ppn(FRAME_ALLOCATOR.lock().alloc()));
+    trace!("alloc frame => {:x?}", ret);
+    ret
 }
 
 pub fn dealloc_frame(f: Frame) {
+    trace!("dealloc frame: {:x?}", f);
     FRAME_ALLOCATOR.lock().dealloc(f.number())
 }
 
@@ -32,27 +34,66 @@ fn init_heap() {
     }
 }
 
-pub fn access_pa_via_va(pa: usize) -> usize {
-    pa + PHYSICAL_MEMORY_OFFSET
-}
-
 pub fn kernel_remap() {
-    let mut memory_set = MemorySet::new();
+    let vmar = VmAddressRegion::new_root();
 
     extern "C" {
-        fn bootstack();
-        fn bootstacktop();
+        fn stext();
+        fn etext();
+        fn srodata();
+        fn erodata();
+        fn sdata();
+        fn ebss();
     }
-    memory_set.push(
-        bootstack as usize,
-        bootstacktop as usize,
-        MemoryAttr::new(),
-        Linear::new(PHYSICAL_MEMORY_OFFSET),
-    );
 
+    const OFFSET: usize = KERNEL_BEGIN_VADDR - KERNEL_BEGIN_PADDR;
+    let vmo_text = unsafe {
+        let vaddr = stext as usize;
+        let pages = pages(etext as usize - vaddr);
+        VMObjectPhysical::new(vaddr - OFFSET, pages)
+    };
+    let vmo_rodata = unsafe {
+        let vaddr = srodata as usize;
+        let pages = pages(erodata as usize - vaddr);
+        VMObjectPhysical::new(vaddr - OFFSET, pages)
+    };
+    let vmo_data = unsafe {
+        let vaddr = sdata as usize;
+        let pages = pages(ebss as usize - vaddr);
+        VMObjectPhysical::new(vaddr - OFFSET, pages)
+    };
+
+    vmar.map(
+        stext as usize,
+        vmo_text.clone(),
+        0,
+        vmo_text.len(),
+        MMUFlags::READ | MMUFlags::EXECUTE,
+    )
+    .unwrap();
+    vmar.map(
+        srodata as usize,
+        vmo_rodata.clone(),
+        0,
+        vmo_rodata.len(),
+        MMUFlags::READ,
+    )
+    .unwrap();
+    vmar.map(
+        sdata as usize,
+        vmo_data.clone(),
+        0,
+        vmo_data.len(),
+        MMUFlags::READ | MMUFlags::WRITE,
+    )
+    .unwrap();
+
+    let table_phys = vmar.table_phys();
     unsafe {
-        memory_set.activate();
+        satp::set(satp::Mode::Sv39, 0, table_phys >> 12);
+        riscv::asm::sfence_vma_all();
     }
+    core::mem::forget(vmar);
 }
 
 #[global_allocator]

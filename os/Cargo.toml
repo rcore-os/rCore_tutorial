@@ -8,6 +8,8 @@ edition = "2018"
 
 [dependencies]
 riscv = { git = "https://github.com/rcore-os/riscv", features = ["inline-asm"] }
+log = "0.4"
 spin = "0.5.2"
 buddy_system_allocator = "0.3"
-
+zircon-object = { git = "https://github.com/rcore-os/zircon-rs.git", rev = "de4b214" }
+zircon-hal-bare = { git = "https://github.com/rcore-os/zircon-rs.git", rev = "de4b214" }

@@ -36,3 +36,20 @@ macro_rules! println {
     () => ($crate::print!("\n"));
     ($($arg:tt)*) => ($crate::print!("{}\n", format_args!($($arg)*)));
 }
+
+pub fn init() {
+    use log::*;
+    struct SimpleLogger;
+    impl Log for SimpleLogger {
+        fn enabled(&self, _metadata: &Metadata) -> bool {
+            true
+        }
+        fn log(&self, record: &Record) {
+            println!("[{:>5}] {}", record.level(), record.args());
+        }
+        fn flush(&self) {}
+    }
+    static LOGGER: SimpleLogger = SimpleLogger;
+    set_logger(&LOGGER).unwrap();
+    set_max_level(LevelFilter::Info);
+}

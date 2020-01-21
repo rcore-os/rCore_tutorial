@@ -4,6 +4,8 @@ use crate::consts::*;
 
 #[no_mangle]
 pub extern "C" fn rust_main() -> ! {
+    zircon_hal_bare::init();
+    crate::io::init();
     crate::interrupt::init();
 
     extern "C" {
