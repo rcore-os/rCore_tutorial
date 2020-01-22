@@ -3,3 +3,4 @@ usr/rust/target
 usr/build
 os/src/link_user.S
 Cargo.lock
+.idea
