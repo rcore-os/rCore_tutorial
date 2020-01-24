@@ -29,7 +29,7 @@ build: $(bin)
 clean:
 	cargo clean
 
-qemu:
+qemu: build
 	qemu-system-riscv64 \
 		-machine virt \
 		-nographic \
