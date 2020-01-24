@@ -1,6 +1,6 @@
 #![no_std]
 #![no_main]
-#![feature(asm)]
+#![feature(global_asm)]
 
 extern crate alloc;
 
@@ -12,7 +12,7 @@ use alloc::vec;
 use alloc::vec::Vec;
 
 
-const DEFAULT_STACK_SIZE: usize = 1024 * 1024 * 2;
+const DEFAULT_STACK_SIZE: usize = 1024 * 2;
 const MAX_THREADS: usize = 4;
 static mut RUNTIME: usize = 0;
 
@@ -166,50 +166,49 @@ pub fn yield_thread() {
     };
 }
 
-#[inline(never)]
-unsafe fn switch(old: *mut ThreadContext, new: *const ThreadContext) {
-    asm!("
-        sd x1, 0x00($0)
-        sd x2, 0x08($0)
-        sd x8, 0x10($0)
-        sd x9, 0x18($0)
-        sd x18, 0x20($0)
-        sd x19, 0x28($0)
-        sd x20, 0x30($0)
-        sd x21, 0x38($0)
-        sd x22, 0x40($0)
-        sd x23, 0x48($0)
-        sd x24, 0x50($0)
-        sd x25, 0x58($0)
-        sd x26, 0x60($0)
-        sd x27, 0x68($0)
+global_asm!("
+    .global switch
+switch:
 
-        sd x1, 0xa0($0)
+    sd x1, 0x00(a0)
+    sd x2, 0x08(a0)
+    sd x8, 0x10(a0)
+    sd x9, 0x18(a0)
+    sd x18, 0x20(a0)
+    sd x19, 0x28(a0)
+    sd x20, 0x30(a0)
+    sd x21, 0x38(a0)
+    sd x22, 0x40(a0)
+    sd x23, 0x48(a0)
+    sd x24, 0x50(a0)
+    sd x25, 0x58(a0)
+    sd x26, 0x60(a0)
+    sd x27, 0x68(a0)
 
-        ld x1, 0x00($1)
-        ld x2, 0x08($1)
-        ld x8, 0x10($1)
-        ld x9, 0x18($1)
-        ld x18, 0x20($1)
-        ld x19, 0x28($1)
-        ld x20, 0x30($1)
-        ld x21, 0x38($1)
-        ld x22, 0x40($1)
-        ld x23, 0x48($1)
-        ld x24, 0x50($1)
-        ld x25, 0x58($1)
-        ld x26, 0x60($1)
-        ld x27, 0x68($1)
+    sd x1, 0x70(a0)
 
-        ld t0, 0xa0($1)
+    ld x1, 0x00(a1)
+    ld x2, 0x08(a1)
+    ld x8, 0x10(a1)
+    ld x9, 0x18(a1)
+    ld x18, 0x20(a1)
+    ld x19, 0x28(a1)
+    ld x20, 0x30(a1)
+    ld x21, 0x38(a1)
+    ld x22, 0x40(a1)
+    ld x23, 0x48(a1)
+    ld x24, 0x50(a1)
+    ld x25, 0x58(a1)
+    ld x26, 0x60(a1)
+    ld x27, 0x68(a1)
 
-        jr t0
-    "
-    :
-    :"r"(old), "r"(new)
-    :
-    : "volatile", "alignstack"
-    );
+    ld t0, 0x70(a1)
+
+    jr t0
+");
+
+extern "C" {
+  fn switch(old: *mut ThreadContext, new: *const ThreadContext);
 }
 
 #[no_mangle]
