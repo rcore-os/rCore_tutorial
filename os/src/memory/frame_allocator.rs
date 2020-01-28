@@ -16,6 +16,7 @@ impl SegmentTreeAllocator {
         while self.m < self.n + 2 {
             self.m = self.m << 1;
         }
+        //println!("STA: l {:#x}, r {:#x},  m {:#x}, n {:#x}", l, r, self.m, self.n);
         for i in (1..(self.m << 1)) { self.a[i] = 1; }
         for i in (1..self.n) { self.a[self.m + i] = 0; }
         for i in (1..self.m).rev() { self.a[i] = self.a[i << 1] & self.a[(i << 1) | 1]; }
