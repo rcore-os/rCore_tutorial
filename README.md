@@ -2,13 +2,25 @@
 
 [![Actions Status](https://github.com/rcore-os/rCore_tutorial/workflows/CI/badge.svg)](https://github.com/rcore-os/rCore_tutorial/actions)
 
-Please read 
+Please read
 - https://rcore-os.github.io/rCore_tutorial_doc/
 - https://github.com/rcore-os/rCore/wiki/os-tutorial-os2atc
 
-## Quickly Try
+## Prerequisite
+
+You need: `rustup` installed and run:
+
+```shell
+cargo install cargo-binutils cargo-xbuild
+rustup component add rust-src
+rustup component add llvm-tools-preview
+rustup target add riscv64imac-unknown-none-elf
 ```
-make run
+
+## Quick Try
+
+```shell
+$ make run
 ## If everything is OK, then you will see below info：
 ......
 OpenSBI v0.4 (Jul  2 2019 11:53:53)
