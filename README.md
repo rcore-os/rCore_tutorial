@@ -11,10 +11,7 @@ Please read
 You need: `rustup` installed and run:
 
 ```shell
-cargo install cargo-binutils cargo-xbuild
-rustup component add rust-src
-rustup component add llvm-tools-preview
-rustup target add riscv64imac-unknown-none-elf
+make env
 ```
 
 ## Quick Try

@@ -9,6 +9,8 @@ run:
 clean:
 	make -C usr clean
 	make -C os clean
+env:
+	make -C os env
 docker:
 	docker run -it --mount type=bind,source=$(shell pwd),destination=/mnt ${DOCKER_NAME}
 
