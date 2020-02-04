@@ -1,9 +1,6 @@
+use crate::alloc::{boxed::Box, vec::Vec};
 use crate::process::scheduler::Scheduler;
 use crate::process::structs::*;
-use crate::alloc::{
-    vec::Vec,
-    boxed::Box,
-};
 use crate::process::Tid;
 
 pub struct ThreadInfo {
@@ -38,12 +35,10 @@ impl ThreadPool {
 
     pub fn add(&mut self, _thread: Box<Thread>) {
         let tid = self.alloc_tid();
-        self.threads[tid] = Some(
-            ThreadInfo {
-                status: Status::Ready,
-                thread: Some(_thread),
-            }
-        );
+        self.threads[tid] = Some(ThreadInfo {
+            status: Status::Ready,
+            thread: Some(_thread),
+        });
         self.scheduler.push(tid);
     }
 
@@ -52,8 +47,7 @@ impl ThreadPool {
             let mut thread_info = self.threads[tid].as_mut().expect("thread not exist!");
             thread_info.status = Status::Running(tid);
             return Some((tid, thread_info.thread.take().expect("thread not exist!")));
-        }
-        else {
+        } else {
             return None;
         }
     }
@@ -62,7 +56,7 @@ impl ThreadPool {
         if self.threads[tid].is_none() {
             return;
         }
-        let mut thread_info = self.threads[tid].as_mut().expect("thread not exist!");       
+        let mut thread_info = self.threads[tid].as_mut().expect("thread not exist!");
         thread_info.thread = Some(thread);
         if let Status::Running(_) = thread_info.status {
             thread_info.status = Status::Ready;
@@ -80,10 +74,11 @@ impl ThreadPool {
         self.scheduler.exit(tid);
     }
 
-	pub fn wakeup(&mut self, tid: Tid) {
-        let proc = self.threads[tid].as_mut().expect("thread not exist when waking up");
+    pub fn wakeup(&mut self, tid: Tid) {
+        let proc = self.threads[tid]
+            .as_mut()
+            .expect("thread not exist when waking up");
         proc.status = Status::Ready;
         self.scheduler.push(tid);
     }
-
 }

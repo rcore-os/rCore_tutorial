@@ -8,7 +8,6 @@ pub trait Scheduler {
     fn exit(&mut self, tid: Tid);
 }
 
-
 #[derive(Default)]
 struct RRInfo {
     valid: bool,
@@ -30,19 +29,17 @@ impl RRScheduler {
             max_time: max_time_slice,
             current: 0,
         };
-        rr.threads.push(
-            RRInfo {
-                valid: false,
-                time: 0,
-                prev: 0,
-                next: 0,
-            }
-        );
+        rr.threads.push(RRInfo {
+            valid: false,
+            time: 0,
+            prev: 0,
+            next: 0,
+        });
         rr
     }
 }
 impl Scheduler for RRScheduler {
-    fn push(&mut self, tid : Tid) {
+    fn push(&mut self, tid: Tid) {
         let tid = tid + 1;
         if tid + 1 > self.threads.len() {
             self.threads.resize_with(tid + 1, Default::default);
@@ -71,27 +68,27 @@ impl Scheduler for RRScheduler {
             self.threads[ret].next = 0;
             self.threads[ret].valid = false;
             self.current = ret;
-            Some(ret-1)
-        }else{
+            Some(ret - 1)
+        } else {
             None
         }
     }
 
     // 当前线程的可用时间片 -= 1
-    fn tick(&mut self) -> bool{
+    fn tick(&mut self) -> bool {
         let tid = self.current;
         if tid != 0 {
             self.threads[tid].time -= 1;
             if self.threads[tid].time == 0 {
                 return true;
-            }else{
+            } else {
                 return false;
             }
         }
         return true;
     }
 
-    fn exit(&mut self, tid : Tid) {
+    fn exit(&mut self, tid: Tid) {
         let tid = tid + 1;
         if self.current == tid {
             self.current = 0;

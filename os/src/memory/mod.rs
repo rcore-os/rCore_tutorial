@@ -1,21 +1,12 @@
 mod frame_allocator;
-pub mod paging;
 pub mod memory_set;
+pub mod paging;
 
+use crate::consts::*;
 use buddy_system_allocator::LockedHeap;
 use frame_allocator::SEGMENT_TREE_ALLOCATOR as FRAME_ALLOCATOR;
-use riscv::addr::{
-    VirtAddr,
-    PhysAddr,
-    Page,
-    Frame
-};
-use crate::consts::*;
-use memory_set::{
-    MemorySet,
-    attr::MemoryAttr,
-    handler::Linear
-};
+use memory_set::{attr::MemoryAttr, handler::Linear, MemorySet};
+use riscv::addr::{Frame, Page, PhysAddr, VirtAddr};
 use riscv::register::sstatus;
 
 pub fn init(l: usize, r: usize) {
@@ -61,21 +52,21 @@ pub fn kernel_remap() {
         bootstacktop as usize,
         MemoryAttr::new(),
         Linear::new(PHYSICAL_MEMORY_OFFSET),
-		None,
+        None,
     );
-	memory_set.push(
+    memory_set.push(
         access_pa_via_va(0x0c00_2000),
         access_pa_via_va(0x0c00_3000),
         MemoryAttr::new(),
         Linear::new(PHYSICAL_MEMORY_OFFSET),
-        None
+        None,
     );
     memory_set.push(
         access_pa_via_va(0x1000_0000),
         access_pa_via_va(0x1000_1000),
         MemoryAttr::new(),
         Linear::new(PHYSICAL_MEMORY_OFFSET),
-        None
+        None,
     );
 
     unsafe {

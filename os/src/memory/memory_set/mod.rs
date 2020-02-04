@@ -1,20 +1,14 @@
+pub mod area;
 pub mod attr;
 pub mod handler;
-pub mod area; 
 
+use crate::consts::*;
+use crate::memory::access_pa_via_va;
+use crate::memory::paging::PageTableImpl;
+use alloc::{boxed::Box, vec::Vec};
 use area::MemoryArea;
 use attr::MemoryAttr;
-use crate::memory::paging::PageTableImpl;
-use crate::consts::*;
-use handler::{
-    MemoryHandler,
-    Linear
-};
-use alloc::{
-    boxed::Box,
-    vec::Vec
-};
-use crate::memory::access_pa_via_va;
+use handler::{Linear, MemoryHandler};
 
 pub struct MemorySet {
     areas: Vec<MemoryArea>,
@@ -22,7 +16,14 @@ pub struct MemorySet {
 }
 
 impl MemorySet {
-    pub fn push(&mut self, start: usize, end: usize, attr: MemoryAttr, handler: impl MemoryHandler, data: Option<(usize, usize)>) {
+    pub fn push(
+        &mut self,
+        start: usize,
+        end: usize,
+        attr: MemoryAttr,
+        handler: impl MemoryHandler,
+        data: Option<(usize, usize)>,
+    ) {
         assert!(start <= end, "invalid memory area!");
         assert!(self.test_free_area(start, end), "memory area overlap!");
         let area = MemoryArea::new(start, end, Box::new(handler), attr);
@@ -31,8 +32,7 @@ impl MemorySet {
             area.page_copy(&mut self.page_table, src, length);
         }
         self.areas.push(area);
-
-    }  
+    }
     fn test_free_area(&self, start: usize, end: usize) -> bool {
         self.areas
             .iter()
@@ -42,7 +42,7 @@ impl MemorySet {
     pub unsafe fn activate(&self) {
         self.page_table.activate();
     }
-	pub fn new() -> Self {
+    pub fn new() -> Self {
         let mut memory_set = MemorySet {
             areas: Vec::new(),
             page_table: PageTableImpl::new_bare(),
@@ -70,7 +70,7 @@ impl MemorySet {
             etext as usize,
             MemoryAttr::new().set_readonly().set_execute(),
             Linear::new(offset),
-			None,
+            None,
         );
         // .rodata R
         self.push(
@@ -78,7 +78,7 @@ impl MemorySet {
             erodata as usize,
             MemoryAttr::new().set_readonly(),
             Linear::new(offset),
-			None,
+            None,
         );
         // .data R|W
         self.push(
@@ -86,7 +86,7 @@ impl MemorySet {
             edata as usize,
             MemoryAttr::new(),
             Linear::new(offset),
-			None,
+            None,
         );
         // .bss R|W
         self.push(
@@ -94,18 +94,18 @@ impl MemorySet {
             ebss as usize,
             MemoryAttr::new(),
             Linear::new(offset),
-			None,
+            None,
         );
         // 物理内存 R|W
         self.push(
-            (end as usize / PAGE_SIZE + 1) * PAGE_SIZE, 
+            (end as usize / PAGE_SIZE + 1) * PAGE_SIZE,
             access_pa_via_va(PHYSICAL_MEMORY_END),
             MemoryAttr::new(),
             Linear::new(offset),
-			None,
+            None,
         );
     }
-	pub fn token(&self) -> usize {
-		self.page_table.token()
-	}
+    pub fn token(&self) -> usize {
+        self.page_table.token()
+    }
 }

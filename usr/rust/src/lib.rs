@@ -9,8 +9,8 @@ extern crate alloc;
 #[macro_use]
 pub mod io;
 
-pub mod syscall;
 pub mod lang_items;
+pub mod syscall;
 
 use buddy_system_allocator::LockedHeap;
 

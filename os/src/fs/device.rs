@@ -1,22 +1,17 @@
-use spin::RwLock;
 use rcore_fs::dev::*;
+use spin::RwLock;
 
 pub struct MemBuf(RwLock<&'static mut [u8]>);
 
 impl MemBuf {
     pub unsafe fn new(begin: usize, end: usize) -> Self {
         use core::slice;
-        MemBuf(
-            RwLock::new(
-                slice::from_raw_parts_mut(
-                    begin as *mut u8,
-                    end - begin
-                )
-            )
-        )
+        MemBuf(RwLock::new(slice::from_raw_parts_mut(
+            begin as *mut u8,
+            end - begin,
+        )))
     }
 }
-
 
 impl Device for MemBuf {
     fn read_at(&self, offset: usize, buf: &mut [u8]) -> Result<usize> {

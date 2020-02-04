@@ -1,24 +1,16 @@
-use crate::context::Context;
-use crate::alloc::alloc::{
-    alloc,
-    dealloc,
-    Layout,
-};
+use super::{ExitCode, Tid};
+use crate::alloc::alloc::{alloc, dealloc, Layout};
 use crate::consts::*;
-use riscv::register::satp;
+use crate::context::Context;
+use crate::memory::memory_set::{attr::MemoryAttr, handler::ByFrame, MemorySet};
 use alloc::boxed::Box;
-use super::{ Tid, ExitCode };
+use core::str;
+use riscv::register::satp;
 use xmas_elf::{
     header,
-    program::{ Flags, SegmentData, Type },
+    program::{Flags, SegmentData, Type},
     ElfFile,
 };
-use crate::memory::memory_set::{
-    MemorySet,
-    handler::ByFrame,
-    attr::MemoryAttr,
-};
-use core::str;
 
 #[derive(Clone)]
 pub enum Status {
@@ -31,7 +23,7 @@ pub enum Status {
 pub struct Thread {
     pub context: Context,
     pub kstack: KernelStack,
-	pub wait: Option<Tid>,
+    pub wait: Option<Tid>,
 }
 
 impl Thread {
@@ -41,41 +33,41 @@ impl Thread {
         }
     }
 
-	pub fn new_kernel(entry: usize) -> Box<Thread> {
+    pub fn new_kernel(entry: usize) -> Box<Thread> {
         unsafe {
             let kstack_ = KernelStack::new();
             Box::new(Thread {
                 context: Context::new_kernel_thread(entry, kstack_.top(), satp::read().bits()),
                 kstack: kstack_,
-				wait: None
+                wait: None,
             })
         }
     }
-	
-	pub fn get_boot_thread() -> Box<Thread> {
+
+    pub fn get_boot_thread() -> Box<Thread> {
         Box::new(Thread {
             context: Context::null(),
             kstack: KernelStack::new_empty(),
-			wait: None
+            wait: None,
         })
     }
 
     pub fn append_initial_arguments(&self, args: [usize; 3]) {
         unsafe {
             self.context.append_initial_arguments(args);
-        } 
+        }
     }
-	
-	pub unsafe fn new_user(data: &[u8], wait_thread: Option<Tid>) -> Box<Thread> {
+
+    pub unsafe fn new_user(data: &[u8], wait_thread: Option<Tid>) -> Box<Thread> {
         let elf = ElfFile::new(data).expect("failed to analyse elf!");
 
         match elf.header.pt2.type_().as_type() {
             header::Type::Executable => {
                 // println!("it really a executable!");
-            },
+            }
             header::Type::SharedObject => {
                 panic!("shared object is not supported!");
-            },
+            }
             _ => {
                 panic!("unsupported elf type!");
             }
@@ -84,7 +76,8 @@ impl Thread {
         let mut vm = elf.make_memory_set();
 
         let mut ustack_top = {
-            let (ustack_bottom, ustack_top) = (USER_STACK_OFFSET, USER_STACK_OFFSET + USER_STACK_SIZE);
+            let (ustack_bottom, ustack_top) =
+                (USER_STACK_OFFSET, USER_STACK_OFFSET + USER_STACK_SIZE);
             vm.push(
                 ustack_bottom,
                 ustack_top,
@@ -97,13 +90,11 @@ impl Thread {
 
         let kstack = KernelStack::new();
 
-        Box::new(
-            Thread {
-                context: Context::new_user_thread(entry_addr, ustack_top, kstack.top(), vm.token()),
-                kstack: kstack,
-				wait: wait_thread
-            }
-        )
+        Box::new(Thread {
+            context: Context::new_user_thread(entry_addr, ustack_top, kstack.top(), vm.token()),
+            kstack: kstack,
+            wait: wait_thread,
+        })
     }
 }
 
@@ -132,9 +123,7 @@ impl Drop for KernelStack {
                     Layout::from_size_align(KERNEL_STACK_SIZE, KERNEL_STACK_SIZE).unwrap(),
                 );
             }
-
         }
-
     }
 }
 

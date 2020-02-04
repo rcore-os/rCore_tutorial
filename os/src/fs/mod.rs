@@ -1,10 +1,10 @@
 mod device;
 pub mod stdio;
 
+use alloc::{sync::Arc, vec::Vec};
 use lazy_static::*;
 use rcore_fs::vfs::*;
 use rcore_fs_sfs::SimpleFileSystem;
-use alloc::{ sync::Arc, vec::Vec };
 
 lazy_static! {
     pub static ref ROOT_INODE: Arc<dyn INode> = {
@@ -15,11 +15,10 @@ lazy_static! {
             };
             let start = _user_img_start as usize;
             let end = _user_img_end as usize;
-            Arc::new(unsafe { device::MemBuf::new(start, end) })        
+            Arc::new(unsafe { device::MemBuf::new(start, end) })
         };
         let sfs = SimpleFileSystem::open(device).expect("failed to open SFS");
         sfs.root_inode()
-        
     };
 }
 

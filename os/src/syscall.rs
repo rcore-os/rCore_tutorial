@@ -11,20 +11,16 @@ pub fn syscall(id: usize, args: [usize; 3], tf: &mut TrapFrame) -> isize {
         SYS_WRITE => {
             print!("{}", args[0] as u8 as char);
             0
-        },
+        }
         SYS_EXIT => {
             sys_exit(args[0]);
             0
-        },
-		SYS_READ => {
-            sys_read(args[0], args[1] as *mut u8, args[2])
-        },
-		SYS_EXEC => {
-            sys_exec(args[0] as *const u8)
-        },
+        }
+        SYS_READ => sys_read(args[0], args[1] as *mut u8, args[2]),
+        SYS_EXEC => sys_exec(args[0] as *const u8),
         _ => {
             panic!("unknown syscall id {}", id);
-        },
+        }
     }
 }
 
@@ -40,13 +36,15 @@ fn sys_read(fd: usize, base: *mut u8, len: usize) -> isize {
 }
 
 pub unsafe fn from_cstr(s: *const u8) -> &'static str {
-    use core::{ slice, str };
+    use core::{slice, str};
     let len = (0usize..).find(|&i| *s.add(i) == 0).unwrap();
     str::from_utf8(slice::from_raw_parts(s, len)).unwrap()
 }
 
 fn sys_exec(path: *const u8) -> isize {
     let valid = process::execute(unsafe { from_cstr(path) }, Some(process::current_tid()));
-    if valid { process::yield_now(); }
+    if valid {
+        process::yield_now();
+    }
     return 0;
 }

@@ -1,21 +1,17 @@
-pub mod structs;
-pub mod scheduler;
-pub mod thread_pool;
 pub mod processor;
+pub mod scheduler;
+pub mod structs;
+pub mod thread_pool;
 
-use structs::Thread;
+use crate::fs::{INodeExt, ROOT_INODE};
+use alloc::boxed::Box;
 use processor::Processor;
 use scheduler::RRScheduler;
+use structs::Thread;
 use thread_pool::ThreadPool;
-use alloc::boxed::Box;
-use crate::fs::{
-    ROOT_INODE,
-    INodeExt
-};
 
 pub type Tid = usize;
 pub type ExitCode = usize;
-
 
 static CPU: Processor = Processor::new();
 
@@ -26,7 +22,7 @@ pub fn init() {
     idle.append_initial_arguments([&CPU as *const Processor as usize, 0, 0]);
     CPU.init(idle, Box::new(thread_pool));
 
-	execute("rust/user_shell", None);
+    execute("rust/user_shell", None);
 
     println!("++++ setup process!   ++++");
 }
@@ -39,7 +35,7 @@ pub fn execute(path: &str, host_tid: Option<Tid>) -> bool {
             let user_thread = unsafe { Thread::new_user(data.as_slice(), host_tid) };
             CPU.add_thread(user_thread);
             true
-        },
+        }
         Err(_) => {
             println!("command not found!");
             false

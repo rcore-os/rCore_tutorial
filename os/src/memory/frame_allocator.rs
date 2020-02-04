@@ -5,7 +5,7 @@ pub struct SegmentTreeAllocator {
     a: [u8; MAX_PHYSICAL_PAGES << 1],
     m: usize,
     n: usize,
-    offset: usize
+    offset: usize,
 }
 
 impl SegmentTreeAllocator {
@@ -16,9 +16,15 @@ impl SegmentTreeAllocator {
         while self.m < self.n + 2 {
             self.m = self.m << 1;
         }
-        for i in (1..(self.m << 1)) { self.a[i] = 1; }
-        for i in (1..self.n) { self.a[self.m + i] = 0; }
-        for i in (1..self.m).rev() { self.a[i] = self.a[i << 1] & self.a[(i << 1) | 1]; }
+        for i in (1..(self.m << 1)) {
+            self.a[i] = 1;
+        }
+        for i in (1..self.n) {
+            self.a[self.m + i] = 0;
+        }
+        for i in (1..self.m).rev() {
+            self.a[i] = self.a[i << 1] & self.a[(i << 1) | 1];
+        }
     }
 
     pub fn alloc(&mut self) -> usize {
@@ -28,7 +34,11 @@ impl SegmentTreeAllocator {
         }
         let mut p = 1;
         while p < self.m {
-            if self.a[p << 1] == 0 { p = p << 1; } else { p = (p << 1) | 1; }
+            if self.a[p << 1] == 0 {
+                p = p << 1;
+            } else {
+                p = (p << 1) | 1;
+            }
         }
         let result = p + self.offset - self.m;
         self.a[p] = 1;
@@ -56,5 +66,5 @@ pub static SEGMENT_TREE_ALLOCATOR: Mutex<SegmentTreeAllocator> = Mutex::new(Segm
     a: [0; MAX_PHYSICAL_PAGES << 1],
     m: 0,
     n: 0,
-    offset: 0
+    offset: 0,
 });

@@ -1,6 +1,6 @@
+use crate::syscall::sys_read;
 use crate::syscall::sys_write;
 use core::fmt::{self, Write};
-use crate::syscall::sys_read;
 
 pub fn putchar(ch: char) {
     sys_write(ch as u8);

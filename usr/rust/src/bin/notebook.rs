@@ -19,7 +19,7 @@ pub fn main() {
                 print!("{}", LF as char);
                 print!("{}", CR as char)
             }
-            _ => print!("{}", c as char)
+            _ => print!("{}", c as char),
         }
     }
 }

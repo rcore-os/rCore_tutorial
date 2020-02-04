@@ -1,5 +1,5 @@
 use crate::sbi;
-use core::fmt::{ self, Write };
+use core::fmt::{self, Write};
 
 pub fn putchar(ch: char) {
     sbi::console_putchar(ch as u8 as usize);
@@ -42,7 +42,7 @@ pub fn getchar() -> char {
 
     match c {
         255 => '\0',
-        c => c as char
+        c => c as char,
     }
 }
 // 调用 OpenSBI 接口
@@ -50,7 +50,6 @@ pub fn getchar_option() -> Option<char> {
     let c = sbi::console_getchar() as isize;
     match c {
         -1 => None,
-        c => Some(c as u8 as char)
+        c => Some(c as u8 as char),
     }
 }
-

@@ -1,18 +1,12 @@
 enum SyscallId {
-	Read = 63,
+    Read = 63,
     Write = 64,
     Exit = 93,
-	Exec = 221,
+    Exec = 221,
 }
 
 #[inline(always)]
-fn sys_call(
-    syscall_id: SyscallId,
-    arg0: usize,
-    arg1: usize,
-    arg2: usize,
-    arg3: usize,
-) -> i64 {
+fn sys_call(syscall_id: SyscallId, arg0: usize, arg1: usize, arg2: usize, arg3: usize) -> i64 {
     let id = syscall_id as usize;
     let mut ret: i64;
     unsafe {

@@ -1,10 +1,10 @@
-use core::cell::UnsafeCell;
-use alloc::boxed::Box;
-use crate::process::Tid;
+use crate::context::ContextContent;
+use crate::interrupt::*;
 use crate::process::structs::*;
 use crate::process::thread_pool::ThreadPool;
-use crate::interrupt::*;
-use crate::context::ContextContent;
+use crate::process::Tid;
+use alloc::boxed::Box;
+use core::cell::UnsafeCell;
 
 pub struct ProcessorInner {
     pool: Box<ThreadPool>,
@@ -27,14 +27,11 @@ impl Processor {
 
     pub fn init(&self, idle: Box<Thread>, pool: Box<ThreadPool>) {
         unsafe {
-            *self.inner.get() = Some(
-                ProcessorInner {
-                    pool,
-                    idle,
-                    current: None,
-                }
-            );
-
+            *self.inner.get() = Some(ProcessorInner {
+                pool,
+                idle,
+                current: None,
+            });
         }
     }
 
@@ -48,7 +45,7 @@ impl Processor {
         self.inner().pool.add(thread);
     }
 
-	pub fn idle_main(&self) -> ! {
+    pub fn idle_main(&self) -> ! {
         let inner = self.inner();
         disable_and_store();
 
@@ -56,39 +53,34 @@ impl Processor {
             if let Some(thread) = inner.pool.acquire() {
                 inner.current = Some(thread);
                 // println!("\n>>>> will switch_to thread {} in idle_main!", inner.current.as_mut().unwrap().0);
-                inner.idle.switch_to(
-                    &mut *inner.current.as_mut().unwrap().1
-                );
+                inner
+                    .idle
+                    .switch_to(&mut *inner.current.as_mut().unwrap().1);
 
                 // println!("\n<<<< switch_back to idle in idle_main!");
                 let (tid, thread) = inner.current.take().unwrap();
                 inner.pool.retrieve(tid, thread);
-            }
-            else {
+            } else {
                 enable_and_wfi();
                 disable_and_store();
             }
         }
     }
 
-	pub fn tick(&self) {
+    pub fn tick(&self) {
         let inner = self.inner();
         if !inner.current.is_none() {
             if inner.pool.tick() {
                 let flags = disable_and_store();
 
-                inner.current
-                    .as_mut()
-                    .unwrap()
-                    .1
-                    .switch_to(&mut inner.idle);
+                inner.current.as_mut().unwrap().1.switch_to(&mut inner.idle);
 
                 restore(flags);
             }
         }
     }
 
-	pub fn exit(&self, code: usize) -> ! {
+    pub fn exit(&self, code: usize) -> ! {
         disable_and_store();
         let inner = self.inner();
         let tid = inner.current.as_ref().unwrap().0;
@@ -96,33 +88,32 @@ impl Processor {
         inner.pool.exit(tid);
         println!("thread {} exited, exit code = {}", tid, code);
 
-		if let Some(wait) = inner.current.as_ref().unwrap().1.wait {
+        if let Some(wait) = inner.current.as_ref().unwrap().1.wait {
             inner.pool.wakeup(wait);
         }
 
-        inner.current
-            .as_mut()
-            .unwrap()
-            .1
-            .switch_to(&mut inner.idle);
+        inner.current.as_mut().unwrap().1.switch_to(&mut inner.idle);
 
         loop {}
     }
 
-	pub fn run(&self) {
+    pub fn run(&self) {
         Thread::get_boot_thread().switch_to(&mut self.inner().idle);
     }
 
-	pub fn yield_now(&self) {
+    pub fn yield_now(&self) {
         let inner = self.inner();
         if !inner.current.is_none() {
             unsafe {
                 let flags = disable_and_store();
                 let tid = inner.current.as_mut().unwrap().0;
-                let thread_info = inner.pool.threads[tid].as_mut().expect("thread not existed when yielding");
-				//let thread_info = inner.pool.get_thread_info(tid);
+                let thread_info = inner.pool.threads[tid]
+                    .as_mut()
+                    .expect("thread not existed when yielding");
+                //let thread_info = inner.pool.get_thread_info(tid);
                 thread_info.status = Status::Sleeping;
-                inner.current
+                inner
+                    .current
                     .as_mut()
                     .unwrap()
                     .1

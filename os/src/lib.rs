@@ -9,15 +9,15 @@ extern crate alloc;
 #[macro_use]
 mod io;
 
-mod init;
-mod lang_items;
-mod sbi;
-mod interrupt;
-mod context;
-mod timer;
 mod consts;
+mod context;
+mod fs;
+mod init;
+mod interrupt;
+mod lang_items;
 mod memory;
 mod process;
-mod syscall;
-mod fs;
+mod sbi;
 mod sync;
+mod syscall;
+mod timer;

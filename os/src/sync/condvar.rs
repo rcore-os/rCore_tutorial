@@ -1,6 +1,6 @@
-use spin::Mutex;
+use crate::process::{current_tid, wake_up, yield_now, Tid};
 use alloc::collections::VecDeque;
-use crate::process::{ Tid, current_tid, yield_now, wake_up };
+use spin::Mutex;
 
 #[derive(Default)]
 pub struct Condvar {
@@ -13,9 +13,7 @@ impl Condvar {
     }
 
     pub fn wait(&self) {
-        self.wait_queue
-            .lock()
-            .push_back(current_tid());
+        self.wait_queue.lock().push_back(current_tid());
         yield_now();
     }
 
@@ -24,6 +22,6 @@ impl Condvar {
         if let Some(tid) = tid {
             wake_up(tid);
         }
-		/* yield_now(); */
+        /* yield_now(); */
     }
 }
