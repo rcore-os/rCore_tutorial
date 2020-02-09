@@ -9,14 +9,26 @@ use memory_set::{attr::MemoryAttr, handler::Linear, MemorySet};
 use riscv::addr::{Frame, Page, PhysAddr, VirtAddr};
 use riscv::register::sstatus;
 
-pub fn init(l: usize, r: usize) {
+pub fn init() {
     unsafe {
         sstatus::set_sum();
     }
+    extern "C" {
+        fn end();
+    }
+    let l = ((end as usize - KERNEL_BEGIN_VADDR + KERNEL_BEGIN_PADDR) >> 12) + 1;
+    let r = PHYSICAL_MEMORY_END >> 12;
     FRAME_ALLOCATOR.lock().init(l, r);
     init_heap();
     kernel_remap();
     println!("++++ setup memory!    ++++");
+}
+
+pub fn init_other() {
+    unsafe {
+        sstatus::set_sum(); // Allow user memory access
+        asm!("csrw satp, $0; sfence.vma" :: "r"(SATP) :: "volatile");
+    }
 }
 
 pub fn alloc_frame() -> Option<Frame> {
@@ -36,7 +48,7 @@ fn init_heap() {
     }
 }
 
-pub fn access_pa_via_va(pa: usize) -> usize {
+pub const fn access_pa_via_va(pa: usize) -> usize {
     pa + PHYSICAL_MEMORY_OFFSET
 }
 
@@ -71,8 +83,13 @@ pub fn kernel_remap() {
 
     unsafe {
         memory_set.activate();
+        SATP = memory_set.token();
     }
 }
+
+// First core stores its SATP here.
+// Other cores load it later.
+static mut SATP: usize = 0;
 
 #[global_allocator]
 static DYNAMIC_ALLOCATOR: LockedHeap = LockedHeap::empty();

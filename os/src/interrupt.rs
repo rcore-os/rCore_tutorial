@@ -22,23 +22,27 @@ pub fn init() {
 
         // enable external interrupt
         sie::set_sext();
+    }
+    println!("++++ setup interrupt! ++++");
+}
 
+pub fn init_board() {
+    unsafe {
         // closed by OpenSBI, so we open them manually
         // see https://github.com/rcore-os/rCore/blob/54fddfbe1d402ac1fafd9d58a0bd4f6a8dd99ece/kernel/src/arch/riscv32/board/virt/mod.rs#L4
         init_external_interrupt();
         enable_serial_interrupt();
     }
-    println!("++++ setup interrupt! ++++");
 }
 
-pub unsafe fn init_external_interrupt() {
-    let HART0_S_MODE_INTERRUPT_ENABLES: *mut u32 = access_pa_via_va(0x0c00_2080) as *mut u32;
+unsafe fn init_external_interrupt() {
+    const HART0_S_MODE_INTERRUPT_ENABLES: *mut u32 = access_pa_via_va(0x0c00_2080) as *mut u32;
     const SERIAL: u32 = 0xa;
     HART0_S_MODE_INTERRUPT_ENABLES.write_volatile(1 << SERIAL);
 }
 
-pub unsafe fn enable_serial_interrupt() {
-    let UART16550: *mut u8 = access_pa_via_va(0x10000000) as *mut u8;
+unsafe fn enable_serial_interrupt() {
+    const UART16550: *mut u8 = access_pa_via_va(0x10000000) as *mut u8;
     UART16550.add(4).write_volatile(0x0B);
     UART16550.add(1).write_volatile(0x01);
 }

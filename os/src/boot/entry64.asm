@@ -10,7 +10,12 @@ _start:
     csrw    satp, t0
     sfence.vma
 
-    lui sp, %hi(bootstacktop)
+    # set sp
+    # sp = bootstack + (hartid + 1) * 0x4000
+    add     t0, a0, 1
+    slli    t0, t0, 14
+    lui     sp, %hi(bootstack)
+    add     sp, sp, t0
 
     lui t0, %hi(rust_main)
     addi t0, t0, %lo(rust_main)
@@ -20,7 +25,7 @@ _start:
     .align 12
     .global bootstack
 bootstack:
-    .space 4096 * 4
+    .space 4096 * 4 * 8
     .global bootstacktop
 bootstacktop:
 

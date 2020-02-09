@@ -34,6 +34,7 @@ qemu: build
 		-machine virt \
 		-nographic \
 		-bios default \
+		-smp 4 \
 		-device loader,file=$(bin),addr=0x80200000
 
 run: build qemu
