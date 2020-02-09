@@ -3,6 +3,7 @@ use crate::consts::PHYSICAL_MEMORY_OFFSET;
 use crate::fs::{disk_page_read, disk_page_write};
 use alloc::boxed::Box;
 use alloc::vec::Vec;
+use core::fmt::LowerHex;
 use lazy_static::*;
 use riscv::addr::{Frame, PhysAddr};
 use riscv::paging::{PageTableEntry, PageTableFlags as EF};
@@ -23,22 +24,19 @@ pub trait PageReplace: Send {
         let entry: &mut PageTableEntry = unsafe { &mut *(entry_loc as *mut PageTableEntry) };
         let mut flags = entry.flags().clone();
         flags.set(EF::VALID, false);
-        let pg_addr = disk_page_write(swap_page, entry_loc);
+        let pg_addr = disk_page_write(swap_page);
         let disk_frame = Frame::of_addr(PhysAddr::new(pg_addr));
         entry.set(disk_frame, flags);
         println!("{:#x?}", entry);
         frame
     }
     /// 处理缺页中断
-    fn do_pgfault(&self, pos: usize) {
-        println!("pgfault addr: {:#x}", pos);
+    fn do_pgfault(&self, entry: &mut PageTableEntry) {
+        println!("pgfault addr: {:#x}", entry.addr().as_usize());
         let frame = alloc_frame().unwrap();
         let new_page: &mut [u8; (1 << 12)] = unsafe { frame.as_kernel_mut(PHYSICAL_MEMORY_OFFSET) };
-        let entry: &mut PageTableEntry =
-            unsafe { &mut *(disk_page_read(pos, new_page) as *mut PageTableEntry) };
-        {
-            entry.flags_mut().set(EF::VALID, true);
-        }
+        disk_page_read(entry.addr().as_usize(), new_page);
+        entry.flags_mut().set(EF::VALID, true);
         let flags = entry.flags();
         entry.set(frame, flags);
     }

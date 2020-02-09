@@ -55,19 +55,16 @@ const DISK_PAGES: usize = 512;
 const PAGE_DISK_SIZE: usize = PAGE_SIZE * DISK_PAGES;
 
 static BUFFER: Mutex<[u8; PAGE_DISK_SIZE]> = Mutex::new([0u8; PAGE_DISK_SIZE]);
-static ENTRYS: Mutex<[usize; DISK_PAGES]> = Mutex::new([0usize; DISK_PAGES]);
 
-pub fn disk_page_write(page: &[u8], entry_loc: usize) -> usize {
+pub fn disk_page_write(page: &[u8]) -> usize {
     let pos = (page.as_ptr() as usize) & (PAGE_DISK_SIZE - 1);
     println!("page loc : {:#x} pos is {:#x}", page.as_ptr() as usize, pos);
     let mut buffer = BUFFER.lock();
     buffer[pos..pos + PAGE_SIZE].copy_from_slice(page);
-    ENTRYS.lock()[pos / PAGE_SIZE] = entry_loc;
     pos
 }
 
-pub fn disk_page_read(pos: usize, page: &mut [u8]) -> usize {
+pub fn disk_page_read(pos: usize, page: &mut [u8]) {
     let buffer = BUFFER.lock();
     page.copy_from_slice(&buffer[pos..pos + PAGE_SIZE]);
-    ENTRYS.lock()[pos / PAGE_SIZE].clone()
 }
