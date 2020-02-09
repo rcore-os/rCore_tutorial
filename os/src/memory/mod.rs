@@ -1,5 +1,6 @@
 mod frame_allocator;
 pub mod memory_set;
+pub mod page_replace;
 pub mod paging;
 
 use crate::consts::*;

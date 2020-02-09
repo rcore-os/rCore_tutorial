@@ -73,7 +73,11 @@ fn page_fault(tf: &mut TrapFrame) {
         tf.stval,
         tf.sepc
     );
-    panic!("page fault!");
+    println!("{:#x?}", tf.x);
+    crate::memory::page_replace::PAGE_REPLACE_HANDLER
+        .lock()
+        .do_pgfault(tf.stval);
+    //panic!("page fault!");
 }
 
 fn syscall(tf: &mut TrapFrame) {
