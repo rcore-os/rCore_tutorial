@@ -106,6 +106,18 @@ impl MemorySet {
             None,
         );
     }
+    pub fn push_mmio(&mut self, l: usize, r: usize) {
+        // check alignment
+        assert!(l & (PAGE_SIZE - 1) == 0);
+        assert!(r & (PAGE_SIZE - 1) == 0);
+        self.push(
+            access_pa_via_va(l),
+            access_pa_via_va(r),
+            MemoryAttr::new(),
+            Linear::new(PHYSICAL_MEMORY_OFFSET),
+            None,
+        );
+    }
     pub fn token(&self) -> usize {
         self.page_table.token()
     }

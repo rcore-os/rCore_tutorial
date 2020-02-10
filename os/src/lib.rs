@@ -21,3 +21,4 @@ mod sbi;
 mod sync;
 mod syscall;
 mod timer;
+mod drivers;
