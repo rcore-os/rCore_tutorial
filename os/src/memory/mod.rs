@@ -58,15 +58,6 @@ pub fn kernel_remap() {
         Linear::new(PHYSICAL_MEMORY_OFFSET),
         None,
     );
-    // PLIC for RISC-V virt machine
-    memory_set.push_mmio(0x0c00_2000, 0x0c00_3000);
-    // 16550a UART for RISC-V virt machine
-    memory_set.push_mmio(0x1000_0000, 0x1000_1000);
-    // VIRTIO0 for RISC-V virt machine
-    memory_set.push_mmio(0x1000_1000, 0x1000_2000);
-    
-    memory_set.push_mmio(0x0c20_1000, 0x0c20_2000);
-    
 
     unsafe {
         memory_set.activate();

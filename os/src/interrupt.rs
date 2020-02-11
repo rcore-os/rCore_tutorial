@@ -104,7 +104,7 @@ fn external(tf: &mut TrapFrame) {
         if irq == 0x01 {
             crate::drivers::virtio_disk::virtio_disk_intr();
         } else if irq == 0x0a {
-            panic!("irq == 0x0a, uart found!");
+            try_serial();
         } else {
             // println!("irq = {}", irq);
         }
@@ -112,7 +112,7 @@ fn external(tf: &mut TrapFrame) {
             plic_complete(irq);
         }
     } else {
-        let _ = try_serial();
+        panic!("unhandled external!");   
     }
 }
 
