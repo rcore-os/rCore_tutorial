@@ -12,6 +12,41 @@ pub struct TrapFrame {
     pub scause: Scause,   // Scause register: record the cause of exception/interrupt/trap
 }
 
+impl TrapFrame {
+    /// Constructs TrapFrame for a new kernel thread.
+    ///
+    /// The new thread starts at function `entry` with an usize argument `arg`.
+    /// The stack pointer will be set to `sp`.
+    fn new_kernel_thread(entry: extern "C" fn(usize) -> !, arg: usize, sp: usize) -> Self {
+        use core::mem::zeroed;
+        let mut tf: Self = unsafe { zeroed() };
+        tf.x[10] = arg; // a0
+        tf.x[2] = sp;
+        tf.sepc = entry as usize;
+        tf.sstatus = sstatus::read();
+        tf.sstatus.set_spie(true);
+        tf.sstatus.set_sie(false);
+        tf.sstatus.set_spp(sstatus::SPP::Supervisor);
+        tf
+    }
+
+    /// Constructs TrapFrame for a new user thread.
+    ///
+    /// The new thread starts at `entry_addr`.
+    /// The stack pointer will be set to `sp`.
+    pub fn new_user_thread(entry_addr: usize, sp: usize) -> Self {
+        use core::mem::zeroed;
+        let mut tf: Self = unsafe { zeroed() };
+        tf.x[2] = sp;
+        tf.sepc = entry_addr;
+        tf.sstatus = sstatus::read();
+        tf.sstatus.set_spie(true);
+        tf.sstatus.set_sie(false);
+        tf.sstatus.set_spp(sstatus::SPP::User);
+        tf
+    }
+}
+
 #[repr(C)]
 #[derive(Clone)]
 pub struct Context {

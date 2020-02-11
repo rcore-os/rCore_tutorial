@@ -64,13 +64,11 @@ impl Thread {
         }
     }
 
-    pub unsafe fn new_user(data: &[u8], wait_thread: Option<Tid>) -> Box<Thread> {
+    pub unsafe fn new_user_vm(data: &[u8]) -> (MemorySet, usize, usize) {
         let elf = ElfFile::new(data).expect("failed to analyse elf!");
 
         match elf.header.pt2.type_().as_type() {
-            header::Type::Executable => {
-                // println!("it really a executable!");
-            }
+            header::Type::Executable => {}
             header::Type::SharedObject => {
                 panic!("shared object is not supported!");
             }
@@ -93,6 +91,11 @@ impl Thread {
             );
             ustack_top
         };
+        (vm, entry_addr, ustack_top)
+    }
+
+    pub unsafe fn new_user(data: &[u8], wait_thread: Option<Tid>) -> Box<Thread> {
+        let (vm, entry_addr, ustack_top) = unsafe { Self::new_user_vm(data) };
 
         let kstack = KernelStack::new();
 

@@ -11,11 +11,11 @@ const CR: u8 = 0x0du8;
 
 use alloc::string::String;
 use user::io::getc;
-use user::syscall::sys_exec;
+use user::syscall::{sys_exec, sys_fork};
 
 #[no_mangle]
 pub fn main() {
-    println!("Rust user shell");
+    println!("Rust user shell v2.0");
     let mut line: String = String::new();
     print!(">> ");
     loop {
@@ -25,7 +25,11 @@ pub fn main() {
                 println!("");
                 if !line.is_empty() {
                     println!("searching for program {}", line);
-                    sys_exec(line.as_ptr());
+                    if (sys_fork() == 0) {
+                        sys_exec(line.as_ptr());
+                        panic!("should not arrive here!");
+                    }
+                    // sys_exec(line.as_ptr());
                     line.clear();
                 }
                 print!(">> ");
