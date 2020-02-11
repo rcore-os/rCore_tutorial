@@ -105,6 +105,14 @@ impl MemorySet {
             Linear::new(offset),
             None,
         );
+        // PLIC for RISC-V virt machine
+        self.push_mmio(0x0c00_2000, 0x0c00_3000);
+        // 16550a UART for RISC-V virt machine
+        self.push_mmio(0x1000_0000, 0x1000_1000);
+        // VIRTIO0 for RISC-V virt machine
+        self.push_mmio(0x1000_1000, 0x1000_2000);
+        
+        self.push_mmio(0x0c20_1000, 0x0c20_2000);
     }
     pub fn push_mmio(&mut self, l: usize, r: usize) {
         // check alignment

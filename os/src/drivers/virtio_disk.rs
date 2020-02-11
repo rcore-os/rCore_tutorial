@@ -9,6 +9,11 @@ use crate::consts::{
     PHYSICAL_MEMORY_OFFSET
 };
 use crate::sync::condvar;
+use riscv::register::{
+    sstatus,
+    sie
+};
+
 const VIRTIO_MMIO_0: usize = 0x10001000;
 const VIRTIO_MMIO_MAGIC_VALUE: usize = 0x000;
 const VIRTIO_MMIO_VERSION: usize = 0x004;
@@ -52,16 +57,22 @@ fn get_reg<T>(offset: usize) -> *mut T {
     let p = access_pa_via_va(VIRTIO_MMIO_0 + offset);
     p as *mut T 
 } 
+
+#[no_mangle]
 fn reg_read<T>(offset: usize) -> T where T: Copy{
     unsafe {
         let p = get_reg::<T>(offset);
         *p
     }
 }
+
+#[no_mangle]
 fn reg_write<T>(offset: usize, v: T) {
     unsafe {
         let p = get_reg::<T>(offset);
+        // println!("before reg_write!");
         *p = v;
+        // println!("after reg_write!");
     }
 }
 
@@ -94,10 +105,21 @@ struct UsedArea {
 #[repr(C)]
 pub struct Buf {
     blockno: u64,
-    data: [u8; 512],
+    pub data: [u8; 512],
     disk: u8,
     // sleep_lock: condvar::Condvar,
     completed: bool,
+}
+
+impl Buf {
+    pub fn new(blockno: u64) -> Self {
+        Buf {
+            blockno,
+            data: [0; 512],
+            disk: 0,
+            completed: false,
+        }
+    }
 }
 
 #[repr(C)]
@@ -277,7 +299,21 @@ impl VirtioDisk {
 }
 
 pub fn virtio_disk_rw(buf: &mut Buf, write: bool) {
-    let idx = DISK.lock().virtio_disk_issue(buf, write);
+    // println!("virtio_disk_rw blockno = {}, write = {}", buf.blockno, write);
+    /*
+    let timer_enabled = sie::read().stimer();
+    if timer_enabled {
+        unsafe { sie::clear_stimer(); }
+    }
+    */
+    let intr_enabled = sstatus::read().sie(); 
+    if !intr_enabled {
+        unsafe { sstatus::set_sie(); }
+    }
+    
+    let idx = DISK.lock()
+        .virtio_disk_issue(buf, write);
+
     // println!("begin waiting...");
     // buf.sleep_lock.wait(); 
     loop {
@@ -285,12 +321,23 @@ pub fn virtio_disk_rw(buf: &mut Buf, write: bool) {
             break;
         }
     }
+    /*
+    if timer_enabled {
+        unsafe { sie::set_stimer(); }
+    }
+    */
+    if !intr_enabled {
+        unsafe { sstatus::clear_sie(); }
+    }
+    
     // println!("end waiting...");
     DISK.lock()
         .virtio_disk_clean(idx);
+    // println!("virtio_disk_rw exit!");
 }
 
 pub fn init() {
+    
     assert_eq!(reg_read::<u32>(VIRTIO_MMIO_MAGIC_VALUE), VIRTIO_MMIO_MAGIC_NUMBER, "magic is wrong!");
     assert_eq!(reg_read::<u32>(VIRTIO_MMIO_VERSION), 0x1, "not legacy ver of virtio!");
     assert_eq!(reg_read::<u32>(VIRTIO_MMIO_DEVICE_ID), 0x2, "not virtio_blk device!");
