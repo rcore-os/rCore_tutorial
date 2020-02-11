@@ -65,6 +65,8 @@ pub fn kernel_remap() {
     // VIRTIO0 for RISC-V virt machine
     memory_set.push_mmio(0x1000_1000, 0x1000_2000);
     
+    memory_set.push_mmio(0x0c20_1000, 0x0c20_2000);
+    
 
     unsafe {
         memory_set.activate();

@@ -1,9 +1,14 @@
 use crate::memory::{
     access_pa_via_va,
-    get_pa_via_va
+    get_pa_via_va,
+    paging
 };
 use spin::Mutex;
-use crate::consts::PAGE_SIZE;
+use crate::consts::{
+    PAGE_SIZE,
+    PHYSICAL_MEMORY_OFFSET
+};
+use crate::sync::condvar;
 const VIRTIO_MMIO_0: usize = 0x10001000;
 const VIRTIO_MMIO_MAGIC_VALUE: usize = 0x000;
 const VIRTIO_MMIO_VERSION: usize = 0x004;
@@ -15,7 +20,7 @@ const VIRTIO_MMIO_GUEST_PAGE_SIZE: usize = 0x028;
 const VIRTIO_MMIO_QUEUE_SEL: usize = 0x030;
 const VIRTIO_MMIO_QUEUE_NUM_MAX: usize = 0x034;
 const VIRTIO_MMIO_QUEUE_NUM: usize = 0x038;
-const VIRTIO_MMIO_QUEUE_ALIGH: usize = 0x03c;
+const VIRTIO_MMIO_QUEUE_ALIGN: usize = 0x03c;
 const VIRTIO_MMIO_QUEUE_PFN: usize = 0x040;
 const VIRTIO_MMIO_QUEUE_READY: usize = 0x044;
 const VIRTIO_MMIO_QUEUE_NOTIFY: usize = 0x050;
@@ -28,7 +33,7 @@ const VIRTIO_MMIO_VENDOR_NUMBER: u32 = 0x554d4551;
 
 // VIRTIO_MMIO_STATUS register bits
 const VIRTIO_CONFIG_S_ACKNOWLEDGE: u32 = 1;
-const VIRTIO_CONFIG_S_DRIVER: u32 = 1;
+const VIRTIO_CONFIG_S_DRIVER: u32 = 2;
 const VIRTIO_CONFIG_S_DRIVER_OK: u32 = 4;
 const VIRTIO_CONFIG_S_FEATURES_OK: u32 = 8;
 
@@ -76,8 +81,8 @@ struct VRingUsedElem {
     len: u32,
 }
 
-const VIRTIO_BLK_T_IN: usize = 0; // read the disk
-const VIRTIO_BLK_T_OUT: usize = 1; // write the disk
+const VIRTIO_BLK_T_IN: u32 = 0; // read the disk
+const VIRTIO_BLK_T_OUT: u32 = 1; // write the disk
 
 #[repr(C)]
 struct UsedArea {
@@ -87,18 +92,29 @@ struct UsedArea {
 }
 
 #[repr(C)]
+pub struct Buf {
+    blockno: u64,
+    data: [u8; 512],
+    disk: u8,
+    // sleep_lock: condvar::Condvar,
+    completed: bool,
+}
+
+#[repr(C)]
+#[derive(Clone,Copy)]
+struct BufInfo {
+    buf: usize, // va of struct Buf
+    status: u8,
+}
+
+#[repr(C)]
 #[repr(align(4096))]
 struct VirtioDisk {
     pages: [u8; 2 * PAGE_SIZE],
     free: [u8; NUM],
     used_idx: u16,
     init: bool,
-}
-
-#[repr(C)]
-struct Buf {
-    blockno: u64,
-    data: [u8; 512],
+    buf_info: [BufInfo; NUM],
 }
 
 #[repr(C)]
@@ -113,6 +129,7 @@ static DISK: Mutex<VirtioDisk> = Mutex::new(VirtioDisk {
     free: [0; NUM],
     used_idx: 0,
     init: false,
+    buf_info: [BufInfo { buf: 0, status: 0 }; NUM],
 });
 
 impl VirtioDisk {
@@ -123,11 +140,12 @@ impl VirtioDisk {
     fn get_avail_array(&mut self) -> &mut [u16] {
         let desc = self.get_desc_array();
         let avail = &mut desc[0] as *mut VRingDesc as usize + NUM * core::mem::size_of::<VRingDesc>();
-        unsafe { core::slice::from_raw_parts_mut(avail as *mut u16, NUM) }
+        unsafe { core::slice::from_raw_parts_mut(avail as *mut u16, NUM + 2) }
     }
 
-    fn get_used_array(&mut self) -> &mut [UsedArea] {
-        unsafe { core::slice::from_raw_parts_mut(&mut self.pages[PAGE_SIZE] as *mut u8 as *mut UsedArea, NUM) }
+    fn get_used(&mut self) -> &mut UsedArea {
+        let slice = unsafe { core::slice::from_raw_parts_mut(&mut self.pages[PAGE_SIZE] as *mut u8 as *mut UsedArea, 1) };
+        &mut slice[0]
     }
 
     fn alloc_desc(&mut self) -> i32 {
@@ -146,7 +164,6 @@ impl VirtioDisk {
         let desc_array = self.get_desc_array();
         desc_array[i].addr = 0;
         self.free[i] = 1;
-        // wakeup?
     }
 
     fn free_chain(&mut self, i: usize) {
@@ -154,6 +171,7 @@ impl VirtioDisk {
         let desc_array = unsafe { core::slice::from_raw_parts_mut(&mut self.pages[0] as *mut u8 as *mut VRingDesc, NUM) };
         let mut p: usize = i;
         loop {
+            // println!("p = {}", p);
             assert!(p < NUM, "free_chain intr 1");
             assert!(self.free[p] == 0, "free_desc intr 2");
             desc_array[p].addr = 0;
@@ -164,6 +182,7 @@ impl VirtioDisk {
                 break;
             }
         }
+        // println!("free_chain exited!");
     }
 
     fn alloc_3desc(&mut self, idx: &mut[usize; 3]) -> i32 {
@@ -181,8 +200,8 @@ impl VirtioDisk {
         0
     }
 
-    fn virtio_disk_rw(&mut self, buf: &Buf, bool write) {
-        u64 sector = buf.blockno;
+    fn virtio_disk_issue(&mut self, buf: &mut Buf, write: bool) -> usize {
+        let sector: u64 = buf.blockno;
         let mut idx: [usize; 3] = [0; 3];
         assert!(self.alloc_3desc(&mut idx) == 0); // assuming desc space is sufficient
         let virtio_hdr = VirtioBlockOuthdr {
@@ -191,9 +210,85 @@ impl VirtioDisk {
             sector,
         };
 
+        self.buf_info[idx[0]].buf = buf as *const _ as usize; 
+        self.buf_info[idx[0]].status = 0xf;
+        let buf_status_va = &self.buf_info[idx[0]].status as *const _ as usize;
+
+        let desc_array = self.get_desc_array();
+        desc_array[idx[0]] = VRingDesc {
+            addr: paging::PageTableImpl::kvmpa(&virtio_hdr as *const _ as usize) as u64,
+            len: core::mem::size_of::<VRingDesc>() as u32,
+            flags: VRING_DESC_F_NEXT,
+            next: idx[1] as u16
+        };
+        desc_array[idx[1]] = VRingDesc {
+            addr: paging::PageTableImpl::kvmpa(&buf.data[0] as *const _ as usize) as u64,
+            len: 512,
+            flags: if write { VRING_DESC_F_NEXT } else { VRING_DESC_F_NEXT | VRING_DESC_F_WRITE },
+            next: idx[2] as u16
+        };
+        desc_array[idx[2]] = VRingDesc {
+            addr: paging::PageTableImpl::kvmpa(buf_status_va) as u64,
+            len: 1,
+            flags: VRING_DESC_F_WRITE,
+            next: 0
+        };
+
+        let avail_array = self.get_avail_array();
+        avail_array[2 + avail_array[1] as usize % NUM] = idx[0] as u16;
+        compiler_memory_barrier();
+        avail_array[1] += 1;
+        compiler_memory_barrier();
+        // assert!(avail_array[1] >= 1 && avail_array[1 + avail_array[1] as usize % NUM] == idx[0] as u16, "memory barrier issue!");
+
+        buf.disk = 1;
+
+        reg_write::<u32>(VIRTIO_MMIO_QUEUE_NOTIFY, 0x0);
+        
+        idx[0]
+    }
+
+    fn virtio_disk_clean(&mut self, idx: usize) {
+        self.buf_info[idx].buf = 0;
+        self.free_chain(idx);
+    }
+
+    fn virtio_disk_intr(&mut self) {
+        // println!("into virtio_disk_intr inside!");
+        let slice = unsafe { core::slice::from_raw_parts_mut(&mut self.pages[PAGE_SIZE] as *mut u8 as *mut UsedArea, 1) };
+        let used = &mut slice[0];
+        let num: u16 = NUM as u16;
+        // println!("self.used_idx = {}", self.used_idx);
+        // println!("used.id = {}", used.id);
+        while self.used_idx % num != used.id % num {
+            let id: usize = used.elems[self.used_idx as usize].id as usize;
+            // println!("used_length = {}", used.elems[self.used_idx as usize].len);
+            assert!(self.buf_info[id].status == 0, "virtio_disk_intr status");
+            let buf = unsafe { &mut *(self.buf_info[id].buf as *mut u8 as *mut Buf) };
+            buf.disk = 0;
+            // println!("before notify!");
+            // buf.sleep_lock.notify();
+            buf.completed = true;
+            // println!("after notify!");
+            self.used_idx = (self.used_idx + 1) % num;
+        }
+        // println!("exit virtio_disk_intr inside!");
     }
 }
 
+pub fn virtio_disk_rw(buf: &mut Buf, write: bool) {
+    let idx = DISK.lock().virtio_disk_issue(buf, write);
+    // println!("begin waiting...");
+    // buf.sleep_lock.wait(); 
+    loop {
+        if buf.completed {
+            break;
+        }
+    }
+    // println!("end waiting...");
+    DISK.lock()
+        .virtio_disk_clean(idx);
+}
 
 pub fn init() {
     assert_eq!(reg_read::<u32>(VIRTIO_MMIO_MAGIC_VALUE), VIRTIO_MMIO_MAGIC_NUMBER, "magic is wrong!");
@@ -211,13 +306,14 @@ pub fn init() {
     reg_write::<u32>(VIRTIO_MMIO_STATUS, status);
 
     let mut features: u32 = reg_read::<u32>(VIRTIO_MMIO_DEVICE_FEATURES);
-    features ^= 1 << VIRTIO_BLK_F_RO;
-    features ^= 1 << VIRTIO_BLK_F_SCSI;
-    features ^= 1 << VIRTIO_BLK_F_CONFIG_WCE;
-    features ^= 1 << VIRTIO_BLK_F_MQ;
-    features ^= 1 << VIRTIO_F_ANY_LAYOUT;
-    features ^= 1 << VIRTIO_RING_F_EVENT_IDX;
-    features ^= 1 << VIRTIO_RING_F_INDIRECT_DESC;
+    // println!("features = {:#x}", features);
+    features &= !(1 << VIRTIO_BLK_F_RO);
+    features &= !(1 << VIRTIO_BLK_F_SCSI);
+    features &= !(1 << VIRTIO_BLK_F_CONFIG_WCE);
+    features &= !(1 << VIRTIO_BLK_F_MQ);
+    features &= !(1 << VIRTIO_F_ANY_LAYOUT);
+    features &= !(1 << VIRTIO_RING_F_EVENT_IDX);
+    features &= !(1 << VIRTIO_RING_F_INDIRECT_DESC);
     reg_write::<u32>(VIRTIO_MMIO_DEVICE_FEATURES, features);
 
     status |= VIRTIO_CONFIG_S_FEATURES_OK;
@@ -233,6 +329,9 @@ pub fn init() {
     let max = reg_read::<u32>(VIRTIO_MMIO_QUEUE_NUM_MAX);
     assert!(max > 0, "virtio disk has no virtqueue 0!");
     assert!(max >= NUM as u32, "virtqueue max size is too small!");
+    // assert!(reg_read::<u32>(VIRTIO_MMIO_QUEUE_ALIGN) == 4096, "virtqueue alignment {} != 4096!");
+    // println!("virtqueue alignment = {}", reg_read::<u32>(VIRTIO_MMIO_QUEUE_ALIGN));
+    reg_write::<u32>(VIRTIO_MMIO_QUEUE_ALIGN, 4096);
     reg_write::<u32>(VIRTIO_MMIO_QUEUE_NUM, NUM as u32);
     reg_write::<u32>(VIRTIO_MMIO_QUEUE_PFN, (get_pa_via_va(&disk.pages[0] as *const u8 as usize) / PAGE_SIZE) as u32);
 
@@ -240,4 +339,42 @@ pub fn init() {
         disk.free[i] = 1;
     }
     disk.init = true;
+}
+
+pub fn virtio_disk_intr() {
+    // println!("into virtio_disk_intr!");
+    DISK.lock().virtio_disk_intr();
+}
+
+pub fn virtio_disk_test() {
+    // println!("into virtio_disk_test!");
+    let mut buf = Buf {
+        blockno: 100,
+        data: [0; 512],
+        disk: 1,
+        // sleep_lock: condvar::Condvar::new(),
+        completed: false,
+    };
+    for i in 0..256 {
+        buf.data[i] = i as u8;
+    }
+    virtio_disk_rw(&mut buf, true);
+    let mut chk_buf = Buf {
+        blockno: 100,
+        data: [0; 512],
+        disk: 1,
+        completed: false,
+    };
+    virtio_disk_rw(&mut chk_buf, false);
+    for i in 0..256 {
+        assert_eq!(chk_buf.data[i], i as u8);
+        // println!("data[{}] = {}", i, chk_buf.data[i]);
+    }
+    println!("passed the disk I/O test!");
+    loop {}
+}
+
+fn compiler_memory_barrier() {
+    //no re-ordering of reads and writes across this point is allowed
+    core::sync::atomic::compiler_fence(core::sync::atomic::Ordering::SeqCst);
 }
