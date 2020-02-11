@@ -21,8 +21,8 @@ pub fn init() {
     let idle = Thread::new_kernel(Processor::idle_main as usize);
     idle.append_initial_arguments([&CPU as *const Processor as usize, 0, 0]);
     CPU.init(idle, Box::new(thread_pool));
-
-    execute("rust/user_shell", None);
+    CPU.add_thread(Thread::new_kernel(crate::drivers::virtio_disk::virtio_disk_test as usize));
+    //execute("rust/user_shell", None);
 
     println!("++++ setup process!   ++++");
 }
