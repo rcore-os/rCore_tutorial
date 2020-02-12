@@ -4,23 +4,31 @@ pub mod structs;
 pub mod thread_pool;
 
 use crate::fs::{INodeExt, ROOT_INODE};
+use crate::interrupt::cpuid;
 use alloc::boxed::Box;
+use alloc::sync::Arc;
 use processor::Processor;
 use scheduler::RRScheduler;
+use spin::Mutex;
 use structs::Thread;
 use thread_pool::ThreadPool;
 
 pub type Tid = usize;
 pub type ExitCode = usize;
 
-static CPU: Processor = Processor::new();
+static CPU: [Processor; 4] = [
+    Processor::new(),
+    Processor::new(),
+    Processor::new(),
+    Processor::new(),
+];
 
 pub fn init() {
     let scheduler = RRScheduler::new(1);
-    let thread_pool = ThreadPool::new(100, Box::new(scheduler));
-    let idle = Thread::new_kernel(Processor::idle_main as usize);
-    idle.append_initial_arguments([&CPU as *const Processor as usize, 0, 0]);
-    CPU.init(idle, Box::new(thread_pool));
+    let thread_pool = Arc::new(Mutex::new(ThreadPool::new(100, Box::new(scheduler))));
+    for cpuid in 0..4 {
+        CPU[cpuid].init(thread_pool.clone());
+    }
 
     execute("rust/user_shell", None);
 
@@ -33,7 +41,7 @@ pub fn execute(path: &str, host_tid: Option<Tid>) -> bool {
         Ok(inode) => {
             let data = inode.read_as_vec().unwrap();
             let user_thread = unsafe { Thread::new_user(data.as_slice(), host_tid) };
-            CPU.add_thread(user_thread);
+            CPU[cpuid()].add_thread(user_thread);
             true
         }
         Err(_) => {
@@ -44,24 +52,26 @@ pub fn execute(path: &str, host_tid: Option<Tid>) -> bool {
 }
 
 pub fn tick() {
-    CPU.tick();
+    CPU[cpuid()].tick();
 }
 
-pub fn run() {
-    CPU.run();
+pub fn run() -> ! {
+    CPU[cpuid()].run();
 }
 
 pub fn exit(code: usize) {
-    CPU.exit(code);
+    CPU[cpuid()].exit(code);
 }
 
 pub fn yield_now() {
-    CPU.yield_now();
+    CPU[cpuid()].yield_now();
 }
-
+pub fn sleep() {
+    CPU[cpuid()].sleep();
+}
 pub fn wake_up(tid: Tid) {
-    CPU.wake_up(tid);
+    CPU[cpuid()].wake_up(tid);
 }
 pub fn current_tid() -> usize {
-    CPU.current_tid()
+    CPU[cpuid()].current_tid()
 }

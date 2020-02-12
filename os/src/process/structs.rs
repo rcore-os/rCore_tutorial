@@ -27,12 +27,6 @@ pub struct Thread {
 }
 
 impl Thread {
-    pub fn switch_to(&mut self, target: &mut Thread) {
-        unsafe {
-            self.context.switch(&mut target.context);
-        }
-    }
-
     pub fn new_kernel(entry: usize) -> Box<Thread> {
         unsafe {
             let kstack_ = KernelStack::new();
@@ -41,20 +35,6 @@ impl Thread {
                 kstack: kstack_,
                 wait: None,
             })
-        }
-    }
-
-    pub fn get_boot_thread() -> Box<Thread> {
-        Box::new(Thread {
-            context: Context::null(),
-            kstack: KernelStack::new_empty(),
-            wait: None,
-        })
-    }
-
-    pub fn append_initial_arguments(&self, args: [usize; 3]) {
-        unsafe {
-            self.context.append_initial_arguments(args);
         }
     }
 

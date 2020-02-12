@@ -12,8 +12,10 @@
 	bnez sp, trap_from_user
 trap_from_kernel:
 	csrr sp, sscratch
+	STORE gp, -36
 trap_from_user:
 	addi sp, sp, -36*XLENB
+	LOAD gp, 0
 	STORE x1, 1
 	STORE x3, 3
 	STORE x4, 4
@@ -66,6 +68,7 @@ trap_from_user:
 _to_user:
 	addi s0, sp, 36*XLENB
 	csrw sscratch, s0
+	STORE gp, 0
 _to_kernel:
     csrw sstatus, s1
     csrw sepc, s2

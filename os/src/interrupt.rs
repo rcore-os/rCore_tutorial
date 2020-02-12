@@ -92,12 +92,11 @@ fn external() {
 
 fn try_serial() -> bool {
     match super::io::getchar_option() {
-        Some(ch) => {
-            if (ch == '\r') {
-                crate::fs::stdio::STDIN.push('\n');
-            } else {
-                crate::fs::stdio::STDIN.push(ch);
+        Some(mut ch) => {
+            if ch == '\r' {
+                ch = '\n';
             }
+            crate::fs::stdio::STDIN.push(ch);
             true
         }
         None => false,
@@ -125,4 +124,13 @@ pub fn enable_and_wfi() {
     unsafe {
         asm!("csrsi sstatus, 1 << 1; wfi" :::: "volatile");
     }
+}
+
+#[inline(always)]
+pub fn cpuid() -> usize {
+    let cpuid: usize;
+    unsafe {
+        asm!("" : "={x3}"(cpuid));
+    }
+    cpuid
 }

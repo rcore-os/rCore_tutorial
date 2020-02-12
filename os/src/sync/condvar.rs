@@ -1,4 +1,4 @@
-use crate::process::{current_tid, wake_up, yield_now, Tid};
+use crate::process::{current_tid, sleep, wake_up, Tid};
 use alloc::collections::VecDeque;
 use spin::Mutex;
 
@@ -14,7 +14,7 @@ impl Condvar {
 
     pub fn wait(&self) {
         self.wait_queue.lock().push_back(current_tid());
-        yield_now();
+        sleep();
     }
 
     pub fn notify(&self) {

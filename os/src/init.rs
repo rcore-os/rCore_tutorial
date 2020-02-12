@@ -5,6 +5,7 @@ global_asm!(include_str!("link_user.S"));
 
 #[no_mangle]
 pub extern "C" fn rust_main(hartid: usize) -> ! {
+    println!("CPU {}: Hello world!", hartid);
     if hartid != 0 {
         while !AP_CAN_INIT.load(Ordering::Relaxed) {
             spin_loop_hint();
@@ -21,15 +22,13 @@ pub extern "C" fn rust_main(hartid: usize) -> ! {
     AP_CAN_INIT.store(true, Ordering::Relaxed);
 
     crate::process::run();
-    loop {}
 }
 
-fn other_main() {
+fn other_main() -> ! {
     crate::interrupt::init();
     crate::memory::init_other();
     crate::timer::init();
     crate::process::run();
-    loop {}
 }
 
 static AP_CAN_INIT: AtomicBool = AtomicBool::new(false);

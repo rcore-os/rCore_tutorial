@@ -54,33 +54,6 @@ pub const fn access_pa_via_va(pa: usize) -> usize {
 
 pub fn kernel_remap() {
     let mut memory_set = MemorySet::new();
-
-    extern "C" {
-        fn bootstack();
-        fn bootstacktop();
-    }
-    memory_set.push(
-        bootstack as usize,
-        bootstacktop as usize,
-        MemoryAttr::new(),
-        Linear::new(PHYSICAL_MEMORY_OFFSET),
-        None,
-    );
-    memory_set.push(
-        access_pa_via_va(0x0c00_2000),
-        access_pa_via_va(0x0c00_3000),
-        MemoryAttr::new(),
-        Linear::new(PHYSICAL_MEMORY_OFFSET),
-        None,
-    );
-    memory_set.push(
-        access_pa_via_va(0x1000_0000),
-        access_pa_via_va(0x1000_1000),
-        MemoryAttr::new(),
-        Linear::new(PHYSICAL_MEMORY_OFFSET),
-        None,
-    );
-
     unsafe {
         memory_set.activate();
         SATP = memory_set.token();

@@ -1,6 +1,10 @@
     .section .text.entry
     .globl _start
 _start:
+    # store hartid
+    mv      gp, a0
+
+    # setup page table
     lui     t0, %hi(boot_page_table_sv39)
     li      t1, 0xffffffffc0000000 - 0x80000000
     sub     t0, t0, t1
@@ -17,9 +21,9 @@ _start:
     lui     sp, %hi(bootstack)
     add     sp, sp, t0
 
-    lui t0, %hi(rust_main)
-    addi t0, t0, %lo(rust_main)
-    jr t0
+    lui     t0, %hi(rust_main)
+    addi    t0, t0, %lo(rust_main)
+    jr      t0
 
     .section .bss.stack
     .align 12

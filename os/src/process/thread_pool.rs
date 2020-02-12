@@ -33,11 +33,11 @@ impl ThreadPool {
         panic!("alloc tid failed!");
     }
 
-    pub fn add(&mut self, _thread: Box<Thread>) {
+    pub fn add(&mut self, thread: Box<Thread>) {
         let tid = self.alloc_tid();
         self.threads[tid] = Some(ThreadInfo {
             status: Status::Ready,
-            thread: Some(_thread),
+            thread: Some(thread),
         });
         self.scheduler.push(tid);
     }

@@ -31,13 +31,6 @@ impl Context {
         ContextContent::new_kernel_thread(entry, kstack_top, satp).push_at(kstack_top)
     }
 
-    pub unsafe fn append_initial_arguments(&self, args: [usize; 3]) {
-        let contextContent = &mut *(self.content_addr as *mut ContextContent);
-        contextContent.tf.x[10] = args[0];
-        contextContent.tf.x[11] = args[1];
-        contextContent.tf.x[12] = args[2];
-    }
-
     pub unsafe fn new_user_thread(
         entry: usize,
         ustack_top: usize,
