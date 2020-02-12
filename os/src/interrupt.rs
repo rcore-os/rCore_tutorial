@@ -76,6 +76,7 @@ fn breakpoint(sepc: &mut usize) {
 }
 
 fn super_timer() {
+    // println!("T");
     clock_set_next_event();
     tick();
 }
@@ -129,7 +130,29 @@ fn try_serial() -> bool {
         None => false,
     }
 }
-
+#[inline(always)]
+pub fn disable_timer_and_store() -> usize {
+    let sie: usize;
+    let bitmask: usize = 1 << 5;
+    unsafe {
+        asm!("csrrc $0, sie, $1" : "=r"(sie) : "r"(bitmask):: "volatile");
+    }
+    sie
+}
+#[inline(always)]
+pub fn restore_timer(sie: usize) {
+    unsafe {
+        asm!("csrs sie, $0" :: "r"(sie) :: "volatile");
+    }
+}
+#[inline(always)]
+pub fn enable_and_store() -> usize {
+    let sstatus: usize;
+    unsafe {
+        asm!("csrsi sstatus, 1 << 1" : "=r"(sstatus) ::: "volatile");
+    }
+    sstatus
+}
 #[inline(always)]
 pub fn disable_and_store() -> usize {
     let sstatus: usize;

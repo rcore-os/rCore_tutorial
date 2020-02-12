@@ -23,6 +23,8 @@ $(bin): kernel
 
 asm:
 	$(objdump) -d $(kernel) | less
+assembly:
+	$(objdump) -d $(kernel) > target/os.asm
 
 build: $(bin)
 

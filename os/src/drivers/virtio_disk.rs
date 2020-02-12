@@ -13,6 +13,14 @@ use riscv::register::{
     sstatus,
     sie
 };
+use crate::interrupt::{
+    disable_and_store,
+    restore,
+    enable_and_wfi,
+    disable_timer_and_store,
+    restore_timer,
+    enable_and_store,
+};
 
 const VIRTIO_MMIO_0: usize = 0x10001000;
 const VIRTIO_MMIO_MAGIC_VALUE: usize = 0x000;
@@ -222,7 +230,8 @@ impl VirtioDisk {
         0
     }
 
-    fn virtio_disk_issue(&mut self, buf: &mut Buf, write: bool) -> usize {
+    #[no_mangle]
+    fn virtio_disk_issue(&mut self, buf: &mut Buf, write: bool, idx0: &mut usize) {
         let sector: u64 = buf.blockno;
         let mut idx: [usize; 3] = [0; 3];
         assert!(self.alloc_3desc(&mut idx) == 0); // assuming desc space is sufficient
@@ -261,13 +270,14 @@ impl VirtioDisk {
         compiler_memory_barrier();
         avail_array[1] += 1;
         compiler_memory_barrier();
-        // assert!(avail_array[1] >= 1 && avail_array[1 + avail_array[1] as usize % NUM] == idx[0] as u16, "memory barrier issue!");
+        
 
         buf.disk = 1;
 
+        *idx0 = idx[0];
         reg_write::<u32>(VIRTIO_MMIO_QUEUE_NOTIFY, 0x0);
-        
-        idx[0]
+        // println!("after writing notify");
+        // println!("issue successfully!");
     }
 
     fn virtio_disk_clean(&mut self, idx: usize) {
@@ -285,6 +295,7 @@ impl VirtioDisk {
         while self.used_idx % num != used.id % num {
             let id: usize = used.elems[self.used_idx as usize].id as usize;
             // println!("used_length = {}", used.elems[self.used_idx as usize].len);
+            // println!("status = {}", self.buf_info[id].status);
             assert!(self.buf_info[id].status == 0, "virtio_disk_intr status");
             let buf = unsafe { &mut *(self.buf_info[id].buf as *mut u8 as *mut Buf) };
             buf.disk = 0;
@@ -298,42 +309,37 @@ impl VirtioDisk {
     }
 }
 
+#[no_mangle]
 pub fn virtio_disk_rw(buf: &mut Buf, write: bool) {
+    let status = disable_and_store();
+    let stimer = riscv::register::sie::read().stimer();
+    unsafe { riscv::register::sie::clear_stimer(); }
     // println!("virtio_disk_rw blockno = {}, write = {}", buf.blockno, write);
-    /*
-    let timer_enabled = sie::read().stimer();
-    if timer_enabled {
-        unsafe { sie::clear_stimer(); }
-    }
-    */
-    let intr_enabled = sstatus::read().sie(); 
-    if !intr_enabled {
-        unsafe { sstatus::set_sie(); }
-    }
     
-    let idx = DISK.lock()
-        .virtio_disk_issue(buf, write);
+    let mut idx0: usize = 0;
+    DISK.lock()
+        .virtio_disk_issue(buf, write, &mut idx0);
 
-    // println!("begin waiting...");
     // buf.sleep_lock.wait(); 
+    
+    enable_and_store();
+    //reg_write::<u32>(VIRTIO_MMIO_QUEUE_NOTIFY, 0x0);
+
+    // println!("start waiting...");
     loop {
         if buf.completed {
             break;
         }
     }
-    /*
-    if timer_enabled {
-        unsafe { sie::set_stimer(); }
-    }
-    */
-    if !intr_enabled {
-        unsafe { sstatus::clear_sie(); }
-    }
-    
     // println!("end waiting...");
+    restore(status);
+    
     DISK.lock()
-        .virtio_disk_clean(idx);
-    // println!("virtio_disk_rw exit!");
+        .virtio_disk_clean(idx0);
+    
+    if stimer {
+        unsafe { riscv::register::sie::set_stimer(); }
+    }
 }
 
 pub fn init() {
@@ -386,6 +392,7 @@ pub fn init() {
         disk.free[i] = 1;
     }
     disk.init = true;
+    println!("++++ setup disk!      ++++");
 }
 
 pub fn virtio_disk_intr() {
