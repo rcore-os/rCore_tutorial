@@ -11,11 +11,11 @@ const CR: u8 = 0x0du8;
 
 use alloc::string::String;
 use user::io::getc;
-use user::syscall::{sys_exec, sys_fork};
+use user::syscall::{sys_exec, sys_fork, sys_exit};
 
 #[no_mangle]
 pub fn main() {
-    println!("Rust user shell v2.0");
+    println!("Rust user shell v3.0");
     let mut line: String = String::new();
     print!(">> ");
     loop {
@@ -26,9 +26,11 @@ pub fn main() {
                 if !line.is_empty() {
                     println!("searching for program {}", line);
                     if (sys_fork() == 0) {
+                        println!("this is child program.");
                         sys_exec(line.as_ptr());
-                        panic!("should not arrive here!");
+                        sys_exit(0);
                     }
+                    println!("this is parent program");
                     // sys_exec(line.as_ptr());
                     line.clear();
                 }
