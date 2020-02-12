@@ -1,13 +1,16 @@
 use crate::context::TrapFrame;
 use crate::process;
 
+pub const SYS_FORK: usize = 57;
+pub const SYS_READ: usize = 63;
 pub const SYS_WRITE: usize = 64;
 pub const SYS_EXIT: usize = 93;
-pub const SYS_READ: usize = 63;
 pub const SYS_EXEC: usize = 221;
 
 pub fn syscall(id: usize, args: [usize; 3], tf: &mut TrapFrame) -> isize {
     match id {
+        SYS_FORK => sys_fork(tf),
+        SYS_READ => sys_read(args[0], args[1] as *mut u8, args[2]),
         SYS_WRITE => {
             print!("{}", args[0] as u8 as char);
             0
@@ -16,12 +19,18 @@ pub fn syscall(id: usize, args: [usize; 3], tf: &mut TrapFrame) -> isize {
             sys_exit(args[0]);
             0
         }
-        SYS_READ => sys_read(args[0], args[1] as *mut u8, args[2]),
         SYS_EXEC => sys_exec(args[0] as *const u8),
         _ => {
             panic!("unknown syscall id {}", id);
         }
     }
+}
+
+fn sys_fork(tf: &mut TrapFrame) -> isize {
+    println!("forking");
+    let new_thread = process::current_thread().fork(tf);
+    let tid = process::add_thread(new_thread);
+    tid as isize
 }
 
 fn sys_exit(code: usize) {

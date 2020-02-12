@@ -172,6 +172,15 @@ impl PageTableImpl {
             Self::flush_tlb();
         }
     }
+
+    pub fn get_page_slice_mut<'a>(&mut self, addr: usize) -> &'a mut [u8] {
+        let frame = self
+            .page_table
+            .translate_page(Page::of_addr(VirtAddr::new(addr)))
+            .unwrap();
+        let vaddr = frame.start_address().as_usize() + PHYSICAL_MEMORY_OFFSET;
+        unsafe { core::slice::from_raw_parts_mut(vaddr as *mut u8, 0x1000) }
+    }
 }
 
 #[derive(Clone, Copy, PartialEq, Eq)]

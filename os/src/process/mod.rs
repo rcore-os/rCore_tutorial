@@ -67,6 +67,15 @@ pub fn yield_now() {
 pub fn wake_up(tid: Tid) {
     CPU.wake_up(tid);
 }
+
 pub fn current_tid() -> usize {
     CPU.current_tid()
+}
+
+pub fn add_thread(thread: Box<Thread>) -> usize {
+    CPU.add_thread(thread)
+}
+
+pub fn current_thread() -> Box<Thread> {
+    CPU.current_thread()
 }
