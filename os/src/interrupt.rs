@@ -66,6 +66,7 @@ fn super_timer() {
     clock_set_next_event();
     tick();
 }
+
 fn page_fault(tf: &mut TrapFrame) {
     println!(
         "{:?} va = {:#x} instruction = {:#x}",

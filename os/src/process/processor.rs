@@ -133,7 +133,7 @@ impl Processor {
         self.inner().current.as_mut().unwrap().0 as usize
     }
 
-    pub fn current_thread(&self) -> Box<Thread> {
-        self.inner().current.as_ref().unwrap().1.clone()
+    pub fn current_thread(&self) -> &Box<Thread> {
+        &self.inner().current.as_mut().unwrap().1
     }
 }

@@ -119,7 +119,6 @@ impl Thread {
     }
 }
 
-#[derive(Clone)]
 pub struct KernelStack(usize);
 
 impl KernelStack {

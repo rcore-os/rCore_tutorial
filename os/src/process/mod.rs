@@ -71,6 +71,6 @@ pub fn add_thread(thread: Box<Thread>) -> usize {
     CPU.add_thread(thread)
 }
 
-pub fn current_thread() -> Box<Thread> {
+pub fn current_thread() -> &'static Box<Thread> {
     CPU.current_thread()
 }
