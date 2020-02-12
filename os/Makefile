@@ -23,6 +23,8 @@ $(bin): kernel
 
 asm:
 	$(objdump) -d $(kernel) | less
+assembly:
+	$(objdump) -d $(kernel) > target/os.asm
 
 build: $(bin)
 
@@ -34,6 +36,8 @@ qemu: build
 		-machine virt \
 		-nographic \
 		-bios default \
-		-device loader,file=$(bin),addr=0x80200000
+		-device loader,file=$(bin),addr=0x80200000 \
+		-drive file=../usr/build/riscv64.img,if=none,format=raw,id=x0 \
+		-device virtio-blk-device,drive=x0,bus=virtio-mmio-bus.0
 
 run: build qemu

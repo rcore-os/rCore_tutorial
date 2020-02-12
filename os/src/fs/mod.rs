@@ -8,6 +8,7 @@ use rcore_fs_sfs::SimpleFileSystem;
 
 lazy_static! {
     pub static ref ROOT_INODE: Arc<dyn INode> = {
+        /*
         let device = {
             extern "C" {
                 fn _user_img_start();
@@ -17,6 +18,8 @@ lazy_static! {
             let end = _user_img_end as usize;
             Arc::new(unsafe { device::MemBuf::new(start, end) })
         };
+        */
+        let device = Arc::new(device::Disk::new());
         let sfs = SimpleFileSystem::open(device).expect("failed to open SFS");
         sfs.root_inode()
     };
@@ -29,10 +32,12 @@ pub trait INodeExt {
 impl INodeExt for dyn INode {
     fn read_as_vec(&self) -> Result<Vec<u8>> {
         let size = self.metadata()?.size;
+        // println!("size = {}", size);
         let mut buf = Vec::with_capacity(size);
         unsafe {
             buf.set_len(size);
         }
+        // println!("begin read_at...");
         self.read_at(0, buf.as_mut_slice())?;
         Ok(buf)
     }
