@@ -27,7 +27,11 @@ pub fn init() {
         // see https://github.com/rcore-os/rCore/blob/54fddfbe1d402ac1fafd9d58a0bd4f6a8dd99ece/kernel/src/arch/riscv32/board/virt/mod.rs#L4
         init_external_interrupt();
         enable_serial_interrupt();
+
     }
+    println!("medeleg = {:#x}", r_medeleg());
+    println!("mideleg = {:#x}", r_mideleg());
+    loop {}
     println!("++++ setup interrupt! ++++");
 }
 
@@ -129,6 +133,22 @@ fn try_serial() -> bool {
         }
         None => false,
     }
+}
+#[inline(always)]
+pub fn r_medeleg() -> usize {
+    let mut ret: usize = 0;
+    unsafe {
+        asm!("csrr $0, medeleg" : "=r"(ret) ::: "volatile");
+    }
+    ret
+}
+#[inline(always)]
+pub fn r_mideleg() -> usize {
+    let mut ret: usize = 0;
+    unsafe {
+        asm!("csrr $0, mideleg" : "=r"(ret) ::: "volatile");
+    }
+    ret
 }
 #[inline(always)]
 pub fn disable_timer_and_store() -> usize {
