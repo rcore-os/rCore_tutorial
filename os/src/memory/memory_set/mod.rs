@@ -5,14 +5,15 @@ pub mod handler;
 use crate::consts::*;
 use crate::memory::access_pa_via_va;
 use crate::memory::paging::PageTableImpl;
-use alloc::{boxed::Box, vec::Vec};
+use alloc::{boxed::Box, sync::Arc, vec::Vec};
 use area::MemoryArea;
 use attr::MemoryAttr;
 use handler::{Linear, MemoryHandler};
+use spin::Mutex;
 
 pub struct MemorySet {
     areas: Vec<MemoryArea>,
-    page_table: PageTableImpl,
+    page_table: Arc<Mutex<PageTableImpl>>,
 }
 
 impl MemorySet {
@@ -27,9 +28,9 @@ impl MemorySet {
         assert!(start <= end, "invalid memory area!");
         assert!(self.test_free_area(start, end), "memory area overlap!");
         let area = MemoryArea::new(start, end, Box::new(handler), attr);
-        area.map(&mut self.page_table);
+        area.map(self.page_table.clone());
         if let Some((src, length)) = data {
-            area.page_copy(&mut self.page_table, src, length);
+            area.page_copy(self.page_table.clone(), src, length);
         }
         self.areas.push(area);
     }
@@ -40,12 +41,12 @@ impl MemorySet {
             .is_none()
     }
     pub unsafe fn activate(&self) {
-        self.page_table.activate();
+        self.page_table.lock().activate();
     }
     pub fn new() -> Self {
         let mut memory_set = MemorySet {
             areas: Vec::new(),
-            page_table: PageTableImpl::new_bare(),
+            page_table: Arc::new(Mutex::new(PageTableImpl::new_bare())),
         };
         memory_set.map_kernel_and_physical_memory();
         memory_set
@@ -106,6 +107,6 @@ impl MemorySet {
         );
     }
     pub fn token(&self) -> usize {
-        self.page_table.token()
+        self.page_table.lock().token()
     }
 }

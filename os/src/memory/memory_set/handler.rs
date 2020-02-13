@@ -6,15 +6,17 @@ use crate::memory::alloc_frame;
 use crate::memory::page_replace::PageReplace;
 use crate::memory::paging::PageTableImpl;
 use alloc::boxed::Box;
+use alloc::sync::Arc;
 use core::fmt::Debug;
 use riscv::addr::VirtAddr;
 use riscv::paging::PageTableEntry;
+use spin::Mutex;
 
 pub trait MemoryHandler: Debug + 'static {
     fn box_clone(&self) -> Box<dyn MemoryHandler>;
-    fn map(&self, pt: &mut PageTableImpl, va: usize, attr: &MemoryAttr);
-    fn unmap(&self, pt: &mut PageTableImpl, va: usize);
-    fn page_copy(&self, pt: &mut PageTableImpl, va: usize, src: usize, length: usize);
+    fn map(&self, pt: Arc<Mutex<PageTableImpl>>, va: usize, attr: &MemoryAttr);
+    fn unmap(&self, pt: Arc<Mutex<PageTableImpl>>, va: usize);
+    fn page_copy(&self, pt: Arc<Mutex<PageTableImpl>>, va: usize, src: usize, length: usize);
 }
 
 impl Clone for Box<dyn MemoryHandler> {
@@ -37,14 +39,20 @@ impl MemoryHandler for Linear {
     fn box_clone(&self) -> Box<dyn MemoryHandler> {
         Box::new(self.clone())
     }
-    fn map(&self, pt: &mut PageTableImpl, va: usize, attr: &MemoryAttr) {
-        attr.apply(pt.map(va, va - self.offset));
+    fn map(&self, pt: Arc<Mutex<PageTableImpl>>, va: usize, attr: &MemoryAttr) {
+        attr.apply(pt.lock().map(va, va - self.offset));
     }
-    fn unmap(&self, pt: &mut PageTableImpl, va: usize) {
-        pt.unmap(va);
+    fn unmap(&self, pt: Arc<Mutex<PageTableImpl>>, va: usize) {
+        pt.lock().unmap(va);
     }
-    fn page_copy(&self, pt: &mut PageTableImpl, va: usize, src: usize, length: usize) {
-        let pa = pt.get_entry(va).expect("get pa error!").0.addr().as_usize();
+    fn page_copy(&self, pt: Arc<Mutex<PageTableImpl>>, va: usize, src: usize, length: usize) {
+        let pa = pt
+            .lock()
+            .get_entry(va)
+            .expect("get pa error!")
+            .0
+            .addr()
+            .as_usize();
         assert!(va == access_pa_via_va(pa));
         assert!(va == pa + self.offset);
         unsafe {
@@ -74,17 +82,23 @@ impl MemoryHandler for ByFrame {
         Box::new(self.clone())
     }
 
-    fn map(&self, pt: &mut PageTableImpl, va: usize, attr: &MemoryAttr) {
+    fn map(&self, pt: Arc<Mutex<PageTableImpl>>, va: usize, attr: &MemoryAttr) {
         let frame = alloc_frame().expect("alloc_frame failed!");
         let pa = frame.start_address().as_usize();
-        attr.apply(pt.map(va, pa));
+        attr.apply(pt.lock().map(va, pa));
     }
 
-    fn unmap(&self, pt: &mut PageTableImpl, va: usize) {
-        pt.unmap(va);
+    fn unmap(&self, pt: Arc<Mutex<PageTableImpl>>, va: usize) {
+        pt.lock().unmap(va);
     }
-    fn page_copy(&self, pt: &mut PageTableImpl, va: usize, src: usize, length: usize) {
-        let pa = pt.get_entry(va).expect("get pa error!").0.addr().as_usize();
+    fn page_copy(&self, pt: Arc<Mutex<PageTableImpl>>, va: usize, src: usize, length: usize) {
+        let pa = pt
+            .lock()
+            .get_entry(va)
+            .expect("get pa error!")
+            .0
+            .addr()
+            .as_usize();
         unsafe {
             let dst = core::slice::from_raw_parts_mut(access_pa_via_va(pa) as *mut u8, PAGE_SIZE);
             if length > 0 {
@@ -112,21 +126,27 @@ impl MemoryHandler for ByFrameWithRpa {
         Box::new(self.clone())
     }
 
-    fn map(&self, pt: &mut PageTableImpl, va: usize, attr: &MemoryAttr) {
+    fn map(&self, pt: Arc<Mutex<PageTableImpl>>, va: usize, attr: &MemoryAttr) {
         let frame = alloc_frame().expect("alloc_frame failed!");
         let pa = frame.start_address().as_usize();
-        let entry = pt.map(va, pa);
-        let entry_loc = entry.0 as *mut PageTableEntry as usize;
-        PAGE_REPLACE_HANDLER.lock().push_frame(frame, entry_loc);
-        attr.apply(entry);
+        attr.apply(pt.lock().map(va, pa));
+        PAGE_REPLACE_HANDLER
+            .lock()
+            .push_frame(va, Arc::downgrade(&pt));
         println!("swap end");
     }
 
-    fn unmap(&self, pt: &mut PageTableImpl, va: usize) {
-        pt.unmap(va);
+    fn unmap(&self, pt: Arc<Mutex<PageTableImpl>>, va: usize) {
+        pt.lock().unmap(va);
     }
-    fn page_copy(&self, pt: &mut PageTableImpl, va: usize, src: usize, length: usize) {
-        let pa = pt.get_entry(va).expect("get pa error!").0.addr().as_usize();
+    fn page_copy(&self, pt: Arc<Mutex<PageTableImpl>>, va: usize, src: usize, length: usize) {
+        let pa = pt
+            .lock()
+            .get_entry(va)
+            .expect("get pa error!")
+            .0
+            .addr()
+            .as_usize();
         unsafe {
             let dst = core::slice::from_raw_parts_mut(access_pa_via_va(pa) as *mut u8, PAGE_SIZE);
             if length > 0 {

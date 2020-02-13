@@ -78,16 +78,15 @@ fn page_fault(tf: &mut TrapFrame) {
         tf.stval,
         tf.sepc
     );
+    // FIXME get entry by a safer way
     let root_table: &mut PageTable =
         unsafe { satp::read().frame().as_kernel_mut(PHYSICAL_MEMORY_OFFSET) };
     let mut pg_table = Rv39PageTable::new(root_table, PHYSICAL_MEMORY_OFFSET);
-    let entry = pg_table
-        .ref_entry(Page::of_addr(VirtAddr::new(tf.stval)))
-        .unwrap();
+    let page = Page::of_addr(VirtAddr::new(tf.stval));
+    let entry = pg_table.ref_entry(page.clone()).unwrap();
     crate::memory::page_replace::PAGE_REPLACE_HANDLER
         .lock()
-        .do_pgfault(entry);
-    //panic!("page fault!");
+        .do_pgfault(entry, tf.stval);
 }
 
 fn syscall(tf: &mut TrapFrame) {
