@@ -36,7 +36,7 @@ fn init_heap() {
     }
 }
 
-pub fn access_pa_via_va(pa: usize) -> usize {
+pub const fn access_pa_via_va(pa: usize) -> usize {
     pa + PHYSICAL_MEMORY_OFFSET
 }
 

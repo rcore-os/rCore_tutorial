@@ -18,13 +18,13 @@ export USER_IMG = ../usr/build/riscv64.img
 kernel:
 	cargo build
 
-$(bin): kernel
-	$(objcopy) $(kernel) --strip-all -O binary $@
-
 asm:
 	$(objdump) -d $(kernel) | less
 
-build: $(bin)
+header:
+	$(objdump) -x $(kernel) | less
+
+build: kernel
 
 clean:
 	cargo clean
@@ -33,7 +33,6 @@ qemu: build
 	qemu-system-riscv64 \
 		-machine virt \
 		-nographic \
-		-bios default \
-		-device loader,file=$(bin),addr=0x80200000
+		-bios $(kernel)
 
 run: build qemu

@@ -1,74 +1,50 @@
-#![allow(dead_code)]
-
-#[inline(always)]
-fn sbi_call(which: usize, arg0: usize, arg1: usize, arg2: usize) -> usize {
-    let ret;
-    unsafe {
-        asm!("ecall"
-            : "={x10}" (ret)
-            : "{x10}" (arg0), "{x11}" (arg1), "{x12}" (arg2), "{x17}" (which)
-            : "memory"
-            : "volatile");
-    }
-    ret
-}
+use crate::memory::access_pa_via_va;
+use core::sync::atomic::spin_loop_hint;
 
 pub fn console_putchar(ch: usize) {
-    sbi_call(SBI_CONSOLE_PUTCHAR, ch, 0, 0);
+    unsafe {
+        while STATUS.read_volatile() & CAN_WRITE == 0 {
+            spin_loop_hint();
+        }
+        DATA.write_volatile(ch as u8);
+    }
 }
 
-pub fn console_getchar() -> usize {
-    sbi_call(SBI_CONSOLE_GETCHAR, 0, 0, 0)
-}
-
-pub fn shutdown() -> ! {
-    sbi_call(SBI_SHUTDOWN, 0, 0, 0);
-    unreachable!()
+pub fn console_getchar() -> u8 {
+    unsafe {
+        while STATUS.read_volatile() & CAN_READ == 0 {
+            spin_loop_hint();
+        }
+        DATA.read_volatile()
+    }
 }
 
 pub fn set_timer(stime_value: u64) {
-    #[cfg(target_pointer_width = "32")]
-    sbi_call(
-        SBI_SET_TIMER,
-        stime_value as usize,
-        (stime_value >> 32) as usize,
-        0,
-    );
-    #[cfg(target_pointer_width = "64")]
-    sbi_call(SBI_SET_TIMER, stime_value as usize, 0, 0);
+    unimplemented!()
 }
 
-pub fn clear_ipi() {
-    sbi_call(SBI_CLEAR_IPI, 0, 0, 0);
+pub fn init() {
+    unsafe {
+        // closed by OpenSBI, so we open them manually
+        // see https://github.com/rcore-os/rCore/blob/54fddfbe1d402ac1fafd9d58a0bd4f6a8dd99ece/kernel/src/arch/riscv32/board/virt/mod.rs#L4
+        init_external_interrupt();
+        enable_serial_interrupt();
+    }
 }
 
-pub fn send_ipi(hart_mask: usize) {
-    sbi_call(SBI_SEND_IPI, &hart_mask as *const _ as usize, 0, 0);
+unsafe fn init_external_interrupt() {
+    const HART0_S_MODE_INTERRUPT_ENABLES: *mut u32 = access_pa_via_va(0x0c00_2080) as *mut u32;
+    const SERIAL: u32 = 0xa;
+    HART0_S_MODE_INTERRUPT_ENABLES.write_volatile(1 << SERIAL);
 }
 
-pub fn remote_fence_i(hart_mask: usize) {
-    sbi_call(SBI_REMOTE_FENCE_I, &hart_mask as *const _ as usize, 0, 0);
+unsafe fn enable_serial_interrupt() {
+    UART16550.add(4).write_volatile(0x0B);
+    UART16550.add(1).write_volatile(0x01);
 }
 
-pub fn remote_sfence_vma(hart_mask: usize, _start: usize, _size: usize) {
-    sbi_call(SBI_REMOTE_SFENCE_VMA, &hart_mask as *const _ as usize, 0, 0);
-}
-
-pub fn remote_sfence_vma_asid(hart_mask: usize, _start: usize, _size: usize, _asid: usize) {
-    sbi_call(
-        SBI_REMOTE_SFENCE_VMA_ASID,
-        &hart_mask as *const _ as usize,
-        0,
-        0,
-    );
-}
-
-const SBI_SET_TIMER: usize = 0;
-const SBI_CONSOLE_PUTCHAR: usize = 1;
-const SBI_CONSOLE_GETCHAR: usize = 2;
-const SBI_CLEAR_IPI: usize = 3;
-const SBI_SEND_IPI: usize = 4;
-const SBI_REMOTE_FENCE_I: usize = 5;
-const SBI_REMOTE_SFENCE_VMA: usize = 6;
-const SBI_REMOTE_SFENCE_VMA_ASID: usize = 7;
-const SBI_SHUTDOWN: usize = 8;
+const UART16550: *mut u8 = access_pa_via_va(0x10000000) as *mut u8;
+const DATA: *mut u8 = access_pa_via_va(0x10000000) as *mut u8;
+const STATUS: *const u8 = access_pa_via_va(0x10000005) as *const u8;
+const CAN_READ: u8 = 1 << 0;
+const CAN_WRITE: u8 = 1 << 5;

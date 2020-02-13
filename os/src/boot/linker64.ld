@@ -6,7 +6,7 @@
 OUTPUT_ARCH(riscv)
 ENTRY(_start)
 
-BASE_ADDRESS = 0xffffffffc0200000;
+BASE_ADDRESS = 0xffffffffc0000000;
 
 SECTIONS
 {
@@ -14,7 +14,7 @@ SECTIONS
     . = BASE_ADDRESS;
     start = .;
 
-    .text : {
+    .text : AT(0x80000000) {
         stext = .;
         *(.text.entry)
         *(.text .text.*)

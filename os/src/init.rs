@@ -6,6 +6,9 @@ use crate::memory::{alloc_frame, dealloc_frame};
 
 #[no_mangle]
 pub extern "C" fn rust_main() -> ! {
+    crate::sbi::init();
+    println!("Hello world!");
+
     extern "C" {
         fn end();
     }
