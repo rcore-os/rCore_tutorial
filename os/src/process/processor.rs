@@ -70,7 +70,9 @@ impl Processor {
     pub fn tick(&self) {
         let inner = self.inner();
         if !inner.current.is_none() {
+            // println!("N");
             if inner.pool.tick() {
+                // println!("P");
                 let flags = disable_and_store();
 
                 inner.current.as_mut().unwrap().1.switch_to(&mut inner.idle);
@@ -133,7 +135,7 @@ impl Processor {
         self.inner().current.as_mut().unwrap().0 as usize
     }
 
-    pub fn current_thread(&self) -> Box<Thread> {
-        self.inner().current.as_ref().unwrap().1.clone()
+    pub fn current_thread(&self) -> &Box<Thread> {
+        &self.inner().current.as_mut().unwrap().1
     }
 }

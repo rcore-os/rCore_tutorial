@@ -14,6 +14,7 @@ pub extern "C" fn rust_main() -> ! {
         PHYSICAL_MEMORY_END >> 12,
     );
     crate::interrupt::init();
+    crate::drivers::virtio_disk::init();
     crate::fs::init();
     crate::process::init();
     crate::timer::init();

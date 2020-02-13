@@ -22,7 +22,6 @@ pub enum Status {
     Exited(ExitCode),
 }
 
-#[derive(Clone)]
 pub struct Thread {
     pub context: Context,
     pub kstack: KernelStack,
@@ -122,7 +121,6 @@ impl Thread {
     }
 }
 
-#[derive(Clone)]
 pub struct KernelStack(usize);
 
 impl KernelStack {
