@@ -20,7 +20,13 @@ pub fn console_getchar() -> u8 {
 }
 
 pub fn set_timer(stime_value: u64) {
-    unimplemented!()
+    unsafe {
+        clint_mtimecmp(0).write_volatile(stime_value);
+    }
+}
+
+pub fn get_cycle() -> u64 {
+    unsafe { CLINT_MTIME.read_volatile() }
 }
 
 pub fn init() {
@@ -48,3 +54,11 @@ const DATA: *mut u8 = access_pa_via_va(0x10000000) as *mut u8;
 const STATUS: *const u8 = access_pa_via_va(0x10000005) as *const u8;
 const CAN_READ: u8 = 1 << 0;
 const CAN_WRITE: u8 = 1 << 5;
+
+// local interrupt controller, which contains the timer.
+const CLINT: usize = access_pa_via_va(0x2000000);
+const CLINT_MTIME: *const u64 = (CLINT + 0xBFF8) as *const u64; // cycles since boot.
+
+const fn clint_mtimecmp(hartid: usize) -> *mut u64 {
+    (CLINT + 0x4000 + 8 * hartid) as _
+}

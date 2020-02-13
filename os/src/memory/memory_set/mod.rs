@@ -61,6 +61,8 @@ impl MemorySet {
             fn sbss();
             fn ebss();
             fn end();
+            fn bootstack();
+            fn bootstacktop();
         }
         let offset = PHYSICAL_MEMORY_OFFSET;
         // 各段全部采用偏移量固定的线性映射
@@ -102,6 +104,30 @@ impl MemorySet {
             access_pa_via_va(PHYSICAL_MEMORY_END),
             MemoryAttr::new(),
             Linear::new(offset),
+            None,
+        );
+        // .stack R|W
+        self.push(
+            bootstack as usize,
+            bootstacktop as usize,
+            MemoryAttr::new(),
+            Linear::new(PHYSICAL_MEMORY_OFFSET),
+            None,
+        );
+        // CLINT
+        self.push(
+            access_pa_via_va(0x200_0000),
+            access_pa_via_va(0x201_0000),
+            MemoryAttr::new(),
+            Linear::new(PHYSICAL_MEMORY_OFFSET),
+            None,
+        );
+        // serial
+        self.push(
+            access_pa_via_va(0x1000_0000),
+            access_pa_via_va(0x1000_1000),
+            MemoryAttr::new(),
+            Linear::new(PHYSICAL_MEMORY_OFFSET),
             None,
         );
     }

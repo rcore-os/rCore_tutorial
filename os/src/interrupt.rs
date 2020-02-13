@@ -30,7 +30,7 @@ pub fn init() {
 pub fn rust_trap(tf: &mut TrapFrame) {
     match tf.scause.cause() {
         Trap::Exception(Exception::Breakpoint) => breakpoint(&mut tf.sepc),
-        Trap::Interrupt(Interrupt::SupervisorTimer) => super_timer(),
+        Trap::Interrupt(Interrupt::SupervisorSoft) => super_timer(),
         Trap::Exception(Exception::InstructionPageFault) => page_fault(tf),
         Trap::Exception(Exception::LoadPageFault) => page_fault(tf),
         Trap::Exception(Exception::StorePageFault) => page_fault(tf),
@@ -46,7 +46,10 @@ fn breakpoint(sepc: &mut usize) {
 }
 
 fn super_timer() {
-    clock_set_next_event();
+    unsafe {
+        // clear SSIP to acknowledge the interrupt
+        asm!("csrc sip, $0" :: "r"(1 << 1));
+    }
     tick();
 }
 fn page_fault(tf: &mut TrapFrame) {
