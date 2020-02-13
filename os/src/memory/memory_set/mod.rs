@@ -122,6 +122,14 @@ impl MemorySet {
             Linear::new(PHYSICAL_MEMORY_OFFSET),
             None,
         );
+        // PLIC
+        self.push(
+            access_pa_via_va(0x0C20_0000),
+            access_pa_via_va(0x0C21_0000),
+            MemoryAttr::new(),
+            Linear::new(PHYSICAL_MEMORY_OFFSET),
+            None,
+        );
         // serial
         self.push(
             access_pa_via_va(0x1000_0000),
