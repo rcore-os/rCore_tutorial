@@ -41,7 +41,6 @@ impl Disk {
 
 impl Device for Disk {
     fn read_at(&self, offset: usize, buf: &mut [u8]) -> Result<usize> {
-        // println!("read_at offset = {}, buf.len = {}", offset, buf.len());
         let b_sector = offset / 512;
         let e_sector = (offset + buf.len() + 511) / 512;
         let mut l = offset;
@@ -57,14 +56,22 @@ impl Device for Disk {
         Ok(buf.len())
     }
     fn write_at(&self, offset: usize, buf: &[u8]) -> Result<usize> {
-        // println!("write_at offset = {}, buf.len = {}", offset, buf.len());
-        assert!(offset % 512 == 0, "offset alignment panic!");
-        assert!(buf.len() % 512 == 0, "buf length alignment panic!");
-        for sector in offset / 512..(offset + buf.len()) / 512 {
+        let b_sector = offset / 512;
+        let e_sector = (offset + buf.len() + 511) / 512;
+        let mut l = offset;
+        for sector in b_sector..e_sector {
             let mut disk_buf = virtio_disk::Buf::new(sector as u64);
-            disk_buf.data[0..512]
-                .copy_from_slice(&buf[sector * 512 - offset..(sector + 1) * 512 - offset]);
+            let mut r = (l / 512 + 1) * 512;
+            r = core::cmp::min(r, offset + buf.len());
+            if l & 511 != 0 || r & 511 != 0 {
+                // write partially, read from disk first
+                virtio_disk::virtio_disk_rw(&mut disk_buf, false);
+            }
+            disk_buf.data[l & 511..{ if r % 512 == 0 {512} else {r % 512} }]
+                .copy_from_slice(&buf[l - offset..r - offset]);
+            disk_buf.clear_completed();
             virtio_disk::virtio_disk_rw(&mut disk_buf, true);
+            l = r;
         }
         Ok(buf.len())
     }

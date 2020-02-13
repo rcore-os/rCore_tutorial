@@ -114,7 +114,7 @@ struct UsedArea {
 pub struct Buf {
     blockno: u64,
     pub data: [u8; 512],
-    disk: u8,
+    // disk: u8,
     // sleep_lock: condvar::Condvar,
     completed: bool,
 }
@@ -124,9 +124,12 @@ impl Buf {
         Buf {
             blockno,
             data: [0; 512],
-            disk: 0,
+            // disk: 0,
             completed: false,
         }
+    }
+    pub fn clear_completed(&mut self) {
+        self.completed = false;
     }
 }
 
@@ -271,8 +274,7 @@ impl VirtioDisk {
         avail_array[1] += 1;
         compiler_memory_barrier();
         
-
-        buf.disk = 1;
+        // buf.disk = 1;
 
         *idx0 = idx[0];
         reg_write::<u32>(VIRTIO_MMIO_QUEUE_NOTIFY, 0x0);
@@ -298,7 +300,9 @@ impl VirtioDisk {
             // println!("status = {}", self.buf_info[id].status);
             assert!(self.buf_info[id].status == 0, "virtio_disk_intr status");
             let buf = unsafe { &mut *(self.buf_info[id].buf as *mut u8 as *mut Buf) };
-            buf.disk = 0;
+
+            // buf.disk = 0;
+
             // println!("before notify!");
             // buf.sleep_lock.notify();
             buf.completed = true;
@@ -348,7 +352,7 @@ pub fn init() {
     assert_eq!(reg_read::<u32>(VIRTIO_MMIO_VERSION), 0x1, "not legacy ver of virtio!");
     assert_eq!(reg_read::<u32>(VIRTIO_MMIO_DEVICE_ID), 0x2, "not virtio_blk device!");
     assert_eq!(reg_read::<u32>(VIRTIO_MMIO_VENDOR_ID), VIRTIO_MMIO_VENDOR_NUMBER, "vendor id is wrong!");
-    println!("virtio_disk found!");
+    // println!("virtio_disk found!");
 
     let mut status: u32 = 0;
 
@@ -405,7 +409,7 @@ pub fn virtio_disk_test() {
     let mut buf = Buf {
         blockno: 100,
         data: [0; 512],
-        disk: 1,
+        // disk: 1,
         // sleep_lock: condvar::Condvar::new(),
         completed: false,
     };
@@ -416,7 +420,7 @@ pub fn virtio_disk_test() {
     let mut chk_buf = Buf {
         blockno: 100,
         data: [0; 512],
-        disk: 1,
+        // disk: 1,
         completed: false,
     };
     virtio_disk_rw(&mut chk_buf, false);
