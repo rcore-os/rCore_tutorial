@@ -3,13 +3,10 @@ use super::attr::MemoryAttr;
 use crate::consts::PAGE_SIZE;
 use crate::memory::access_pa_via_va;
 use crate::memory::alloc_frame;
-use crate::memory::page_replace::PageReplace;
 use crate::memory::paging::PageTableImpl;
 use alloc::boxed::Box;
 use alloc::sync::Arc;
 use core::fmt::Debug;
-use riscv::addr::VirtAddr;
-use riscv::paging::PageTableEntry;
 use spin::Mutex;
 
 pub trait MemoryHandler: Debug + 'static {

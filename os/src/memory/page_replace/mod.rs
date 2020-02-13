@@ -4,11 +4,7 @@ use {
         consts::{PAGE_SIZE, PHYSICAL_MEMORY_OFFSET},
         fs::{disk_page_read, disk_page_write},
     },
-    alloc::{
-        boxed::Box,
-        sync::{Arc, Weak},
-    },
-    core::fmt::LowerHex,
+    alloc::{boxed::Box, sync::Weak},
     lazy_static::*,
     riscv::{
         addr::{Frame, PhysAddr},
@@ -31,9 +27,7 @@ pub trait PageReplace: Send {
     /// 2 并记录页帧所在磁盘位置到页表项中
     /// 3 返回可用的物理页帧
     fn swap_out_one(&mut self) -> Option<Frame> {
-        let mut check = true;
-        while check {
-            let (vaddr, weak_pt) = self.choose_victim().expect("failed to get frame");
+        while let Some((vaddr, weak_pt)) = self.choose_victim() {
             if let Some(pt) = weak_pt.upgrade() {
                 let mut table = pt.lock();
                 if let Some(entry) = table.get_entry(vaddr) {
@@ -48,11 +42,7 @@ pub trait PageReplace: Send {
                     entry.update();
                     println!("swap out, entry: {:#x?}, vaddr {:x}", entry.0, vaddr);
                     return Some(frame);
-                } else {
-                    check = true;
                 }
-            } else {
-                check = true;
             }
         }
         None
@@ -82,6 +72,6 @@ pub trait PageReplace: Send {
 }
 
 lazy_static! {
-    pub static ref PAGE_REPLACE_HANDLER: Mutex<Box<PageReplace>> =
+    pub static ref PAGE_REPLACE_HANDLER: Mutex<Box<dyn PageReplace>> =
         Mutex::new(Box::new(FifoPageReplace::default()));
 }
