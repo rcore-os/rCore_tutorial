@@ -30,7 +30,7 @@ pub fn syscall(id: usize, args: [usize; 3], tf: &mut TrapFrame) -> isize {
 }
 
 fn sys_fork(tf: &mut TrapFrame) -> isize {
-    println!("forking");
+    // println!("forking");
     let new_thread = process::current_thread().fork(tf);
     let tid = process::add_thread(new_thread);
     tid as isize
@@ -53,7 +53,6 @@ pub unsafe fn from_cstr(s: *const u8) -> &'static str {
     str::from_utf8(slice::from_raw_parts(s, len)).unwrap()
 }
 
-<<<<<<< HEAD
 // fn sys_exec(path: *const u8) -> isize {
 //     let valid = process::execute(unsafe { from_cstr(path) }, Some(process::current_tid()));
 //     if valid {
@@ -82,12 +81,5 @@ fn sys_exec(path: *const u8, tf: &mut TrapFrame) -> isize {
             println!("exec error! cannot find the program {}", exec_path);
             -1
         }
-=======
-fn sys_exec(path: *const u8) -> isize {
-    // println!("enter sys_exec!");
-    let valid = process::execute(unsafe { from_cstr(path) }, Some(process::current_tid()));
-    if valid {
-        process::yield_now();
->>>>>>> master
     }
 }
