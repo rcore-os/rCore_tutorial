@@ -29,9 +29,6 @@ pub fn init() {
         enable_serial_interrupt();
 
     }
-    println!("medeleg = {:#x}", r_medeleg());
-    println!("mideleg = {:#x}", r_mideleg());
-    loop {}
     println!("++++ setup interrupt! ++++");
 }
 

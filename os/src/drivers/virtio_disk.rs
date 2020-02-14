@@ -70,7 +70,8 @@ fn get_reg<T>(offset: usize) -> *mut T {
 fn reg_read<T>(offset: usize) -> T where T: Copy{
     unsafe {
         let p = get_reg::<T>(offset);
-        *p
+        core::ptr::read_volatile(p)
+        // *p
     }
 }
 
@@ -78,9 +79,8 @@ fn reg_read<T>(offset: usize) -> T where T: Copy{
 fn reg_write<T>(offset: usize, v: T) {
     unsafe {
         let p = get_reg::<T>(offset);
-        // println!("before reg_write!");
-        *p = v;
-        // println!("after reg_write!");
+        // *p = v;
+        core::ptr::write_volatile(p, v)
     }
 }
 
@@ -277,7 +277,9 @@ impl VirtioDisk {
         // buf.disk = 1;
 
         *idx0 = idx[0];
+
         reg_write::<u32>(VIRTIO_MMIO_QUEUE_NOTIFY, 0x0);
+
         // println!("after writing notify");
         // println!("issue successfully!");
     }
@@ -316,8 +318,11 @@ impl VirtioDisk {
 #[no_mangle]
 pub fn virtio_disk_rw(buf: &mut Buf, write: bool) {
     let status = disable_and_store();
+    // println!("status = {:#x}", status);
+    /*
     let stimer = riscv::register::sie::read().stimer();
     unsafe { riscv::register::sie::clear_stimer(); }
+    */
     // println!("virtio_disk_rw blockno = {}, write = {}", buf.blockno, write);
     
     let mut idx0: usize = 0;
@@ -327,7 +332,7 @@ pub fn virtio_disk_rw(buf: &mut Buf, write: bool) {
     // buf.sleep_lock.wait(); 
     
     enable_and_store();
-    //reg_write::<u32>(VIRTIO_MMIO_QUEUE_NOTIFY, 0x0);
+    // reg_write::<u32>(VIRTIO_MMIO_QUEUE_NOTIFY, 0x0);
 
     // println!("start waiting...");
     loop {
@@ -341,18 +346,18 @@ pub fn virtio_disk_rw(buf: &mut Buf, write: bool) {
     DISK.lock()
         .virtio_disk_clean(idx0);
     
+    /*
     if stimer {
         unsafe { riscv::register::sie::set_stimer(); }
     }
+    */
 }
 
 pub fn init() {
-    
     assert_eq!(reg_read::<u32>(VIRTIO_MMIO_MAGIC_VALUE), VIRTIO_MMIO_MAGIC_NUMBER, "magic is wrong!");
     assert_eq!(reg_read::<u32>(VIRTIO_MMIO_VERSION), 0x1, "not legacy ver of virtio!");
     assert_eq!(reg_read::<u32>(VIRTIO_MMIO_DEVICE_ID), 0x2, "not virtio_blk device!");
     assert_eq!(reg_read::<u32>(VIRTIO_MMIO_VENDOR_ID), VIRTIO_MMIO_VENDOR_NUMBER, "vendor id is wrong!");
-    // println!("virtio_disk found!");
 
     let mut status: u32 = 0;
 

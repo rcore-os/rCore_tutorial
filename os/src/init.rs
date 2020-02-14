@@ -5,7 +5,7 @@ use crate::consts::*;
 use crate::memory::{alloc_frame, dealloc_frame};
 
 #[no_mangle]
-pub extern "C" fn rust_main(a0: usize, a1: usize) -> ! {
+pub extern "C" fn rust_main() -> ! {
     extern "C" {
         fn end();
     }

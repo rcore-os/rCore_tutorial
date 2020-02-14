@@ -28,17 +28,12 @@ pub fn init() {
 }
 
 pub fn execute(path: &str, host_tid: Option<Tid>) -> bool {
-    // println!("before lookup!");
     let find_result = ROOT_INODE.lookup(path);
-    // println!("after loopup!");
     match find_result {
         Ok(inode) => {
-            // println!("Ok(inode)!");
             let data = inode.read_as_vec().unwrap();
-            // println!("ok data!");
             let user_thread = unsafe { Thread::new_user(data.as_slice(), host_tid) };
             CPU.add_thread(user_thread);
-            // println!("CPU.add_thread");
             true
         }
         Err(_) => {
