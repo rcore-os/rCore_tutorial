@@ -13,13 +13,6 @@ use alloc::string::String;
 use user::io::getc;
 use user::syscall::{sys_exec, sys_exit, sys_fork};
 
-unsafe fn to_cstr(s: &mut String) -> *const u8 {
-    let ptr = s.as_mut_ptr();
-    let len = s.len();
-    *ptr.add(len) = 0;
-    ptr
-}
-
 #[no_mangle]
 pub fn main() {
     println!("Rust user shell");
@@ -33,7 +26,8 @@ pub fn main() {
                 if !line.is_empty() {
                     println!("searching for program {}", line);
                     if sys_fork() == 0 {
-                        sys_exec(unsafe { to_cstr(&mut line) });
+                        line.push('\0');
+                        sys_exec(line.as_ptr());
                         sys_exit(0);
                     }
                     line.clear();
