@@ -66,7 +66,6 @@ fn get_reg<T>(offset: usize) -> *mut T {
     p as *mut T 
 } 
 
-#[no_mangle]
 fn reg_read<T>(offset: usize) -> T where T: Copy{
     unsafe {
         let p = get_reg::<T>(offset);
@@ -75,7 +74,6 @@ fn reg_read<T>(offset: usize) -> T where T: Copy{
     }
 }
 
-#[no_mangle]
 fn reg_write<T>(offset: usize, v: T) {
     unsafe {
         let p = get_reg::<T>(offset);
