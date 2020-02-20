@@ -10,7 +10,7 @@ objcopy := rust-objcopy --binary-architecture=riscv64
 
 env:
 	cargo install cargo-binutils
-	rustup component add llvm-tools-preview rustfmt
+	rustup component add llvm-tools-preview
 	rustup target add $(target)
 
 export USER_IMG = ../usr/build/riscv64.img
