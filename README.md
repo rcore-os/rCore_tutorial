@@ -8,7 +8,7 @@ Please read
 
 ## Prerequisite
 
-You need: `rustup` installed and run:
+You need: `rustup` installed, ensure `~/.cargo/bin` is added to PATH and run:
 
 ```shell
 make env
