@@ -1,7 +1,8 @@
 use crate::context::TrapFrame;
 use crate::memory::access_pa_via_va;
 use crate::process::tick;
-use crate::timer::{clock_set_next_event, TICKS};
+use crate::timer::{clock_set_next_event, now};
+use core::time::Duration;
 use riscv::register::sie;
 use riscv::register::{
     scause::{self, Exception, Interrupt, Trap},
@@ -64,8 +65,9 @@ fn breakpoint(sepc: &mut usize) {
 
 fn super_timer() {
     clock_set_next_event();
-    tick();
+    tick(now());
 }
+
 fn page_fault(tf: &mut TrapFrame) {
     println!(
         "{:?} va = {:#x} instruction = {:#x}",

@@ -2,11 +2,17 @@ pub mod processor;
 pub mod scheduler;
 pub mod structs;
 pub mod thread_pool;
+pub mod timer;
 
+use self::timer::Timer;
 use crate::fs::{INodeExt, ROOT_INODE};
+use crate::timer::now;
 use alloc::boxed::Box;
+use core::time::Duration;
+use lazy_static::lazy_static;
 use processor::Processor;
 use scheduler::RRScheduler;
+use spin::Mutex;
 use structs::Thread;
 use thread_pool::ThreadPool;
 
@@ -14,6 +20,10 @@ pub type Tid = usize;
 pub type ExitCode = usize;
 
 static CPU: Processor = Processor::new();
+
+lazy_static! {
+    static ref TIMER: Mutex<Timer> = Mutex::new(Timer::default());
+}
 
 pub fn init() {
     let scheduler = RRScheduler::new(1);
@@ -43,8 +53,9 @@ pub fn execute(path: &str, host_tid: Option<Tid>) -> bool {
     }
 }
 
-pub fn tick() {
+pub fn tick(now: Duration) {
     CPU.tick();
+    TIMER.lock().tick(now);
 }
 
 pub fn run() {
@@ -64,4 +75,17 @@ pub fn wake_up(tid: Tid) {
 }
 pub fn current_tid() -> usize {
     CPU.current_tid()
+}
+
+/// Sleep for `duration` time.
+pub fn sleep(duration: Duration) {
+    let tid = current_tid();
+    add_timer(duration, move || wake_up(tid));
+    yield_now();
+}
+
+/// Add a timer after `interval`.
+pub fn add_timer(interval: Duration, callback: impl FnOnce() + Send + Sync + 'static) {
+    let deadline = now() + interval;
+    TIMER.lock().add(deadline, callback);
 }
