@@ -28,8 +28,10 @@ lazy_static! {
 pub fn init() {
     let scheduler = RRScheduler::new(1);
     let thread_pool = ThreadPool::new(100, Box::new(scheduler));
-    let idle = Thread::new_kernel(Processor::idle_main as usize);
-    idle.append_initial_arguments([&CPU as *const Processor as usize, 0, 0]);
+    let idle = Thread::new_kernel(
+        Processor::idle_main as usize,
+        &CPU as *const Processor as usize,
+    );
     CPU.init(idle, Box::new(thread_pool));
 
     execute("rust/user_shell", None);
@@ -88,4 +90,24 @@ pub fn sleep(duration: Duration) {
 pub fn add_timer(interval: Duration, callback: impl FnOnce() + Send + Sync + 'static) {
     let deadline = now() + interval;
     TIMER.lock().add(deadline, callback);
+}
+
+/// Spawn a new kernel thread from function `f`.
+pub fn spawn<F>(f: F)
+where
+    F: FnOnce() + Send + 'static,
+{
+    let f = Box::into_raw(Box::new(f));
+    CPU.add_thread(Thread::new_kernel(entry::<F> as usize, f as usize));
+
+    // define a normal function, pass the function object from argument
+    extern "C" fn entry<F>(f: usize) -> !
+    where
+        F: FnOnce() + Send + 'static,
+    {
+        let f = unsafe { Box::from_raw(f as *mut F) };
+        f();
+        exit(0);
+        unreachable!()
+    }
 }

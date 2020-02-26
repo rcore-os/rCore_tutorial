@@ -93,8 +93,7 @@ impl Processor {
         }
 
         inner.current.as_mut().unwrap().1.switch_to(&mut inner.idle);
-
-        loop {}
+        unreachable!();
     }
 
     pub fn run(&self) {
@@ -106,19 +105,8 @@ impl Processor {
         if !inner.current.is_none() {
             unsafe {
                 let flags = disable_and_store();
-                let tid = inner.current.as_mut().unwrap().0;
-                let thread_info = inner.pool.threads[tid]
-                    .as_mut()
-                    .expect("thread not existed when yielding");
-                //let thread_info = inner.pool.get_thread_info(tid);
-                thread_info.status = Status::Sleeping;
-                inner
-                    .current
-                    .as_mut()
-                    .unwrap()
-                    .1
-                    .switch_to(&mut *inner.idle);
-
+                let current_thread = &mut inner.current.as_mut().unwrap().1;
+                current_thread.switch_to(&mut *inner.idle);
                 restore(flags);
             }
         }
