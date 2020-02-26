@@ -37,7 +37,7 @@ pub fn init() {
     execute("rust/user_shell", None);
 
     // LAB7
-    spawn(crate::sync::test::philosopher_using_mutex);
+    // spawn(crate::sync::test::philosopher_using_mutex);
 
     println!("++++ setup process!   ++++");
 }
@@ -82,11 +82,16 @@ pub fn current_tid() -> usize {
     CPU.current_tid()
 }
 
+/// Blocks unless or until the current thread's token is made available.
+pub fn park() {
+    CPU.park();
+}
+
 /// Sleep for `duration` time.
 pub fn sleep(duration: Duration) {
     let tid = current_tid();
     add_timer(duration, move || wake_up(tid));
-    yield_now();
+    park();
 }
 
 /// Add a timer after `interval`.

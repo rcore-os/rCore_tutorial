@@ -76,7 +76,7 @@ impl ContextContent {
                 tf.sepc = entry;
                 tf.sstatus = sstatus::read();
                 tf.sstatus.set_spp(sstatus::SPP::Supervisor);
-                tf.sstatus.set_spie(true);
+                tf.sstatus.set_spie(false);
                 tf.sstatus.set_sie(false);
                 tf
             },

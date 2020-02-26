@@ -2,7 +2,7 @@ use crate::context::ContextContent;
 use crate::interrupt::*;
 use crate::process::structs::*;
 use crate::process::thread_pool::ThreadPool;
-use crate::process::Tid;
+use crate::process::{current_tid, yield_now, Tid};
 use alloc::boxed::Box;
 use core::cell::UnsafeCell;
 
@@ -60,6 +60,10 @@ impl Processor {
                 // println!("\n<<<< switch_back to idle in idle_main!");
                 let (tid, thread) = inner.current.take().unwrap();
                 inner.pool.retrieve(tid, thread);
+
+                // enable interrupt just a moment to allow timer interrupt in
+                enable();
+                disable_and_store();
             } else {
                 enable_and_wfi();
                 disable_and_store();
@@ -81,7 +85,6 @@ impl Processor {
     }
 
     pub fn exit(&self, code: usize) -> ! {
-        disable_and_store();
         let inner = self.inner();
         let tid = inner.current.as_ref().unwrap().0;
 
@@ -92,7 +95,7 @@ impl Processor {
             inner.pool.wakeup(wait);
         }
 
-        inner.current.as_mut().unwrap().1.switch_to(&mut inner.idle);
+        self.yield_now();
         unreachable!();
     }
 
@@ -115,6 +118,11 @@ impl Processor {
     pub fn wake_up(&self, tid: Tid) {
         let inner = self.inner();
         inner.pool.wakeup(tid);
+    }
+
+    pub fn park(&self) {
+        self.inner().pool.set_sleep(current_tid());
+        self.yield_now();
     }
 
     pub fn current_tid(&self) -> usize {
