@@ -1,5 +1,5 @@
 use crate::process;
-use crate::sync::condvar::*;
+use crate::sync::Condvar;
 use alloc::{collections::VecDeque, sync::Arc};
 use lazy_static::*;
 use spin::Mutex;

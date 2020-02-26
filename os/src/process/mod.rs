@@ -36,6 +36,9 @@ pub fn init() {
 
     execute("rust/user_shell", None);
 
+    // LAB7
+    spawn(crate::sync::test::philosopher_using_mutex);
+
     println!("++++ setup process!   ++++");
 }
 
