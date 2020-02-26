@@ -5,8 +5,7 @@
 extern crate user;
 
 use user::syscall::{
-    set_priority, sys_exit as exit, sys_fork as fork, sys_getpid as getpid,
-    sys_gettime as gettime_msec, sys_wait as waitpid,
+    set_priority, sys_exit as exit, sys_fork as fork, sys_gettime as gettime_msec,
 };
 
 fn spin_delay() {
