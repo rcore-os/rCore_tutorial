@@ -1,0 +1,15 @@
+name: CI
+
+on: [push, pull_request]
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+    - uses: actions/checkout@v2
+    - name: Setup Environment
+      run: cd os && make env
+    - name: Build user
+      run: cd usr && make user_img
+    - name: Build kernel
+      run: cd os && make build
