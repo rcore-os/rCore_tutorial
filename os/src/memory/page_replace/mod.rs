@@ -33,10 +33,12 @@ pub trait PageReplace: Send {
                 println!("SWAP_OUT:");
                 let frame = Frame::of_addr(PhysAddr::new(entry.target()));
                 entry.set_present(false);
-                let swap_page: &mut [u8; PAGE_SIZE] =
-                    unsafe { frame.as_kernel_mut(PHYSICAL_MEMORY_OFFSET) };
-                entry.set_target(disk_page_write(swap_page));
-                entry.set_replaced(true);
+                if entry.dirty() {
+                    let swap_page: &mut [u8; PAGE_SIZE] =
+                        unsafe { frame.as_kernel_mut(PHYSICAL_MEMORY_OFFSET) };
+                    entry.set_target(disk_page_write(swap_page));
+                    entry.set_replaced(true);
+                }
                 entry.update();
                 println!("    vaddr {:x}", vaddr);
                 return Some(frame);
