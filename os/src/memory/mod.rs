@@ -39,6 +39,10 @@ fn init_heap() {
 pub fn access_pa_via_va(pa: usize) -> usize {
     pa + PHYSICAL_MEMORY_OFFSET
 }
+// only works for pa in main memory
+pub fn get_pa_via_va(va: usize) -> usize {
+    va - PHYSICAL_MEMORY_OFFSET
+}
 
 pub fn kernel_remap() {
     let mut memory_set = MemorySet::new();
@@ -50,20 +54,6 @@ pub fn kernel_remap() {
     memory_set.push(
         bootstack as usize,
         bootstacktop as usize,
-        MemoryAttr::new(),
-        Linear::new(PHYSICAL_MEMORY_OFFSET),
-        None,
-    );
-    memory_set.push(
-        access_pa_via_va(0x0c00_2000),
-        access_pa_via_va(0x0c00_3000),
-        MemoryAttr::new(),
-        Linear::new(PHYSICAL_MEMORY_OFFSET),
-        None,
-    );
-    memory_set.push(
-        access_pa_via_va(0x1000_0000),
-        access_pa_via_va(0x1000_1000),
         MemoryAttr::new(),
         Linear::new(PHYSICAL_MEMORY_OFFSET),
         None,

@@ -24,6 +24,7 @@ impl ThreadPool {
             scheduler,
         }
     }
+
     fn alloc_tid(&self) -> Tid {
         for (i, info) in self.threads.iter().enumerate() {
             if info.is_none() {
@@ -33,13 +34,14 @@ impl ThreadPool {
         panic!("alloc tid failed!");
     }
 
-    pub fn add(&mut self, _thread: Box<Thread>) {
+    pub fn add(&mut self, _thread: Box<Thread>) -> Tid {
         let tid = self.alloc_tid();
         self.threads[tid] = Some(ThreadInfo {
             status: Status::Ready,
             thread: Some(_thread),
         });
         self.scheduler.push(tid);
+        return tid;
     }
 
     pub fn acquire(&mut self) -> Option<(Tid, Box<Thread>)> {

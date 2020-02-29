@@ -4,11 +4,12 @@ pub mod handler;
 
 use crate::consts::*;
 use crate::memory::access_pa_via_va;
-use crate::memory::paging::PageTableImpl;
+use crate::memory::paging::{PageRange, PageTableImpl};
 use alloc::{boxed::Box, vec::Vec};
 use area::MemoryArea;
 use attr::MemoryAttr;
 use handler::{Linear, MemoryHandler};
+use riscv::addr::{Page, VirtAddr};
 
 pub struct MemorySet {
     areas: Vec<MemoryArea>,
@@ -104,8 +105,46 @@ impl MemorySet {
             Linear::new(offset),
             None,
         );
+        // PLIC for RISC-V virt machine
+        self.push_mmio(0x0c00_2000, 0x0c00_3000);
+        // 16550a UART for RISC-V virt machine
+        self.push_mmio(0x1000_0000, 0x1000_1000);
+        // VIRTIO0 for RISC-V virt machine
+        self.push_mmio(0x1000_1000, 0x1000_2000);
+        
+        self.push_mmio(0x0c20_1000, 0x0c20_2000);
+    }
+    pub fn push_mmio(&mut self, l: usize, r: usize) {
+        // check alignment
+        assert!(l & (PAGE_SIZE - 1) == 0);
+        assert!(r & (PAGE_SIZE - 1) == 0);
+        self.push(
+            access_pa_via_va(l),
+            access_pa_via_va(r),
+            MemoryAttr::new(),
+            Linear::new(PHYSICAL_MEMORY_OFFSET),
+            None,
+        );
     }
     pub fn token(&self) -> usize {
         self.page_table.token()
+    }
+    pub fn clone(&mut self) -> Self {
+        let mut new_page_table = PageTableImpl::new_bare();
+        let Self {
+            ref mut page_table,
+            ref areas,
+            ..
+        } = self;
+        for area in areas.iter() {
+            for page in PageRange::new(area.start, area.end) {
+                area.handler
+                    .clone_map(&mut new_page_table, page_table, page, &area.attr);
+            }
+        }
+        MemorySet {
+            areas: areas.clone(),
+            page_table: new_page_table,
+        }
     }
 }

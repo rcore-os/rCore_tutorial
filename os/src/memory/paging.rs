@@ -103,6 +103,21 @@ impl PageTableImpl {
         }
     }
 
+    pub fn kvmpa(va: usize) -> usize {
+        let root_frame_ppn = Self::active_token() & ((1 << 44) - 1);
+        let root_frame_pa = root_frame_ppn << 12;
+        let table = unsafe { &mut *(access_pa_via_va(root_frame_pa) as *mut PageTableEntryArray) };
+        let mut pageTable = PageTableImpl {
+            page_table: Rv39PageTable::new(table, PHYSICAL_MEMORY_OFFSET),
+            root_frame: Frame::of_addr(PhysAddr::new(root_frame_pa)),
+            entry: None,
+        };
+        if let Some(pageEntry) = pageTable.get_entry(va) {
+            return pageEntry.target() + (va & (PAGE_SIZE - 1));
+        }
+        panic!("in kvmpa, given va hasn't been mapped!");
+    }
+
     pub fn map(&mut self, va: usize, pa: usize) -> &mut PageEntry {
         let flags = EF::VALID | EF::READABLE | EF::WRITABLE;
         let page = Page::of_addr(VirtAddr::new(va));
@@ -156,6 +171,15 @@ impl PageTableImpl {
             Self::set_token(new_token);
             Self::flush_tlb();
         }
+    }
+
+    pub fn get_page_slice_mut<'a>(&mut self, addr: usize) -> &'a mut [u8] {
+        let frame = self
+            .page_table
+            .translate_page(Page::of_addr(VirtAddr::new(addr)))
+            .unwrap();
+        let vaddr = frame.start_address().as_usize() + PHYSICAL_MEMORY_OFFSET;
+        unsafe { core::slice::from_raw_parts_mut(vaddr as *mut u8, 0x1000) }
     }
 }
 

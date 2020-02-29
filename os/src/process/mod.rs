@@ -33,7 +33,7 @@ pub fn init() {
         &CPU as *const Processor as usize,
     );
     CPU.init(idle, Box::new(thread_pool));
-
+    // CPU.add_thread(Thread::new_kernel(crate::drivers::virtio_disk::virtio_disk_test as usize));
     execute("rust/user_shell", None);
 
     // LAB7
@@ -78,6 +78,7 @@ pub fn yield_now() {
 pub fn wake_up(tid: Tid) {
     CPU.wake_up(tid);
 }
+
 pub fn current_tid() -> usize {
     CPU.current_tid()
 }
@@ -118,4 +119,11 @@ where
         exit(0);
         unreachable!()
     }
+}
+pub fn add_thread(thread: Box<Thread>) -> usize {
+    CPU.add_thread(thread)
+}
+
+pub fn current_thread() -> Box<Thread> {
+    CPU.current_thread()
 }

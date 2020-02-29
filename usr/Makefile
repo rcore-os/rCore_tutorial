@@ -23,6 +23,7 @@ rust:
 	@cp $(rust_targets) $(out_dir)/rust
 
 $(sfsimg): rcore-fs-fuse rust
+	@dd if=/dev/zero of=$(out_dir)/swap bs=1M count=2
 	@rcore-fs-fuse --fs sfs $@ $(out_dir) zip 
 
 user_img: $(sfsimg)
