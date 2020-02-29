@@ -4,7 +4,7 @@ use {
         consts::{PAGE_SIZE, PHYSICAL_MEMORY_OFFSET},
         fs::{disk_page_read, disk_page_write},
     },
-    alloc::{boxed::Box, sync::Weak},
+    alloc::{boxed::Box, sync::Arc},
     lazy_static::*,
     riscv::{
         addr::{Frame, PhysAddr},
@@ -20,41 +20,37 @@ pub use fifo::FifoPageReplace;
 
 pub trait PageReplace: Send {
     /// 将可被置换的物理页帧纳入算法
-    fn push_frame(&mut self, vaddr: usize, weak_pt: Weak<Mutex<PageTableImpl>>);
+    fn push_frame(&mut self, vaddr: usize, weak_pt: Arc<Mutex<PageTableImpl>>);
     /// 选择要被置换的物理页帧
-    fn choose_victim(&mut self) -> Option<(usize, Weak<Mutex<PageTableImpl>>)>;
-    /// 1 复制页帧的内容到磁盘
+    fn choose_victim(&mut self) -> Option<(usize, Arc<Mutex<PageTableImpl>>)>;
+    /// 1 (可选)复制页帧的内容到磁盘
     /// 2 并记录页帧所在磁盘位置到页表项中
     /// 3 返回可用的物理页帧
     fn swap_out_one(&mut self) -> Option<Frame> {
-        while let Some((vaddr, weak_pt)) = self.choose_victim() {
-            if let Some(pt) = weak_pt.upgrade() {
-                let mut table = pt.lock();
-                if let Some(entry) = table.get_entry(vaddr) {
-                    let frame = Frame::of_addr(PhysAddr::new(entry.target()));
-                    entry.set_present(false);
-                    if entry.dirty() {
-                        let swap_page: &mut [u8; PAGE_SIZE] =
-                            unsafe { frame.as_kernel_mut(PHYSICAL_MEMORY_OFFSET) };
-                        entry.set_target(disk_page_write(swap_page));
-                        entry.set_replaced(true);
-                    }
-                    entry.update();
-                    println!("swap out, entry: {:#x?}, vaddr {:x}", entry.0, vaddr);
-                    return Some(frame);
-                }
+        while let Some((vaddr, pt)) = self.choose_victim() {
+            let mut table = pt.lock();
+            if let Some(entry) = table.get_entry(vaddr) {
+                println!("SWAP_OUT:");
+                let frame = Frame::of_addr(PhysAddr::new(entry.target()));
+                entry.set_present(false);
+                let swap_page: &mut [u8; PAGE_SIZE] =
+                    unsafe { frame.as_kernel_mut(PHYSICAL_MEMORY_OFFSET) };
+                entry.set_target(disk_page_write(swap_page));
+                entry.set_replaced(true);
+                entry.update();
+                println!("    vaddr {:x}", vaddr);
+                return Some(frame);
             }
         }
         None
     }
     /// 处理缺页中断
     // TODO use crate::memory::PageEntry
-    fn do_pgfault(&self, entry: &mut PageTableEntry, vaddr: usize) {
-        println!("pgfault addr: {:#x?}", entry);
-        let frame = alloc_frame().expect("failed to alloc frame");
+    fn do_pgfault(&mut self, entry: &mut PageTableEntry, vaddr: usize) {
+        let frame = self.swap_out_one().expect("failed to alloc frame");
         let mut flags = entry.flags().clone();
         if flags.contains(EF::RESERVED1) {
-            println!("need swap in");
+            println!("SWAP_IN:");
             let new_page: &mut [u8; PAGE_SIZE] =
                 unsafe { frame.as_kernel_mut(PHYSICAL_MEMORY_OFFSET) };
             disk_page_read(entry.ppn() * PAGE_SIZE, new_page);
@@ -65,7 +61,10 @@ pub trait PageReplace: Send {
         unsafe {
             sfence_vma(0, vaddr & !(PAGE_SIZE - 1));
         }
-        println!("swap in, entry: {:#x?}", entry);
+        println!(
+            "frame loc: {:#x}",
+            entry.addr().as_usize() + PHYSICAL_MEMORY_OFFSET
+        );
     }
     /// 传递时钟中断（用于积极页面置换策略）
     fn tick(&self);

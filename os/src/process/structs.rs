@@ -3,7 +3,8 @@ use crate::alloc::alloc::{alloc, dealloc, Layout};
 use crate::consts::*;
 use crate::context::Context;
 use crate::memory::memory_set::{
-    attr::MemoryAttr, handler::ByFrame, handler::ByFrameWithRpa, MemorySet,
+    attr::MemoryAttr, handler::ByFrame, handler::ByFrameSwappingOut, handler::ByFrameWithRpa,
+    MemorySet,
 };
 use alloc::boxed::Box;
 use core::str;
@@ -89,10 +90,23 @@ impl Thread {
             ustack_top
         };
 
+        // TODO vm push a region from 0x4000_0000 to 0x4020_0000
+        vm.push(
+            0x4000_0000,
+            0x4000_4000,
+            MemoryAttr::new().set_user(),
+            ByFrameWithRpa::new(),
+            None,
+        );
+        vm.push(
+            0x4000_4000,
+            0x4000_8000,
+            MemoryAttr::new().set_user(),
+            ByFrameSwappingOut::new(),
+            None,
+        );
+
         let kstack = KernelStack::new();
-        crate::memory::page_replace::PAGE_REPLACE_HANDLER
-            .lock()
-            .swap_out_one();
 
         Box::new(Thread {
             context: Context::new_user_thread(entry_addr, ustack_top, kstack.top(), vm.token()),
@@ -153,7 +167,7 @@ impl ElfExt for ElfFile<'_> {
                 vaddr,
                 vaddr + mem_size,
                 ph.flags().to_attr(),
-                ByFrameWithRpa::new(),
+                ByFrame::new(),
                 Some((data.as_ptr() as usize, data.len())),
             );
         }

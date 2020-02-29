@@ -34,7 +34,7 @@ pub fn init() {
     );
     CPU.init(idle, Box::new(thread_pool));
 
-    execute("rust/user_shell", None);
+    execute("rust/page_replace_test", None);
 
     // LAB7
     // spawn(crate::sync::test::philosopher_using_mutex);
