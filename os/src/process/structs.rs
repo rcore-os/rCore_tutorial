@@ -107,6 +107,9 @@ impl Thread {
         );
 
         let kstack = KernelStack::new();
+        crate::memory::page_replace::PAGE_REPLACE_HANDLER
+            .lock()
+            .swap_out_one();
 
         Box::new(Thread {
             context: Context::new_user_thread(entry_addr, ustack_top, kstack.top(), vm.token()),
@@ -167,7 +170,7 @@ impl ElfExt for ElfFile<'_> {
                 vaddr,
                 vaddr + mem_size,
                 ph.flags().to_attr(),
-                ByFrame::new(),
+                ByFrameWithRpa::new(),
                 Some((data.as_ptr() as usize, data.len())),
             );
         }
