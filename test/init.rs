@@ -32,8 +32,8 @@ fn alloc(cnt: usize) -> Option<usize> {
     return None;
 }
 
-fn dealloc(pnn: usize, cnt: usize) {
-    crate::memory::dealloc_frames(Frame::of_ppn(pnn), cnt)
+fn dealloc(ppn: usize, cnt: usize) {
+    crate::memory::dealloc_frames(Frame::of_ppn(ppn), cnt)
 }
 
 fn FirstFitAllocator_test() -> usize {
