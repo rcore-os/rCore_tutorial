@@ -15,7 +15,7 @@ ifeq ($(shell which rcore-fs-fuse),)
 	@cargo install rcore-fs-fuse --git https://github.com/rcore-os/rcore-fs --rev d8d61190
 endif
 
-rust:
+rust: $(rust_srcs)
 	@cd rust && cargo build
 	@echo targets includes $(rust_targets)
 	@rm -rf $(out_dir)/rust && mkdir -p $(out_dir)/rust

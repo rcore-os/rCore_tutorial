@@ -41,8 +41,8 @@ impl Processor {
             .expect("Processor is not initialized!")
     }
 
-    pub fn add_thread(&self, thread: Box<Thread>) {
-        self.inner().pool.add(thread);
+    pub fn add_thread(&self, thread: Box<Thread>) -> Tid {
+        self.inner().pool.add(thread)
     }
 
     pub fn idle_main(&self) -> ! {
@@ -70,7 +70,9 @@ impl Processor {
     pub fn tick(&self) {
         let inner = self.inner();
         if !inner.current.is_none() {
+            // println!("N");
             if inner.pool.tick() {
+                // println!("P");
                 let flags = disable_and_store();
 
                 inner.current.as_mut().unwrap().1.switch_to(&mut inner.idle);
@@ -131,5 +133,9 @@ impl Processor {
 
     pub fn current_tid(&self) -> usize {
         self.inner().current.as_mut().unwrap().0 as usize
+    }
+
+    pub fn current_thread(&self) -> &Box<Thread> {
+        &self.inner().current.as_mut().unwrap().1
     }
 }

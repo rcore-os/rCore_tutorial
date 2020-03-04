@@ -11,7 +11,7 @@ const CR: u8 = 0x0du8;
 
 use alloc::string::String;
 use user::io::getc;
-use user::syscall::sys_exec;
+use user::syscall::{sys_exec, sys_exit, sys_fork};
 
 #[no_mangle]
 pub fn main() {
@@ -26,7 +26,11 @@ pub fn main() {
                 if !line.is_empty() {
                     line.push('\0');
                     println!("searching for program {}", line);
-                    sys_exec(line.as_ptr());
+                    if sys_fork() == 0 {
+                        line.push('\0');
+                        sys_exec(line.as_ptr());
+                        sys_exit(0);
+                    }
                     line.clear();
                 }
                 print!(">> ");

@@ -21,19 +21,24 @@ pub fn init() {
     let idle = Thread::new_kernel(Processor::idle_main as usize);
     idle.append_initial_arguments([&CPU as *const Processor as usize, 0, 0]);
     CPU.init(idle, Box::new(thread_pool));
-
+    // CPU.add_thread(Thread::new_kernel(crate::drivers::virtio_disk::virtio_disk_test as usize));
     execute("rust/user_shell", None);
 
     println!("++++ setup process!   ++++");
 }
 
 pub fn execute(path: &str, host_tid: Option<Tid>) -> bool {
+    // println!("before lookup!");
     let find_result = ROOT_INODE.lookup(path);
+    // println!("after loopup!");
     match find_result {
         Ok(inode) => {
+            // println!("Ok(inode)!");
             let data = inode.read_as_vec().unwrap();
+            // println!("ok data!");
             let user_thread = unsafe { Thread::new_user(data.as_slice(), host_tid) };
             CPU.add_thread(user_thread);
+            // println!("CPU.add_thread");
             true
         }
         Err(_) => {
@@ -62,6 +67,15 @@ pub fn yield_now() {
 pub fn wake_up(tid: Tid) {
     CPU.wake_up(tid);
 }
+
 pub fn current_tid() -> usize {
     CPU.current_tid()
+}
+
+pub fn add_thread(thread: Box<Thread>) -> usize {
+    CPU.add_thread(thread)
+}
+
+pub fn current_thread() -> &'static Box<Thread> {
+    CPU.current_thread()
 }
