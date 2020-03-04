@@ -90,22 +90,6 @@ impl Thread {
             ustack_top
         };
 
-        // TODO vm push a region from 0x4000_0000 to 0x4020_0000
-        vm.push(
-            0x4000_0000,
-            0x4000_4000,
-            MemoryAttr::new().set_user(),
-            ByFrameWithRpa::new(),
-            None,
-        );
-        vm.push(
-            0x4000_4000,
-            0x4000_8000,
-            MemoryAttr::new().set_user(),
-            ByFrameSwappingOut::new(),
-            None,
-        );
-
         let kstack = KernelStack::new();
 
         Box::new(Thread {

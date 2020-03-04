@@ -34,8 +34,7 @@ pub fn init() {
     );
     CPU.init(idle, Box::new(thread_pool));
 
-    // 此处将默认启动程序设置为该程序仅为测试需要，正常情况为shell
-    execute("rust/page_replace_test", None);
+    execute("rust/user_shell", None);
 
     // LAB7
     // spawn(crate::sync::test::philosopher_using_mutex);
