@@ -129,6 +129,7 @@ impl MemoryHandler for ByFrameWithRpa {
         let mut table = pt.lock();
         let mut entry = table.map(va, pa);
         entry.clear_dirty();
+        entry.clear_accessed();
         attr.apply(entry);
         PAGE_REPLACE_HANDLER.lock().push_frame(va, pt.clone());
     }
@@ -180,6 +181,7 @@ impl MemoryHandler for ByFrameSwappingOut {
         let mut table = pt.lock();
         let mut entry = table.map(va, pa);
         entry.clear_dirty();
+        entry.clear_accessed();
         attr.apply(entry);
         PAGE_REPLACE_HANDLER.lock().push_frame(va, pt.clone());
     }
