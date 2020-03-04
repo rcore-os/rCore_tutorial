@@ -109,4 +109,7 @@ impl MemorySet {
     pub fn token(&self) -> usize {
         self.page_table.lock().token()
     }
+    pub fn get_table(&self) -> Arc<Mutex<PageTableImpl>> {
+        self.page_table.clone()
+    }
 }
