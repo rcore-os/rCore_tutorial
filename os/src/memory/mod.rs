@@ -10,6 +10,8 @@ use crate::consts::*;
 
 mod frame_allocator;
 
+// l: physical page number of the begin of free physical memory
+// r: physical page number of the end of free physical memory
 pub fn init(l: usize, r: usize) {
     FRAME_ALLOCATOR.lock().init(l, r);
     init_heap();
