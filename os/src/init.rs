@@ -80,22 +80,23 @@ fn page_test() {
 
     let table = memory_set.get_table();
 
+    let ptr1 = unsafe { &mut *(0x4000_a000 as *mut u64) };
+    *ptr1 = 0xdeaddead;
+    let ptr2 = unsafe { &mut *(0x4000_c000 as *mut u64) };
+    *ptr2 = 0xdeaddead;
+
     let mut count = 0;
     println!("test begin");
-    let ptr8 = unsafe { &mut *(0x4000_a000 as *mut u8) };
-    *ptr8 = 0xFF;
-    let ptr9 = unsafe { &mut *(0x4000_c000 as *mut u8) };
-    *ptr9 = 0x01;
-    count += check_a_to_b(&table, 0x4000_a000, 0x4000_0000);
-    count += check_a_to_b(&table, 0x4000_c000, 0x4000_1000);
-    count += check_a_to_b(&table, 0x4000_0000, 0x4000_2000);
-    count += check_a_to_b(&table, 0x4000_1000, 0x4000_3000);
-    count += check_a_to_b(&table, 0x4000_2000, 0x4000_4000);
-    count += check_a_to_b(&table, 0x4000_3000, 0x4000_5000);
-    count += check_a_to_b(&table, 0x4000_4000, 0x4000_6000);
-    count += check_a_to_b(&table, 0x4000_5000, 0x4000_7000);
+    count += check_a_to_b(&table, 0x4000_8000, 0x4000_0000);
+    count += check_a_to_b(&table, 0x4000_9000, 0x4000_1000);
+    count += check_a_to_b(&table, 0x4000_b000, 0x4000_2000);
+    count += check_a_to_b(&table, 0x4000_d000, 0x4000_3000);
+    count += check_a_to_b(&table, 0x4000_e000, 0x4000_4000);
+    count += check_a_to_b(&table, 0x4000_f000, 0x4000_5000);
+    count += check_a_to_b(&table, 0x4000_a000, 0x4000_6000);
+    count += check_a_to_b(&table, 0x4000_c000, 0x4000_7000);
     println!("test end");
-    println!("COUNT: {}", count);
+    println!("COUNT: {} / 8", count);
     loop {}
 }
 
