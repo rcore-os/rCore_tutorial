@@ -81,9 +81,4 @@ impl ThreadPool {
         proc.status = Status::Ready;
         self.scheduler.push(tid);
     }
-
-    pub fn set_sleep(&mut self, tid: Tid) {
-        let proc = self.threads[tid].as_mut().expect("thread not exist");
-        proc.status = Status::Sleeping;
-    }
 }

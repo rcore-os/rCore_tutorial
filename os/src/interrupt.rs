@@ -1,8 +1,7 @@
 use crate::context::TrapFrame;
 use crate::memory::access_pa_via_va;
 use crate::process::tick;
-use crate::timer::{clock_set_next_event, now};
-use core::time::Duration;
+use crate::timer::{clock_set_next_event, TICKS};
 use riscv::register::sie;
 use riscv::register::{
     scause::{self, Exception, Interrupt, Trap},
@@ -65,9 +64,8 @@ fn breakpoint(sepc: &mut usize) {
 
 fn super_timer() {
     clock_set_next_event();
-    tick(now());
+    tick();
 }
-
 fn page_fault(tf: &mut TrapFrame) {
     use crate::consts::PHYSICAL_MEMORY_OFFSET;
     use riscv::addr::{Page, VirtAddr};
@@ -135,12 +133,5 @@ pub fn restore(flags: usize) {
 pub fn enable_and_wfi() {
     unsafe {
         asm!("csrsi sstatus, 1 << 1; wfi" :::: "volatile");
-    }
-}
-
-#[inline(always)]
-pub fn enable() {
-    unsafe {
-        asm!("csrsi sstatus, 1 << 1" :::: "volatile");
     }
 }

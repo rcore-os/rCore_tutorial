@@ -36,16 +36,11 @@ impl Thread {
         }
     }
 
-    pub fn new_kernel(entry: usize, arg0: usize) -> Box<Thread> {
+    pub fn new_kernel(entry: usize) -> Box<Thread> {
         unsafe {
             let kstack_ = KernelStack::new();
             Box::new(Thread {
-                context: Context::new_kernel_thread(
-                    entry,
-                    arg0,
-                    kstack_.top(),
-                    satp::read().bits(),
-                ),
+                context: Context::new_kernel_thread(entry, kstack_.top(), satp::read().bits()),
                 kstack: kstack_,
                 wait: None,
             })
@@ -58,6 +53,12 @@ impl Thread {
             kstack: KernelStack::new_empty(),
             wait: None,
         })
+    }
+
+    pub fn append_initial_arguments(&self, args: [usize; 3]) {
+        unsafe {
+            self.context.append_initial_arguments(args);
+        }
     }
 
     pub unsafe fn new_user(data: &[u8], wait_thread: Option<Tid>) -> Box<Thread> {

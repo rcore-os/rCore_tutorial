@@ -27,13 +27,15 @@ impl Context {
         Context { content_addr: 0 }
     }
 
-    pub unsafe fn new_kernel_thread(
-        entry: usize,
-        arg0: usize,
-        kstack_top: usize,
-        satp: usize,
-    ) -> Context {
-        ContextContent::new_kernel_thread(entry, arg0, kstack_top, satp).push_at(kstack_top)
+    pub unsafe fn new_kernel_thread(entry: usize, kstack_top: usize, satp: usize) -> Context {
+        ContextContent::new_kernel_thread(entry, kstack_top, satp).push_at(kstack_top)
+    }
+
+    pub unsafe fn append_initial_arguments(&self, args: [usize; 3]) {
+        let contextContent = &mut *(self.content_addr as *mut ContextContent);
+        contextContent.tf.x[10] = args[0];
+        contextContent.tf.x[11] = args[1];
+        contextContent.tf.x[12] = args[2];
     }
 
     pub unsafe fn new_user_thread(
@@ -59,12 +61,7 @@ extern "C" {
 }
 
 impl ContextContent {
-    fn new_kernel_thread(
-        entry: usize,
-        arg0: usize,
-        kstack_top: usize,
-        satp: usize,
-    ) -> ContextContent {
+    fn new_kernel_thread(entry: usize, kstack_top: usize, satp: usize) -> ContextContent {
         let mut content = ContextContent {
             ra: __trapret as usize,
             satp,
@@ -72,11 +69,10 @@ impl ContextContent {
             tf: {
                 let mut tf: TrapFrame = unsafe { zeroed() };
                 tf.x[2] = kstack_top;
-                tf.x[10] = arg0;
                 tf.sepc = entry;
                 tf.sstatus = sstatus::read();
                 tf.sstatus.set_spp(sstatus::SPP::Supervisor);
-                tf.sstatus.set_spie(false);
+                tf.sstatus.set_spie(true);
                 tf.sstatus.set_sie(false);
                 tf
             },

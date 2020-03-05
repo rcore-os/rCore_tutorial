@@ -1,4 +1,4 @@
-use crate::process::{current_tid, park, wake_up, Tid};
+use crate::process::{current_tid, wake_up, yield_now, Tid};
 use alloc::collections::VecDeque;
 use spin::Mutex;
 
@@ -14,7 +14,7 @@ impl Condvar {
 
     pub fn wait(&self) {
         self.wait_queue.lock().push_back(current_tid());
-        park();
+        yield_now();
     }
 
     pub fn notify(&self) {
@@ -22,5 +22,6 @@ impl Condvar {
         if let Some(tid) = tid {
             wake_up(tid);
         }
+        /* yield_now(); */
     }
 }

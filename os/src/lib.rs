@@ -3,7 +3,6 @@
 #![feature(global_asm)]
 #![feature(alloc_error_handler)]
 #![feature(naked_functions)]
-#![feature(map_first_last)]
 
 extern crate alloc;
 

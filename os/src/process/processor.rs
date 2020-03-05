@@ -2,7 +2,7 @@ use crate::context::ContextContent;
 use crate::interrupt::*;
 use crate::process::structs::*;
 use crate::process::thread_pool::ThreadPool;
-use crate::process::{current_tid, yield_now, Tid};
+use crate::process::Tid;
 use alloc::boxed::Box;
 use core::cell::UnsafeCell;
 
@@ -60,10 +60,6 @@ impl Processor {
                 // println!("\n<<<< switch_back to idle in idle_main!");
                 let (tid, thread) = inner.current.take().unwrap();
                 inner.pool.retrieve(tid, thread);
-
-                // enable interrupt just a moment to allow timer interrupt in
-                enable();
-                disable_and_store();
             } else {
                 enable_and_wfi();
                 disable_and_store();
@@ -85,6 +81,7 @@ impl Processor {
     }
 
     pub fn exit(&self, code: usize) -> ! {
+        disable_and_store();
         let inner = self.inner();
         let tid = inner.current.as_ref().unwrap().0;
 
@@ -95,8 +92,9 @@ impl Processor {
             inner.pool.wakeup(wait);
         }
 
-        self.yield_now();
-        unreachable!();
+        inner.current.as_mut().unwrap().1.switch_to(&mut inner.idle);
+
+        loop {}
     }
 
     pub fn run(&self) {
@@ -108,8 +106,19 @@ impl Processor {
         if !inner.current.is_none() {
             unsafe {
                 let flags = disable_and_store();
-                let current_thread = &mut inner.current.as_mut().unwrap().1;
-                current_thread.switch_to(&mut *inner.idle);
+                let tid = inner.current.as_mut().unwrap().0;
+                let thread_info = inner.pool.threads[tid]
+                    .as_mut()
+                    .expect("thread not existed when yielding");
+                //let thread_info = inner.pool.get_thread_info(tid);
+                thread_info.status = Status::Sleeping;
+                inner
+                    .current
+                    .as_mut()
+                    .unwrap()
+                    .1
+                    .switch_to(&mut *inner.idle);
+
                 restore(flags);
             }
         }
@@ -118,11 +127,6 @@ impl Processor {
     pub fn wake_up(&self, tid: Tid) {
         let inner = self.inner();
         inner.pool.wakeup(tid);
-    }
-
-    pub fn park(&self) {
-        self.inner().pool.set_sleep(current_tid());
-        self.yield_now();
     }
 
     pub fn current_tid(&self) -> usize {
