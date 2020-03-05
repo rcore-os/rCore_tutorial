@@ -16,3 +16,5 @@ pub const KERNEL_STACK_SIZE: usize = 0x80000;
 
 pub const USER_STACK_SIZE: usize = 0x80000;
 pub const USER_STACK_OFFSET: usize = 0xffffffff00000000;
+
+pub const NOFILE: usize = 16;

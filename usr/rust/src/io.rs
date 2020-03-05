@@ -3,7 +3,8 @@ use core::fmt::{self, Write};
 use crate::syscall::sys_read;
 
 pub fn putchar(ch: char) {
-    sys_write(ch as u8);
+    // sys_write(ch as u8);
+    sys_write(STDOUT, &ch as *const char as *const u8, 1);
 }
 
 pub fn puts(s: &str) {
@@ -39,9 +40,17 @@ pub fn _print(args: fmt::Arguments) {
 }
 
 pub const STDIN: usize = 0;
+pub const STDOUT: usize = 1;
 
 pub fn getc() -> u8 {
     let mut c = 0u8;
     assert_eq!(sys_read(STDIN, &mut c, 1), 1);
     c
 }
+
+pub const O_RDONLY: i32 = 0;
+pub const O_WRONLY: i32 = 1;
+pub const O_RDWR: i32 = 2;
+pub const O_CREAT: i32 = 64;
+pub const O_APPEND: i32 = 1024;
+
