@@ -48,7 +48,7 @@ impl Processor {
         self.inner().pool.add(thread);
     }
 
-	pub fn idle_main(&self) -> ! {
+    pub fn idle_main(&self) -> ! {
         let inner = self.inner();
         disable_and_store();
 
@@ -71,7 +71,7 @@ impl Processor {
         }
     }
 
-	pub fn tick(&self) {
+    pub fn tick(&self) {
         let inner = self.inner();
         if !inner.current.is_none() {
             if inner.pool.tick() {
@@ -88,7 +88,7 @@ impl Processor {
         }
     }
 
-	pub fn exit(&self, code: usize) -> ! {
+    pub fn exit(&self, code: usize) -> ! {
         disable_and_store();
         let inner = self.inner();
         let tid = inner.current.as_ref().unwrap().0;
@@ -109,18 +109,17 @@ impl Processor {
         loop {}
     }
 
-	pub fn run(&self) {
+    pub fn run(&self) {
         Thread::get_boot_thread().switch_to(&mut self.inner().idle);
     }
 
-	pub fn yield_now(&self) {
+    pub fn yield_now(&self) {
         let inner = self.inner();
         if !inner.current.is_none() {
             unsafe {
                 let flags = disable_and_store();
                 let tid = inner.current.as_mut().unwrap().0;
                 let thread_info = inner.pool.threads[tid].as_mut().expect("thread not existed when yielding");
-				//let thread_info = inner.pool.get_thread_info(tid);
                 thread_info.status = Status::Sleeping;
                 inner.current
                     .as_mut()
