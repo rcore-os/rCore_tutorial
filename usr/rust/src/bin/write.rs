@@ -14,24 +14,26 @@ use user::syscall::{
     sys_write,
 };
 
+const BUFFER_SIZE: usize = 20;
+const FILE: &'static str = "temp\0";
+const TEXT: &'static str = "Hello world!\0";
+
 #[no_mangle]
 pub fn main() -> usize {
-    let write_fd = sys_open("temp\0".as_ptr(), O_WRONLY);
-    let mut text = "Hello world!\0";
-    sys_write(write_fd as usize, text.as_ptr(), text.len());
+    let write_fd = sys_open(FILE.as_ptr(), O_WRONLY);
+    sys_write(write_fd as usize, TEXT.as_ptr(), TEXT.len());
     println!("write to file 'temp' successfully...");
     sys_close(write_fd as i32);
 
-    let read_fd = sys_open("temp\0".as_ptr(), O_RDONLY);
-    let mut read: [u8; 20] = [0; 20];
-    sys_read(read_fd as usize, &read[0] as *const u8, 20);
+    let read_fd = sys_open(FILE.as_ptr(), O_RDONLY);
+    let mut read = [0u8; BUFFER_SIZE];
+    sys_read(read_fd as usize, &read[0] as *const u8, BUFFER_SIZE);
     println!("read from file 'temp' successfully...");
+    let len = (0..BUFFER_SIZE).find(|&i| read[i] as u8 == 0).unwrap();
     print!("content = ");
-    for i in 0..20 {
+    for i in 0usize..len {
+        assert!(read[i] == TEXT.as_bytes()[i]);
         putchar(read[i] as char);
-        if read[0] as u8 == 0 {
-            break;
-        }
     }
     putchar('\n');
     sys_close(read_fd as i32);
