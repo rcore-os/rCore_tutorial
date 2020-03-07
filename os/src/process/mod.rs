@@ -65,3 +65,7 @@ pub fn wake_up(tid: Tid) {
 pub fn current_tid() -> usize {
     CPU.current_tid()
 }
+
+pub fn current_thread_mut() -> &'static mut Thread {
+    CPU.current_thread_mut()
+}

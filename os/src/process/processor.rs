@@ -132,4 +132,8 @@ impl Processor {
     pub fn current_tid(&self) -> usize {
         self.inner().current.as_mut().unwrap().0 as usize
     }
+
+    pub fn current_thread_mut(&self) -> &mut Thread {
+        self.inner().current.as_mut().unwrap().1.as_mut()
+    }
 }
