@@ -28,15 +28,6 @@ pub extern "C" fn rust_main() -> ! {
     crate::sbi::shutdown();
 }
 
-use crate::memory::{
-    access_pa_via_va,
-    memory_set::{
-        attr::MemoryAttr,
-        handler::{ByFrameSwappingOut, ByFrameWithRpa, Linear},
-        MemorySet,
-    },
-};
-
 fn page_test() {
     let mut memory_set = MemorySet::new();
 
