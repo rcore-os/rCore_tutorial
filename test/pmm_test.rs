@@ -13,7 +13,6 @@ pub extern "C" fn rust_main() -> ! {
         ((end as usize - KERNEL_BEGIN_VADDR + KERNEL_BEGIN_PADDR) >> 12) + 1,
         PHYSICAL_MEMORY_END >> 12,
     );
-    crate::interrupt::init();
     println!("First Fit Allocator: {} / 8", FF_grade);
     crate::sbi::shutdown();
 }
