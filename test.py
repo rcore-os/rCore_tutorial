@@ -7,6 +7,7 @@ tests = {
     'labuser': (True, 'test_test.rs'),
     'lab5': (True, 'fork_test.rs'),
     'lab6': (True, 'stride_test.rs'),
+    'lab7': (False, 'mutex_test.rs'),
     'lab8': (True, 'pipe_test.rs'),
 }
 if sys.argv[1] == 'clean':
@@ -20,12 +21,15 @@ try:
         # save process/mod.rs
         os.system('\\cp os/src/process/mod.rs os/src/process/mod_backup.rs')
         # replace with user test
-        os.system('\\cp test/usr/' + test_file + ' usr/rust/src/bin/' + test_file)
+        os.system('\\cp test/usr/' + test_file +
+                  ' usr/rust/src/bin/' + test_file)
         s = open('os/src/process/mod.rs').read()
-        s = s.replace('rust/user_shell', 'rust/' + test_file[:test_file.find('.')])
+        s = s.replace('rust/user_shell', 'rust/' +
+                      test_file[:test_file.find('.')])
         with open('os/src/process/mod.rs', 'w') as f:
             f.write(s)
         # try test
+        c = os.system('make clean')
         c = os.system('make run > ' + sys.argv[1] + '.result')
         if c == 0:
             print('test successfully')
@@ -60,4 +64,4 @@ try:
         if c == 0:
             os.system('cat ' + sys.argv[1] + '.result | less')
 except:
-    print('Usage: python3 test.py labX/clean (X={2,3,5,6,8,kernel,user})')
+    print('Usage: python3 test.py labX/clean (X={2,3,5,6,7,8,kernel,user})')
