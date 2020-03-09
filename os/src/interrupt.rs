@@ -67,13 +67,25 @@ fn super_timer() {
     tick();
 }
 fn page_fault(tf: &mut TrapFrame) {
+    use crate::consts::PHYSICAL_MEMORY_OFFSET;
+    use riscv::addr::{Page, VirtAddr};
+    use riscv::paging::Mapper;
+    use riscv::paging::{PageTable, Rv39PageTable};
+    use riscv::register::satp;
     println!(
         "{:?} va = {:#x} instruction = {:#x}",
         tf.scause.cause(),
         tf.stval,
         tf.sepc
     );
-    panic!("page fault!");
+    let root_table: &mut PageTable =
+        unsafe { satp::read().frame().as_kernel_mut(PHYSICAL_MEMORY_OFFSET) };
+    let mut pg_table = Rv39PageTable::new(root_table, PHYSICAL_MEMORY_OFFSET);
+    let page = Page::of_addr(VirtAddr::new(tf.stval));
+    let entry = pg_table.ref_entry(page.clone()).unwrap();
+    crate::memory::page_replace::PAGE_REPLACE_HANDLER
+        .lock()
+        .do_pgfault(entry, tf.stval);
 }
 
 fn syscall(tf: &mut TrapFrame) {

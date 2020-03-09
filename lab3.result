@@ -1,0 +1,108 @@
+make -C usr user_img
+make[1]: Entering directory '/home/pan/Code/rCore_tutorial/usr'
+targets includes rust/target/riscv64imac-unknown-none-elf/debug/user_shell rust/target/riscv64imac-unknown-none-elf/debug/notebook rust/target/riscv64imac-unknown-none-elf/debug/hello_world rust/target/riscv64imac-unknown-none-elf/debug/model rust/target/riscv64imac-unknown-none-elf/debug/write
+make[1]: Leaving directory '/home/pan/Code/rCore_tutorial/usr'
+make -C os run
+make[1]: Entering directory '/home/pan/Code/rCore_tutorial/os'
+cargo build
+rust-objcopy --binary-architecture=riscv64 target/riscv64imac-unknown-none-elf/debug/os --strip-all -O binary target/riscv64imac-unknown-none-elf/debug/kernel.bin
+qemu-system-riscv64 \
+	-machine virt \
+	-nographic \
+	-bios default \
+	-device loader,file=target/riscv64imac-unknown-none-elf/debug/kernel.bin,addr=0x80200000
+
+OpenSBI v0.5 (Oct  9 2019 12:03:04)
+   ____                    _____ ____ _____
+  / __ \                  / ____|  _ \_   _|
+ | |  | |_ __   ___ _ __ | (___ | |_) || |
+ | |  | | '_ \ / _ \ '_ \ \___ \|  _ < | |
+ | |__| | |_) |  __/ | | |____) | |_) || |_
+  \____/| .__/ \___|_| |_|_____/|____/_____|
+        | |
+        |_|
+
+Platform Name          : QEMU Virt Machine
+Platform HART Features : RV64ACDFIMSU
+Platform Max HARTs     : 8
+Current Hart           : 0
+Firmware Base          : 0x80000000
+Firmware Size          : 116 KB
+Runtime SBI Version    : 0.2
+
+PMP0: 0x0000000080000000-0x000000008001ffff (A)
+PMP1: 0x0000000000000000-0xffffffffffffffff (A,R,W,X)
+switch satp from 0x800000000008025b to 0x8000000000080c72
+++++ setup memory!    ++++
+++++ setup interrupt! ++++
+push vaddr: 0x40000000
+push vaddr: 0x40001000
+push vaddr: 0x40002000
+push vaddr: 0x40003000
+push vaddr: 0x40004000
+push vaddr: 0x40005000
+push vaddr: 0x40006000
+push vaddr: 0x40007000
+SWAP_OUT:
+    vaddr 40000000
+push vaddr: 0x40008000
+SWAP_OUT:
+    vaddr 40001000
+push vaddr: 0x40009000
+SWAP_OUT:
+    vaddr 40002000
+push vaddr: 0x4000a000
+SWAP_OUT:
+    vaddr 40003000
+push vaddr: 0x4000b000
+SWAP_OUT:
+    vaddr 40004000
+push vaddr: 0x4000c000
+SWAP_OUT:
+    vaddr 40005000
+push vaddr: 0x4000d000
+SWAP_OUT:
+    vaddr 40006000
+push vaddr: 0x4000e000
+SWAP_OUT:
+    vaddr 40007000
+push vaddr: 0x4000f000
+switch satp from 0x8000000000080c72 to 0x8000000000080cb6
+test begin
+Exception(StorePageFault) va = 0x40000000 instruction = 0xffffffffc0213cd6
+SWAP_OUT:
+    vaddr 40008000
+frame loc: 0xffffffffc0cfa000
+Exception(StorePageFault) va = 0x40001000 instruction = 0xffffffffc0213cd6
+SWAP_OUT:
+    vaddr 40009000
+frame loc: 0xffffffffc0cfd000
+Exception(StorePageFault) va = 0x40002000 instruction = 0xffffffffc0213cd6
+SWAP_OUT:
+    frame loc : 0xffffffffc0cfe000, disk pos is 0x0
+    vaddr 4000a000
+frame loc: 0xffffffffc0cfe000
+Exception(StorePageFault) va = 0x40003000 instruction = 0xffffffffc0213cd6
+SWAP_OUT:
+    vaddr 4000b000
+frame loc: 0xffffffffc0cff000
+Exception(StorePageFault) va = 0x40004000 instruction = 0xffffffffc0213cd6
+SWAP_OUT:
+    frame loc : 0xffffffffc0d00000, disk pos is 0x1000
+    vaddr 4000c000
+frame loc: 0xffffffffc0d00000
+Exception(StorePageFault) va = 0x40005000 instruction = 0xffffffffc0213cd6
+SWAP_OUT:
+    vaddr 4000d000
+frame loc: 0xffffffffc0d01000
+Exception(StorePageFault) va = 0x40006000 instruction = 0xffffffffc0213cd6
+SWAP_OUT:
+    vaddr 4000e000
+frame loc: 0xffffffffc0d02000
+Exception(StorePageFault) va = 0x40007000 instruction = 0xffffffffc0213cd6
+SWAP_OUT:
+    vaddr 4000f000
+frame loc: 0xffffffffc0d03000
+test end
+COUNT: 2 / 8
+make[1]: Leaving directory '/home/pan/Code/rCore_tutorial/os'

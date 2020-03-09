@@ -1,7 +1,8 @@
 use super::{attr::MemoryAttr, handler::MemoryHandler};
 use crate::consts::PAGE_SIZE;
 use crate::memory::paging::{PageRange, PageTableImpl};
-use alloc::boxed::Box;
+use alloc::{boxed::Box, sync::Arc};
+use spin::Mutex;
 
 #[derive(Debug, Clone)]
 pub struct MemoryArea {
@@ -12,14 +13,14 @@ pub struct MemoryArea {
 }
 
 impl MemoryArea {
-    pub fn map(&self, pt: &mut PageTableImpl) {
+    pub fn map(&self, pt: Arc<Mutex<PageTableImpl>>) {
         for page in PageRange::new(self.start, self.end) {
-            self.handler.map(pt, page, &self.attr);
+            self.handler.map(pt.clone(), page, &self.attr);
         }
     }
-    fn unmap(&self, pt: &mut PageTableImpl) {
+    fn unmap(&self, pt: Arc<Mutex<PageTableImpl>>) {
         for page in PageRange::new(self.start, self.end) {
-            self.handler.unmap(pt, page);
+            self.handler.unmap(pt.clone(), page);
         }
     }
 

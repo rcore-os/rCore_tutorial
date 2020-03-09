@@ -67,6 +67,13 @@ impl PageEntry {
         let frame = Frame::of_addr(PhysAddr::new(target));
         self.0.set(frame, flags);
     }
+
+    pub fn replaced(&self) -> bool {
+        self.0.flags().contains(EF::RESERVED1)
+    }
+    pub fn set_replaced(&mut self, value: bool) {
+        self.0.flags_mut().set(EF::RESERVED1, value);
+    }
 }
 
 struct FrameAllocatorForPaging;
