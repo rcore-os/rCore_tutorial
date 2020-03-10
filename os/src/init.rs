@@ -6,6 +6,7 @@ pub extern "C" fn rust_main() -> ! {
     crate::timer::init();
 
     unsafe {
+        asm!("mret");
         asm!("ebreak"::::"volatile");
     }
     panic!("end of rust_main");

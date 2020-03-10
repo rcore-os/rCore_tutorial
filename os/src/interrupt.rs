@@ -8,7 +8,10 @@ use riscv::register::{
     sepc,
     stvec,
     sscratch,
-    sstatus
+    sstatus::{
+        self,
+        Sstatus
+    }
 };
 use crate::timer::{
     TICKS,
@@ -35,12 +38,20 @@ pub fn init() {
 #[no_mangle]
 pub fn rust_trap(tf: &mut TrapFrame) {
     match tf.scause.cause() {
-        Trap::Exception(Exception::Breakpoint) => breakpoint(&mut tf.sepc),
+        //Trap::Exception(Exception::Breakpoint) => breakpoint(&mut tf.sepc),
         Trap::Interrupt(Interrupt::SupervisorTimer) => super_timer(),
-        _ => panic!("undefined trap!")
+        _ => unknown(&mut tf.sstatus, &mut tf.scause.bits(), &mut tf.sepc),
+
     }
 }
 
+fn unknown(sstatus:&mut Sstatus, scause:&mut usize, sepc: &mut usize ) {
+    println!("sstatus sie {:?}", sstatus.sie());
+    println!("sstatus spie {:?}", sstatus.spie());
+    println!("scause @0x{:x}", scause);
+    println!("a breakpoint set @0x{:x}", sepc);
+    *sepc += 2;
+}
 fn breakpoint(sepc: &mut usize) {
     println!("a breakpoint set @0x{:x}", sepc);
     *sepc += 2;
