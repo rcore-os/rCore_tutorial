@@ -14,6 +14,9 @@ xmas-elf = "0.6"
 rcore-fs = { git = "https://github.com/rcore-os/rcore-fs", rev = "d8d61190"  }
 rcore-fs-sfs = { git = "https://github.com/rcore-os/rcore-fs", rev = "d8d61190"  }
 
+[build-dependencies]
+chrono = "0.4"
+
 [dependencies.lazy_static]
 version = "1.0"
 features = ["spin_no_std"]
