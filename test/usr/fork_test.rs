@@ -18,20 +18,3 @@ pub fn main() -> usize {
     println!("ret tid is: {}", tid);
     0
 }
-
-/*
-out put:
-
-I am child
-ret tid is: 0
-thread 3 exited, exit code = 0
-I am father
-ret tid is: 3
-thread 2 exited, exit code = 0
-I am child
-ret tid is: 0
-thread 4 exited, exit code = 0
-I am father
-ret tid is: 4
-thread 1 exited, exit code = 0
-*/
