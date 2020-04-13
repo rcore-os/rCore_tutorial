@@ -30,10 +30,10 @@ pub fn main() -> usize {
         let ch: u8 = 0;
         loop {
             sys_read(pipefd[0] as usize, &ch as *const u8, 1);
-            string.push(ch as char);
             if ch == 0 {
                 break;
             }
+            string.push(ch as char);
         }
         println!("message received in child process = {}", string);
     } else {
