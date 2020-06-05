@@ -4,6 +4,7 @@
 
 Please read
 - https://rcore-os.github.io/rCore_tutorial_doc/
+    - [Docs Repository](https://github.com/rcore-os/rCore_tutorial_doc)
 - https://github.com/rcore-os/rCore/wiki/os-tutorial-os2atc
 
 ## Prerequisite
