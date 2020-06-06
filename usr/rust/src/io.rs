@@ -47,9 +47,8 @@ pub fn getc() -> u8 {
     c
 }
 
-pub const O_RDONLY: i32 = 0;    // 只读
-pub const O_WRONLY: i32 = 1;    // 只写
-pub const O_RDWR: i32 = 2;        // 可读可写
-pub const O_CREAT: i32 = 64;    // 打开文件时若文件不存在，创建它
-pub const O_APPEND: i32 = 1024;    // 从文件结尾开始写入
-
+pub const O_RDONLY: i32 = 0; // 只读
+pub const O_WRONLY: i32 = 1; // 只写
+pub const O_RDWR: i32 = 2; // 可读可写
+pub const O_CREAT: i32 = 64; // 打开文件时若文件不存在，创建它
+pub const O_APPEND: i32 = 1024; // 从文件结尾开始写入

@@ -12,7 +12,7 @@ fn sys_call(syscall_id: SyscallId, arg0: usize, arg1: usize, arg2: usize, arg3: 
     let id = syscall_id as usize;
     let mut ret: i64;
     unsafe {
-        asm!(
+        llvm_asm!(
             "ecall"
             : "={x10}"(ret)
             : "{x17}"(id), "{x10}"(arg0), "{x11}"(arg1), "{x12}"(arg2), "{x13}"(arg3)
@@ -22,7 +22,6 @@ fn sys_call(syscall_id: SyscallId, arg0: usize, arg1: usize, arg2: usize, arg3: 
     }
     ret
 }
-
 
 pub fn sys_open(path: *const u8, flags: i32) -> i64 {
     sys_call(SyscallId::Open, path as usize, flags as usize, 0, 0)

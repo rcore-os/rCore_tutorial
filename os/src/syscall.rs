@@ -1,6 +1,6 @@
 use crate::context::TrapFrame;
-use crate::process;
 use crate::fs::file::FileDescriptorType;
+use crate::process;
 
 pub const SYS_OPEN: usize = 56;
 pub const SYS_CLOSE: usize = 57;
@@ -56,7 +56,7 @@ unsafe fn sys_read(fd: usize, base: *mut u8, len: usize) -> isize {
         }
         return 1;
     } else {
-        let mut thread = process::current_thread_mut();
+        let thread = process::current_thread_mut();
         assert!(thread.ofile[fd].is_some());
         let mut file = thread.ofile[fd as usize].as_ref().unwrap().lock();
         assert!(file.get_readable());
@@ -83,7 +83,9 @@ unsafe fn sys_read(fd: usize, base: *mut u8, len: usize) -> isize {
 unsafe fn sys_write(fd: usize, base: *const u8, len: usize) -> isize {
     if fd == 1 {
         assert!(len == 1);
-        unsafe { crate::io::putchar(*base as char); }
+        unsafe {
+            crate::io::putchar(*base as char);
+        }
         return 1;
     } else {
         let thread = process::current_thread_mut();
