@@ -1,4 +1,3 @@
-use crate::process;
 use crate::sync::condvar::*;
 use alloc::{collections::VecDeque, sync::Arc};
 use lazy_static::*;

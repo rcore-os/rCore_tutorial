@@ -1,9 +1,8 @@
+use crate::fs::ROOT_INODE;
 use alloc::sync::Arc;
 use rcore_fs::vfs::INode;
-use rcore_fs_sfs::INodeImpl;
-use crate::fs::ROOT_INODE;
 
-#[derive(Copy,Clone,Debug)]
+#[derive(Copy, Clone, Debug)]
 pub enum FileDescriptorType {
     FD_NONE,
     FD_INODE,
@@ -29,14 +28,30 @@ impl File {
             offset: 0,
         }
     }
-    pub fn set_readable(&mut self, v: bool) { self.readable = v; }
-    pub fn set_writable(&mut self, v: bool) { self.writable = v; }
-    pub fn get_readable(&self) -> bool { self.readable }
-    pub fn get_writable(&self) -> bool { self.writable }
-    pub fn set_fdtype(&mut self, t: FileDescriptorType) { self.fdtype = t; }
-    pub fn get_fdtype(&self) -> FileDescriptorType { self.fdtype }
-    pub fn set_offset(&mut self, o: usize) { self.offset = o; }
-    pub fn get_offset(&self) -> usize { self.offset }
+    pub fn set_readable(&mut self, v: bool) {
+        self.readable = v;
+    }
+    pub fn set_writable(&mut self, v: bool) {
+        self.writable = v;
+    }
+    pub fn get_readable(&self) -> bool {
+        self.readable
+    }
+    pub fn get_writable(&self) -> bool {
+        self.writable
+    }
+    pub fn set_fdtype(&mut self, t: FileDescriptorType) {
+        self.fdtype = t;
+    }
+    pub fn get_fdtype(&self) -> FileDescriptorType {
+        self.fdtype
+    }
+    pub fn set_offset(&mut self, o: usize) {
+        self.offset = o;
+    }
+    pub fn get_offset(&self) -> usize {
+        self.offset
+    }
 
     pub fn open_file(&mut self, path: &'static str, flags: i32) {
         self.set_fdtype(FileDescriptorType::FD_INODE);

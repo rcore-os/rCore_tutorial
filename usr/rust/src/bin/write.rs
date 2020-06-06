@@ -7,12 +7,7 @@ extern crate alloc;
 extern crate user;
 
 use user::io::*;
-use user::syscall::{
-    sys_open,
-    sys_close,
-    sys_read,
-    sys_write,
-};
+use user::syscall::{sys_close, sys_open, sys_read, sys_write};
 
 const BUFFER_SIZE: usize = 20;
 const FILE: &'static str = "temp\0";
@@ -28,7 +23,7 @@ pub fn main() -> usize {
 
     // 将字符串从文件 temp 读入内存
     let read_fd = sys_open(FILE.as_ptr(), O_RDONLY);
-    let mut read = [0u8; BUFFER_SIZE];
+    let read = [0u8; BUFFER_SIZE];
     sys_read(read_fd as usize, &read[0] as *const u8, BUFFER_SIZE);
     println!("read from file 'temp' successfully...");
 

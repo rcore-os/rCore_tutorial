@@ -1,6 +1,6 @@
 mod device;
-pub mod stdio;
 pub mod file;
+pub mod stdio;
 
 use alloc::{sync::Arc, vec::Vec};
 use lazy_static::*;
@@ -42,7 +42,7 @@ impl INodeExt for dyn INode {
 pub fn init() {
     println!("available programs in rust/ are:");
     let mut id = 0;
-    let mut rust_dir = ROOT_INODE.lookup("rust").unwrap();
+    let rust_dir = ROOT_INODE.lookup("rust").unwrap();
     while let Ok(name) = rust_dir.get_entry(id) {
         id += 1;
         println!("  {}", name);
