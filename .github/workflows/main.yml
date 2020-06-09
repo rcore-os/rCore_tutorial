@@ -11,7 +11,7 @@ jobs:
         with:
           components: rustfmt, clippy
       - name: Check user
-        run: cd usr && cargo fmt -- --check && cargo clippy -- -D warnings
+        run: cd usr/rust/ && cargo fmt -- --check && cargo clippy -- -D warnings
       - name: Check os
         run: cd os && cargo fmt -- --check && cargo clippy -- -D warnings
   build:
