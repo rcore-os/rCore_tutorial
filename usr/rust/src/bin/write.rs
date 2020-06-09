@@ -10,8 +10,8 @@ use user::io::*;
 use user::syscall::{sys_close, sys_open, sys_read, sys_write};
 
 const BUFFER_SIZE: usize = 20;
-const FILE: &'static str = "temp\0";
-const TEXT: &'static str = "Hello world!\0";
+const FILE: &str = "temp\0";
+const TEXT: &str = "Hello world!\0";
 
 #[no_mangle]
 pub fn main() -> usize {
@@ -30,9 +30,9 @@ pub fn main() -> usize {
     // 检查功能是否正确
     let len = (0..BUFFER_SIZE).find(|&i| read[i] as u8 == 0).unwrap();
     print!("content = ");
-    for i in 0usize..len {
-        assert!(read[i] == TEXT.as_bytes()[i]);
-        putchar(read[i] as char);
+    for (i, item) in read.iter().enumerate().take(len) {
+        assert!(*item == TEXT.as_bytes()[i]);
+        putchar(*item as char);
     }
     putchar('\n');
     sys_close(read_fd as i32);

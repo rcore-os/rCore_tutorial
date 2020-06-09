@@ -42,8 +42,8 @@ pub const STDIN: usize = 0;
 pub const STDOUT: usize = 1;
 
 pub fn getc() -> u8 {
-    let mut c = 0u8;
-    assert_eq!(sys_read(STDIN, &mut c, 1), 1);
+    let c = 0u8;
+    assert_eq!(sys_read(STDIN, &c, 1), 1);
     c
 }
 
