@@ -10,6 +10,8 @@ jobs:
       - uses: actions-rs/toolchain@v1
         with:
           components: rustfmt, clippy
+      - name: Setup Environment
+        run: cd os && make env
       - name: Check user
         run: cd usr/rust/ && cargo fmt -- --check && cargo clippy -- -D warnings
       - name: Check os
