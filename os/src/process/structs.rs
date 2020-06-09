@@ -19,6 +19,7 @@ pub enum Status {
     Ready,
     Running(Tid),
     Sleeping,
+    #[allow(dead_code)]
     Exited(ExitCode),
 }
 

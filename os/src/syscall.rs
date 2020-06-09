@@ -9,7 +9,7 @@ pub const SYS_EXIT: usize = 93;
 pub const SYS_READ: usize = 63;
 pub const SYS_EXEC: usize = 221;
 
-pub fn syscall(id: usize, args: [usize; 3], tf: &mut TrapFrame) -> isize {
+pub fn syscall(id: usize, args: [usize; 3], _tf: &mut TrapFrame) -> isize {
     match id {
         SYS_OPEN => sys_open(args[0] as *const u8, args[1] as i32),
         SYS_CLOSE => sys_close(args[0] as i32),
@@ -51,9 +51,7 @@ fn sys_exit(code: usize) {
 unsafe fn sys_read(fd: usize, base: *mut u8, len: usize) -> isize {
     if fd == 0 {
         // 如果是标准输入
-        unsafe {
-            *base = crate::fs::stdio::STDIN.pop() as u8;
-        }
+        *base = crate::fs::stdio::STDIN.pop() as u8;
         return 1;
     } else {
         let thread = process::current_thread_mut();
@@ -61,7 +59,7 @@ unsafe fn sys_read(fd: usize, base: *mut u8, len: usize) -> isize {
         let mut file = thread.ofile[fd as usize].as_ref().unwrap().lock();
         assert!(file.get_readable());
         match file.get_fdtype() {
-            FileDescriptorType::FD_INODE => {
+            FileDescriptorType::FdInode => {
                 let mut offset = file.get_offset();
                 let s = file
                     .inode
@@ -83,9 +81,7 @@ unsafe fn sys_read(fd: usize, base: *mut u8, len: usize) -> isize {
 unsafe fn sys_write(fd: usize, base: *const u8, len: usize) -> isize {
     if fd == 1 {
         assert!(len == 1);
-        unsafe {
-            crate::io::putchar(*base as char);
-        }
+        crate::io::putchar(*base as char);
         return 1;
     } else {
         let thread = process::current_thread_mut();
@@ -93,7 +89,7 @@ unsafe fn sys_write(fd: usize, base: *const u8, len: usize) -> isize {
         let mut file = thread.ofile[fd as usize].as_ref().unwrap().lock();
         assert!(file.get_writable());
         match file.get_fdtype() {
-            FileDescriptorType::FD_INODE => {
+            FileDescriptorType::FdInode => {
                 let mut offset = file.get_offset();
                 let s = file
                     .inode
@@ -109,7 +105,6 @@ unsafe fn sys_write(fd: usize, base: *const u8, len: usize) -> isize {
                 panic!("fdtype not handled!");
             }
         }
-        0
     }
 }
 

@@ -32,15 +32,15 @@ pub fn init() {
 }
 
 pub unsafe fn init_external_interrupt() {
-    let HART0_S_MODE_INTERRUPT_ENABLES: *mut u32 = access_pa_via_va(0x0c00_2080) as *mut u32;
+    let hart0_s_mode_interrupt_enables: *mut u32 = access_pa_via_va(0x0c00_2080) as *mut u32;
     const SERIAL: u32 = 0xa;
-    HART0_S_MODE_INTERRUPT_ENABLES.write_volatile(1 << SERIAL);
+    hart0_s_mode_interrupt_enables.write_volatile(1 << SERIAL);
 }
 
 pub unsafe fn enable_serial_interrupt() {
-    let UART16550: *mut u8 = access_pa_via_va(0x10000000) as *mut u8;
-    UART16550.add(4).write_volatile(0x0B);
-    UART16550.add(1).write_volatile(0x01);
+    let uart16550: *mut u8 = access_pa_via_va(0x10000000) as *mut u8;
+    uart16550.add(4).write_volatile(0x0B);
+    uart16550.add(1).write_volatile(0x01);
 }
 
 #[no_mangle]

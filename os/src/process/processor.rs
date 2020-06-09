@@ -100,6 +100,7 @@ impl Processor {
         Thread::get_boot_thread().switch_to(&mut self.inner().idle);
     }
 
+    #[allow(unused_unsafe)]
     pub fn yield_now(&self) {
         let inner = self.inner();
         if !inner.current.is_none() {
