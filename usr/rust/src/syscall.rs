@@ -40,7 +40,7 @@ pub fn sys_exit(code: usize) -> ! {
     loop {}
 }
 
-pub fn sys_read(fd: usize, base: *const u8, len: usize) -> i64 {
+pub fn sys_read(fd: usize, base: *mut u8, len: usize) -> i64 {
     sys_call(SyscallId::Read, fd, base as usize, len, 0)
 }
 

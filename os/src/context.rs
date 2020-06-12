@@ -62,7 +62,7 @@ extern "C" {
 
 impl ContextContent {
     fn new_kernel_thread(entry: usize, kstack_top: usize, satp: usize) -> ContextContent {
-        let content = ContextContent {
+        ContextContent {
             ra: __trapret as usize,
             satp,
             s: [0; 12],
@@ -76,8 +76,7 @@ impl ContextContent {
                 tf.sstatus.set_sie(false);
                 tf
             },
-        };
-        content
+        }
     }
 
     fn new_user_thread(entry: usize, ustack_top: usize, satp: usize) -> Self {

@@ -47,12 +47,10 @@ impl MemoryHandler for Linear {
             let dst = core::slice::from_raw_parts_mut(va as *mut u8, PAGE_SIZE);
             if length > 0 {
                 let src = core::slice::from_raw_parts(src as *const u8, PAGE_SIZE);
-                for i in 0..length {
-                    dst[i] = src[i];
-                }
+                dst[..length].clone_from_slice(&src[..length]);
             }
-            for i in length..PAGE_SIZE {
-                dst[i] = 0;
+            for item in dst.iter_mut().take(PAGE_SIZE).skip(length) {
+                *item = 0;
             }
         }
     }
@@ -85,12 +83,10 @@ impl MemoryHandler for ByFrame {
             let dst = core::slice::from_raw_parts_mut(access_pa_via_va(pa) as *mut u8, PAGE_SIZE);
             if length > 0 {
                 let src = core::slice::from_raw_parts(src as *const u8, PAGE_SIZE);
-                for i in 0..length {
-                    dst[i] = src[i];
-                }
+                dst[..length].clone_from_slice(&src[..length]);
             }
-            for i in length..PAGE_SIZE {
-                dst[i] = 0;
+            for item in dst.iter_mut().take(PAGE_SIZE).skip(length) {
+                *item = 0;
             }
         }
     }

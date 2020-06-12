@@ -42,8 +42,8 @@ impl MemoryArea {
         MemoryArea {
             start: start_addr,
             end: end_addr,
-            handler: handler,
-            attr: attr,
+            handler,
+            attr,
         }
     }
 

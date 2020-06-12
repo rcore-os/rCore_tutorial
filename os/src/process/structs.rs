@@ -87,7 +87,7 @@ impl Thread {
             vm.push(
                 ustack_bottom,
                 ustack_top,
-                MemoryAttr::new().set_user(),
+                MemoryAttr::default().set_user(),
                 ByFrame::new(),
                 None,
             );
@@ -98,7 +98,7 @@ impl Thread {
 
         let mut thread = Thread {
             context: Context::new_user_thread(entry_addr, ustack_top, kstack.top(), vm.token()),
-            kstack: kstack,
+            kstack,
             wait: wait_thread,
             ofile: [None; NOFILE],
         };
@@ -191,7 +191,7 @@ trait ToMemoryAttr {
 }
 impl ToMemoryAttr for Flags {
     fn to_attr(&self) -> MemoryAttr {
-        let mut flags = MemoryAttr::new().set_user();
+        let mut flags = MemoryAttr::default().set_user();
         if self.is_execute() {
             flags = flags.set_execute();
         }

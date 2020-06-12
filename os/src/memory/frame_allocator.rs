@@ -14,7 +14,7 @@ impl SegmentTreeAllocator {
         self.n = r - l;
         self.m = 1;
         while self.m < self.n + 2 {
-            self.m = self.m << 1;
+            self.m <<= 1;
         }
         for i in 1..(self.m << 1) {
             self.a[i] = 1;
@@ -35,7 +35,7 @@ impl SegmentTreeAllocator {
         let mut p = 1;
         while p < self.m {
             if self.a[p << 1] == 0 {
-                p = p << 1;
+                p <<= 1;
             } else {
                 p = (p << 1) | 1;
             }

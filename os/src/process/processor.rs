@@ -34,6 +34,7 @@ impl Processor {
         }
     }
 
+    #[allow(clippy::mut_from_ref)]
     fn inner(&self) -> &mut ProcessorInner {
         unsafe { &mut *self.inner.get() }
             .as_mut()
@@ -68,14 +69,12 @@ impl Processor {
 
     pub fn tick(&self) {
         let inner = self.inner();
-        if !inner.current.is_none() {
-            if inner.pool.tick() {
-                let flags = disable_and_store();
+        if inner.current.is_some() && inner.pool.tick() {
+            let flags = disable_and_store();
 
-                inner.current.as_mut().unwrap().1.switch_to(&mut inner.idle);
+            inner.current.as_mut().unwrap().1.switch_to(&mut inner.idle);
 
-                restore(flags);
-            }
+            restore(flags);
         }
     }
 
@@ -103,7 +102,7 @@ impl Processor {
     #[allow(unused_unsafe)]
     pub fn yield_now(&self) {
         let inner = self.inner();
-        if !inner.current.is_none() {
+        if inner.current.is_some() {
             unsafe {
                 let flags = disable_and_store();
                 let tid = inner.current.as_mut().unwrap().0;
@@ -133,6 +132,7 @@ impl Processor {
         self.inner().current.as_mut().unwrap().0 as usize
     }
 
+    #[allow(clippy::mut_from_ref)]
     pub fn current_thread_mut(&self) -> &mut Thread {
         self.inner().current.as_mut().unwrap().1.as_mut()
     }

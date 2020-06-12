@@ -13,7 +13,9 @@ jobs:
       - name: Setup Environment
         run: cd os && make env
       - name: Check user
-        run: cd usr/rust/ && cargo fmt -- --check && cargo clippy -- -D warnings
+        run: |
+        export USER_IMG = ../usr/build/riscv64.img
+        cd usr/rust/ && cargo fmt -- --check && cargo clippy -- -D warnings
       - name: Check os
         run: cd os && cargo fmt -- --check && cargo clippy -- -D warnings
   build:

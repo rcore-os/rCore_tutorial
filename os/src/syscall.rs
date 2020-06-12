@@ -52,7 +52,7 @@ unsafe fn sys_read(fd: usize, base: *mut u8, len: usize) -> isize {
     if fd == 0 {
         // 如果是标准输入
         *base = crate::fs::stdio::STDIN.pop() as u8;
-        return 1;
+        1
     } else {
         let thread = process::current_thread_mut();
         assert!(thread.ofile[fd].is_some());
@@ -69,7 +69,7 @@ unsafe fn sys_read(fd: usize, base: *mut u8, len: usize) -> isize {
                     .unwrap();
                 offset += s;
                 file.set_offset(offset);
-                return s as isize;
+                s as isize
             }
             _ => {
                 panic!("fdtype not handled!");
@@ -82,7 +82,7 @@ unsafe fn sys_write(fd: usize, base: *const u8, len: usize) -> isize {
     if fd == 1 {
         assert!(len == 1);
         crate::io::putchar(*base as char);
-        return 1;
+        1
     } else {
         let thread = process::current_thread_mut();
         assert!(thread.ofile[fd].is_some());
@@ -99,7 +99,7 @@ unsafe fn sys_write(fd: usize, base: *const u8, len: usize) -> isize {
                     .unwrap();
                 offset += s;
                 file.set_offset(offset);
-                return s as isize;
+                s as isize
             }
             _ => {
                 panic!("fdtype not handled!");
@@ -119,5 +119,5 @@ fn sys_exec(path: *const u8) -> isize {
     if valid {
         process::yield_now();
     }
-    return 0;
+    0
 }
