@@ -49,8 +49,9 @@ impl MemoryHandler for Linear {
                 let src = core::slice::from_raw_parts(src as *const u8, PAGE_SIZE);
                 dst[..length].clone_from_slice(&src[..length]);
             }
-            for item in dst.iter_mut().take(PAGE_SIZE).skip(length) {
-                *item = 0;
+            #[allow(clippy::needless_range_loop)]
+            for i in length..PAGE_SIZE {
+                dst[i] = 0;
             }
         }
     }
@@ -85,8 +86,9 @@ impl MemoryHandler for ByFrame {
                 let src = core::slice::from_raw_parts(src as *const u8, PAGE_SIZE);
                 dst[..length].clone_from_slice(&src[..length]);
             }
-            for item in dst.iter_mut().take(PAGE_SIZE).skip(length) {
-                *item = 0;
+            #[allow(clippy::needless_range_loop)]
+            for i in length..PAGE_SIZE {
+                dst[i] = 0;
             }
         }
     }
