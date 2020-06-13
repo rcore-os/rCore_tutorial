@@ -37,14 +37,6 @@ macro_rules! println {
     ($($arg:tt)*) => ($crate::print!("{}\n", format_args!($($arg)*)));
 }
 
-pub fn getchar() -> char {
-    let c = sbi::console_getchar() as u8;
-
-    match c {
-        255 => '\0',
-        c => c as char,
-    }
-}
 // 调用 OpenSBI 接口
 pub fn getchar_option() -> Option<char> {
     let c = sbi::console_getchar() as isize;

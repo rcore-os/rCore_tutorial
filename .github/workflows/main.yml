@@ -3,13 +3,26 @@ name: CI
 on: [push, pull_request]
 
 jobs:
+  check:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v2
+      - uses: actions-rs/toolchain@v1
+        with:
+          components: rustfmt, clippy
+      - name: Setup Environment
+        run: cd os && make env
+      - name: Check user
+        run: cd usr/rust/ && cargo fmt -- --check && cargo clippy -- -D warnings
+      - name: Check os
+        run: export USER_IMG="../usr/build/riscv64.img" && cd os && cargo fmt -- --check && cargo clippy -- -D warnings
   build:
     runs-on: ubuntu-latest
     steps:
-    - uses: actions/checkout@v2
-    - name: Setup Environment
-      run: cd os && make env
-    - name: Build user
-      run: cd usr && make user_img
-    - name: Build kernel
-      run: cd os && make build
+      - uses: actions/checkout@v2
+      - name: Setup Environment
+        run: cd os && make env
+      - name: Build user
+        run: cd usr && make user_img
+      - name: Build kernel
+        run: cd os && make build

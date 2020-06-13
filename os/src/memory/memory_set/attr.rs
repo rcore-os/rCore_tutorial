@@ -1,6 +1,6 @@
 use crate::memory::paging::PageEntry;
 
-#[derive(Clone, Debug)]
+#[derive(Clone, Default, Debug)]
 pub struct MemoryAttr {
     user: bool,
     readonly: bool,
@@ -8,14 +8,6 @@ pub struct MemoryAttr {
 }
 
 impl MemoryAttr {
-    pub fn new() -> Self {
-        MemoryAttr {
-            user: false,
-            readonly: false,
-            execute: false,
-        }
-    }
-
     pub fn set_user(mut self) -> Self {
         self.user = true;
         self

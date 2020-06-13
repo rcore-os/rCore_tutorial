@@ -46,9 +46,9 @@ impl ThreadPool {
         if let Some(tid) = self.scheduler.pop() {
             let mut thread_info = self.threads[tid].as_mut().expect("thread not exist!");
             thread_info.status = Status::Running(tid);
-            return Some((tid, thread_info.thread.take().expect("thread not exist!")));
+            Some((tid, thread_info.thread.take().expect("thread not exist!")))
         } else {
-            return None;
+            None
         }
     }
 
@@ -65,8 +65,7 @@ impl ThreadPool {
     }
 
     pub fn tick(&mut self) -> bool {
-        let ret = self.scheduler.tick();
-        ret
+        self.scheduler.tick()
     }
 
     pub fn exit(&mut self, tid: Tid) {

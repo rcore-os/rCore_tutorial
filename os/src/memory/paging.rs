@@ -122,7 +122,7 @@ impl PageTableImpl {
 
     pub fn get_entry(&mut self, va: usize) -> Option<&mut PageEntry> {
         let page = Page::of_addr(VirtAddr::new(va));
-        if let Ok(e) = self.page_table.ref_entry(page.clone()) {
+        if let Ok(e) = self.page_table.ref_entry(page) {
             let e = unsafe { &mut *(e as *mut PageTableEntry) };
             self.entry = Some(PageEntry(e, page));
             Some(self.entry.as_mut().unwrap())

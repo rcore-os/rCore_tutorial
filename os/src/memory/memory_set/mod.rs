@@ -68,7 +68,7 @@ impl MemorySet {
         self.push(
             stext as usize,
             etext as usize,
-            MemoryAttr::new().set_readonly().set_execute(),
+            MemoryAttr::default().set_readonly().set_execute(),
             Linear::new(offset),
             None,
         );
@@ -76,7 +76,7 @@ impl MemorySet {
         self.push(
             srodata as usize,
             erodata as usize,
-            MemoryAttr::new().set_readonly(),
+            MemoryAttr::default().set_readonly(),
             Linear::new(offset),
             None,
         );
@@ -84,7 +84,7 @@ impl MemorySet {
         self.push(
             sdata as usize,
             edata as usize,
-            MemoryAttr::new(),
+            MemoryAttr::default(),
             Linear::new(offset),
             None,
         );
@@ -92,7 +92,7 @@ impl MemorySet {
         self.push(
             sbss as usize,
             ebss as usize,
-            MemoryAttr::new(),
+            MemoryAttr::default(),
             Linear::new(offset),
             None,
         );
@@ -100,7 +100,7 @@ impl MemorySet {
         self.push(
             (end as usize / PAGE_SIZE + 1) * PAGE_SIZE,
             access_pa_via_va(PHYSICAL_MEMORY_END),
-            MemoryAttr::new(),
+            MemoryAttr::default(),
             Linear::new(offset),
             None,
         );

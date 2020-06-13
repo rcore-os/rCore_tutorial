@@ -17,6 +17,8 @@ impl MemoryArea {
             self.handler.map(pt, page, &self.attr);
         }
     }
+
+    #[allow(dead_code)]
     fn unmap(&self, pt: &mut PageTableImpl) {
         for page in PageRange::new(self.start, self.end) {
             self.handler.unmap(pt, page);
@@ -40,8 +42,8 @@ impl MemoryArea {
         MemoryArea {
             start: start_addr,
             end: end_addr,
-            handler: handler,
-            attr: attr,
+            handler,
+            attr,
         }
     }
 

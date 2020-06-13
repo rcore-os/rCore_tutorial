@@ -22,7 +22,7 @@ pub fn main() {
         let c = getc();
         match c {
             LF | CR => {
-                println!("");
+                println!();
                 if !line.is_empty() {
                     line.push('\0');
                     println!("searching for program {}", line);

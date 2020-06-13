@@ -50,21 +50,21 @@ pub fn kernel_remap() {
     memory_set.push(
         bootstack as usize,
         bootstacktop as usize,
-        MemoryAttr::new(),
+        MemoryAttr::default(),
         Linear::new(PHYSICAL_MEMORY_OFFSET),
         None,
     );
     memory_set.push(
         access_pa_via_va(0x0c00_2000),
         access_pa_via_va(0x0c00_3000),
-        MemoryAttr::new(),
+        MemoryAttr::default(),
         Linear::new(PHYSICAL_MEMORY_OFFSET),
         None,
     );
     memory_set.push(
         access_pa_via_va(0x1000_0000),
         access_pa_via_va(0x1000_1000),
-        MemoryAttr::new(),
+        MemoryAttr::default(),
         Linear::new(PHYSICAL_MEMORY_OFFSET),
         None,
     );
