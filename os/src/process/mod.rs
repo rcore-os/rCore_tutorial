@@ -70,6 +70,7 @@ pub fn sleep() {
     CPU[cpuid()].sleep();
 }
 pub fn wake_up(tid: Tid) {
+    // println!("wake_up tid = {} on hartid = {}", tid, cpuid());
     CPU[cpuid()].wake_up(tid);
 }
 pub fn current_tid() -> usize {

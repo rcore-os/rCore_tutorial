@@ -2,7 +2,8 @@ use core::panic::PanicInfo;
 
 #[panic_handler]
 fn panic(info: &PanicInfo) -> ! {
-    println!("{}", info);
+    println!("{}, hartid = {}", info, crate::interrupt::cpuid());
+    crate::sbi::shutdown();
     loop {}
 }
 

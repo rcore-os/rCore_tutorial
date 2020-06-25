@@ -30,6 +30,7 @@ impl Stdin {
                     return ch;
                 }
                 None => {
+                    // println!("\nready waiting in pop, hartid = {}", crate::interrupt::cpuid());
                     self.pushed.wait();
                 }
             }

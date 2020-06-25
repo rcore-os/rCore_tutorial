@@ -1,7 +1,7 @@
 use crate::context::TrapFrame;
 use crate::memory::access_pa_via_va;
 use crate::process::tick;
-use crate::timer::{clock_set_next_event, TICKS};
+use crate::timer::{clock_set_next_event};
 use riscv::register::sie;
 use riscv::register::{
     scause::{self, Exception, Interrupt, Trap},
@@ -22,6 +22,7 @@ pub fn init() {
 
         // enable external interrupt
         sie::set_sext();
+        //sie::set_sext();
     }
     println!("++++ setup interrupt! ++++");
 }
@@ -87,6 +88,7 @@ fn syscall(tf: &mut TrapFrame) {
 }
 
 fn external() {
+    // println!("external hartid = {}", cpuid());
     let _ = try_serial();
 }
 
@@ -130,7 +132,8 @@ pub fn enable_and_wfi() {
 pub fn cpuid() -> usize {
     let cpuid: usize;
     unsafe {
-        asm!("" : "={x3}"(cpuid));
+        //asm!("" : "={x3}"(cpuid));
+        asm!("mv $0, gp" : "=r"(cpuid));
     }
     cpuid
 }

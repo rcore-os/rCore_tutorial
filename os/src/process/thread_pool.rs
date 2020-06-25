@@ -43,6 +43,7 @@ impl ThreadPool {
     }
 
     pub fn acquire(&mut self) -> Option<(Tid, Box<Thread>)> {
+        // println!("acquire on hartid = {}", crate::interrupt::cpuid());
         if let Some(tid) = self.scheduler.pop() {
             let mut thread_info = self.threads[tid].as_mut().expect("thread not exist!");
             thread_info.status = Status::Running(tid);

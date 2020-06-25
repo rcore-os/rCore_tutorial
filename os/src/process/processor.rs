@@ -54,11 +54,11 @@ impl Processor {
         loop {
             inner.current = inner.pool.lock().acquire();
             if let Some((tid, thread)) = &mut inner.current {
-                // println!("\n>>>> will switch_to thread {} in idle_main!", tid);
+                println!("\n>>>> will switch_to thread {} in idle_main on hart {}!", tid, cpuid());
                 unsafe {
                     inner.context.switch(&mut thread.context);
                 }
-                // println!("\n<<<< switch_back to idle in idle_main!");
+                println!("\n<<<< switch_back to idle in idle_main on hart {}!", cpuid());
                 let (tid, thread) = inner.current.take().unwrap();
                 inner.pool.lock().retrieve(tid, thread);
             } else {
@@ -69,6 +69,7 @@ impl Processor {
     }
 
     pub fn tick(&self) {
+        // println!("hartid = {} ticked", cpuid());
         let inner = self.inner();
         if !inner.current.is_none() {
             if inner.pool.lock().tick() {
@@ -97,6 +98,7 @@ impl Processor {
         let inner = self.inner();
         unsafe {
             let flags = disable_and_store();
+            // println!("\nyield_now on hartid = {}", crate::interrupt::cpuid());
             let current_context = &mut inner.current.as_mut().unwrap().1.context;
             current_context.switch(&mut inner.context);
             restore(flags);
@@ -109,6 +111,7 @@ impl Processor {
     }
 
     pub fn sleep(&self) {
+        // println!("\nsleep tid = {} on hartid = {}", self.current_tid(), crate::interrupt::cpuid());
         let inner = self.inner();
         inner.pool.lock().threads[self.current_tid()]
             .as_mut()

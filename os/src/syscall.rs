@@ -29,9 +29,11 @@ fn sys_exit(code: usize) {
 }
 
 fn sys_read(fd: usize, base: *mut u8, len: usize) -> isize {
+    // println!("try sys_read on hartid = {}", crate::interrupt::cpuid());
     unsafe {
         *base = crate::fs::stdio::STDIN.pop() as u8;
     }
+    // println!("sys_read returned on hartid = {}", crate::interrupt::cpuid());
     return 1;
 }
 
