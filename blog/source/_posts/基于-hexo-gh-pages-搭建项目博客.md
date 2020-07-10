@@ -41,7 +41,7 @@ tags:
 
 5. 为你的项目新建 `gh-pages` 分支用于发布生成的博客页面，再在项目的设置中将 Pages 来源改为 `gh-pages` 分支，如下图所示：
 
-   ![](figures/gh-pages.png)
+   ![](gh-pages.png)
 
 6. 回到我们本地的 `blog-host` 分支，直接 `hexo clean && hexo deploy` 部署即可
 
@@ -53,3 +53,7 @@ tags:
 
 只要切换到 `blog-host` 分支，通过 `hexo new post` 发布新博客，随后 hexo 会为你自动创建一个同名的 Markdown，编辑之后重新 `hexo clean && hexo deploy` 部署即可。在这之后也别忘了将 `blog-host` 分支同样 push 上去。
 
+## 插入图片
+
+参考[这里](https://blog.csdn.net/Fitz1318/article/details/86548129)。
+注意必须将引用的图片放在 `_post` 目录下与博客名字相同的文件夹下，然后直接用图片名来插入图片。
