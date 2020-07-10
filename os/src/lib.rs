@@ -1,5 +1,6 @@
 #![no_std]
-#![feature(asm)]
+//#![feature(asm)]
+#![feature(llvm_asm)]
 #![feature(global_asm)]
 #![feature(alloc_error_handler)]
 #![feature(naked_functions)]

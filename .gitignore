@@ -4,3 +4,4 @@ usr/build
 os/src/link_user.S
 Cargo.lock
 os/.idea
+usr/.idea
