@@ -5,15 +5,23 @@
   
 
   
-  <title>Hexo</title>
+  <title>基于 hexo/gh-pages 搭建项目博客 | Hexo</title>
   <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
-  <meta property="og:type" content="website">
-<meta property="og:title" content="Hexo">
-<meta property="og:url" content="http://rcore-os.github.io/rCore_tutorial/index.html">
+  <meta name="description" content="这里简单记录一下基于 hexo&#x2F;gh-pages 搭建 Github 项目博客的一个过程，希望大家能基于这个平台进行更方便的交流，并为后来者留下更多的启示。">
+<meta property="og:type" content="article">
+<meta property="og:title" content="基于 hexo&#x2F;gh-pages 搭建项目博客">
+<meta property="og:url" content="http://rcore-os.github.io/rCore_tutorial/2020/07/10/%E5%9F%BA%E4%BA%8E-hexo-gh-pages-%E6%90%AD%E5%BB%BA%E9%A1%B9%E7%9B%AE%E5%8D%9A%E5%AE%A2/index.html">
 <meta property="og:site_name" content="Hexo">
+<meta property="og:description" content="这里简单记录一下基于 hexo&#x2F;gh-pages 搭建 Github 项目博客的一个过程，希望大家能基于这个平台进行更方便的交流，并为后来者留下更多的启示。">
 <meta property="og:locale" content="en_US">
+<meta property="og:image" content="http://rcore-os.github.io/rCore_tutorial/2020/07/10/%E5%9F%BA%E4%BA%8E-hexo-gh-pages-%E6%90%AD%E5%BB%BA%E9%A1%B9%E7%9B%AE%E5%8D%9A%E5%AE%A2/figures/gh-pages.png">
+<meta property="article:published_time" content="2020-07-10T13:42:18.000Z">
+<meta property="article:modified_time" content="2020-07-10T14:01:29.113Z">
 <meta property="article:author" content="John Doe">
+<meta property="article:tag" content="hexo">
+<meta property="article:tag" content="github pages">
 <meta name="twitter:card" content="summary">
+<meta name="twitter:image" content="http://rcore-os.github.io/rCore_tutorial/2020/07/10/%E5%9F%BA%E4%BA%8E-hexo-gh-pages-%E6%90%AD%E5%BB%BA%E9%A1%B9%E7%9B%AE%E5%8D%9A%E5%AE%A2/figures/gh-pages.png">
   
     <link rel="alternate" href="/rCore_tutorial/atom.xml" title="Hexo" type="application/atom+xml">
   
@@ -62,9 +70,7 @@
   </div>
 </header>
       <div class="outer">
-        <section id="main">
-  
-    <article id="post-基于-hexo-gh-pages-搭建项目博客" class="article article-type-post" itemscope itemprop="blogPost">
+        <section id="main"><article id="post-基于-hexo-gh-pages-搭建项目博客" class="article article-type-post" itemscope itemprop="blogPost">
   <div class="article-meta">
     <a href="/rCore_tutorial/2020/07/10/%E5%9F%BA%E4%BA%8E-hexo-gh-pages-%E6%90%AD%E5%BB%BA%E9%A1%B9%E7%9B%AE%E5%8D%9A%E5%AE%A2/" class="article-date">
   <time datetime="2020-07-10T13:42:18.000Z" itemprop="datePublished">2020-07-10</time>
@@ -81,8 +87,8 @@
       <header class="article-header">
         
   
-    <h1 itemprop="name">
-      <a class="article-title" href="/rCore_tutorial/2020/07/10/%E5%9F%BA%E4%BA%8E-hexo-gh-pages-%E6%90%AD%E5%BB%BA%E9%A1%B9%E7%9B%AE%E5%8D%9A%E5%AE%A2/">基于 hexo/gh-pages 搭建项目博客</a>
+    <h1 class="article-title" itemprop="name">
+      基于 hexo/gh-pages 搭建项目博客
     </h1>
   
 
@@ -91,11 +97,35 @@
     <div class="article-entry" itemprop="articleBody">
       
         <p>这里简单记录一下基于 hexo/gh-pages 搭建 Github 项目博客的一个过程，希望大家能基于这个平台进行更方便的交流，并为后来者留下更多的启示。</p>
-        
-          <p class="article-more-link">
-            <a href="/rCore_tutorial/2020/07/10/%E5%9F%BA%E4%BA%8E-hexo-gh-pages-%E6%90%AD%E5%BB%BA%E9%A1%B9%E7%9B%AE%E5%8D%9A%E5%AE%A2/#more">Read More</a>
-          </p>
-        
+<a id="more"></a>
+
+<h2 id="初始化"><a href="#初始化" class="headerlink" title="初始化"></a>初始化</h2><ol>
+<li><p>安装 hexo: <code>npm install hexo-cli -g</code></p>
+</li>
+<li><p>为你的项目新建 <code>blog-host</code> 分支用来维护博客主体，在该分支下 <code>hexo init blog</code></p>
+</li>
+<li><p>安装 hexo 部署插件： <code>npm install hexo-deployer-git --save</code></p>
+</li>
+<li><p>修改 <code>blog</code> 目录下的 <code>_config.yml</code> 文件，假设当前的项目地址为 <code>https://github.com/&lt;username&gt;/&lt;repo&gt;</code>，例如 rCore tutorial 第二版的地址为 <code>https://github.com/rcore-os/rCore_tutorial</code>，则 <code>&lt;username&gt;</code> 为 rcore-os，<code>&lt;repo&gt;</code> 为 rCore_tutorial。<br>首先，修改 <code>url</code> 和 <code>root</code> 项如下：</p>
+<figure class="highlight yml"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line"><span class="attr">url:</span> <span class="string">http://rcore-os.github.io/rCore_tutorial</span></span><br><span class="line"><span class="attr">root:</span> <span class="string">/rCore_tutorial/</span></span><br></pre></td></tr></table></figure>
+
+<p>注意，格式要严格与上面一致。</p>
+<p>其次，修改部署方式：</p>
+<figure class="highlight yml"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line"><span class="attr">deploy:</span></span><br><span class="line">  <span class="attr">type:</span> <span class="string">git</span></span><br><span class="line">  <span class="attr">repo:</span> <span class="string">https://github.com/rcore-os/rCore_tutorial</span></span><br><span class="line">  <span class="attr">branch:</span> <span class="string">gh-pages</span></span><br></pre></td></tr></table></figure>
+
+<p>这里方便起见，我们直接部署到 repo 的 <code>gh-pages</code> 分支上。</p>
+</li>
+<li><p>为你的项目新建 <code>gh-pages</code> 分支用于发布生成的博客页面，再在项目的设置中将 Pages 来源改为 <code>gh-pages</code> 分支，如下图所示：</p>
+<p><img src="figures/gh-pages.png" alt=""></p>
+</li>
+<li><p>回到我们本地的 <code>blog-host</code> 分支，直接 <code>hexo clean &amp;&amp; hexo deploy</code> 部署即可</p>
+</li>
+<li><p>访问 <code>https://rcore-os.github.io/rCore_tutorial/</code>，发现我们的博客已经搭起来了！</p>
+<p>之后还可以进行很多界面美化和功能拓展，就请大家自己深入探索了。</p>
+</li>
+</ol>
+<h2 id="博客维护"><a href="#博客维护" class="headerlink" title="博客维护"></a>博客维护</h2><p>只要切换到 <code>blog-host</code> 分支，通过 <code>hexo new post</code> 发布新博客，随后 hexo 会为你自动创建一个同名的 Markdown，编辑之后重新 <code>hexo clean &amp;&amp; hexo deploy</code> 部署即可。在这之后也别忘了将 <code>blog-host</code> 分支同样 push 上去。</p>
+
       
     </div>
     <footer class="article-footer">
@@ -107,60 +137,19 @@
     </footer>
   </div>
   
-</article>
-
-
+    
+<nav id="article-nav">
   
-    <article id="post-hello-world" class="article article-type-post" itemscope itemprop="blogPost">
-  <div class="article-meta">
-    <a href="/rCore_tutorial/2020/07/10/hello-world/" class="article-date">
-  <time datetime="2020-07-10T13:18:17.567Z" itemprop="datePublished">2020-07-10</time>
-</a>
-    
-  </div>
-  <div class="article-inner">
-    
-    
-      <header class="article-header">
-        
   
-    <h1 itemprop="name">
-      <a class="article-title" href="/rCore_tutorial/2020/07/10/hello-world/">Hello World</a>
-    </h1>
+    <a href="/rCore_tutorial/2020/07/10/hello-world/" id="article-nav-older" class="article-nav-link-wrap">
+      <strong class="article-nav-caption">Older</strong>
+      <div class="article-nav-title">Hello World</div>
+    </a>
   
+</nav>
 
-      </header>
-    
-    <div class="article-entry" itemprop="articleBody">
-      
-        <p>Welcome to <a href="https://hexo.io/" target="_blank" rel="noopener">Hexo</a>! This is your very first post. Check <a href="https://hexo.io/docs/" target="_blank" rel="noopener">documentation</a> for more info. If you get any problems when using Hexo, you can find the answer in <a href="https://hexo.io/docs/troubleshooting.html" target="_blank" rel="noopener">troubleshooting</a> or you can ask me on <a href="https://github.com/hexojs/hexo/issues" target="_blank" rel="noopener">GitHub</a>.</p>
-<h2 id="Quick-Start"><a href="#Quick-Start" class="headerlink" title="Quick Start"></a>Quick Start</h2><h3 id="Create-a-new-post"><a href="#Create-a-new-post" class="headerlink" title="Create a new post"></a>Create a new post</h3><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">$ hexo new <span class="string">"My New Post"</span></span><br></pre></td></tr></table></figure>
-
-<p>More info: <a href="https://hexo.io/docs/writing.html" target="_blank" rel="noopener">Writing</a></p>
-<h3 id="Run-server"><a href="#Run-server" class="headerlink" title="Run server"></a>Run server</h3><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">$ hexo server</span><br></pre></td></tr></table></figure>
-
-<p>More info: <a href="https://hexo.io/docs/server.html" target="_blank" rel="noopener">Server</a></p>
-<h3 id="Generate-static-files"><a href="#Generate-static-files" class="headerlink" title="Generate static files"></a>Generate static files</h3><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">$ hexo generate</span><br></pre></td></tr></table></figure>
-
-<p>More info: <a href="https://hexo.io/docs/generating.html" target="_blank" rel="noopener">Generating</a></p>
-<h3 id="Deploy-to-remote-sites"><a href="#Deploy-to-remote-sites" class="headerlink" title="Deploy to remote sites"></a>Deploy to remote sites</h3><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">$ hexo deploy</span><br></pre></td></tr></table></figure>
-
-<p>More info: <a href="https://hexo.io/docs/one-command-deployment.html" target="_blank" rel="noopener">Deployment</a></p>
-
-      
-    </div>
-    <footer class="article-footer">
-      <a data-url="http://rcore-os.github.io/rCore_tutorial/2020/07/10/hello-world/" data-id="ckcgags4q00008lw2ce8pgau1" class="article-share-link">Share</a>
-      
-      
-    </footer>
-  </div>
   
 </article>
-
-
-  
-
 
 </section>
         
