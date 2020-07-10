@@ -1,100 +1,268 @@
 <!DOCTYPE html>
-<html>
+<html lang="en">
 <head>
-  <meta charset="utf-8">
-  
+  <meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=2">
+<meta name="theme-color" content="#222">
+<meta name="generator" content="Hexo 4.2.1">
+  <link rel="apple-touch-icon" sizes="180x180" href="/rCore_tutorial/images/apple-touch-icon-next.png">
+  <link rel="icon" type="image/png" sizes="32x32" href="/rCore_tutorial/images/favicon-32x32-next.png">
+  <link rel="icon" type="image/png" sizes="16x16" href="/rCore_tutorial/images/favicon-16x16-next.png">
+  <link rel="mask-icon" href="/rCore_tutorial/images/logo.svg" color="#222">
 
+<link rel="stylesheet" href="/rCore_tutorial/css/main.css">
+
+
+<link rel="stylesheet" href="/rCore_tutorial/lib/font-awesome/css/all.min.css">
   
-  <title>基于 hexo/gh-pages 搭建项目博客 | Hexo</title>
-  <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+  <link rel="stylesheet" href="/rCore_tutorial/lib/animate-css/animate.min.css">
+
+<script class="hexo-configurations">
+    var NexT = window.NexT || {};
+    var CONFIG = {"hostname":"rcore-os.github.io","root":"/rCore_tutorial/","scheme":"Muse","version":"8.0.0-rc.4","exturl":false,"sidebar":{"position":"left","display":"post","padding":18,"offset":12},"copycode":false,"bookmark":{"enable":false,"color":"#222","save":"auto"},"fancybox":false,"mediumzoom":false,"lazyload":false,"pangu":false,"comments":{"style":"tabs","active":null,"storage":true,"lazyload":false,"nav":null},"algolia":{"hits":{"per_page":10},"labels":{"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}},"localsearch":{"enable":false,"trigger":"auto","top_n_per_article":1,"unescape":false,"preload":false},"motion":{"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"fadeInDown","post_body":"fadeInDown","coll_header":"fadeInLeft","sidebar":"fadeInUp"}}};
+  </script>
+
   <meta name="description" content="这里简单记录一下基于 hexo&#x2F;gh-pages 搭建 Github 项目博客的一个过程，希望大家能基于这个平台进行更方便的交流，并为后来者留下更多的启示。">
 <meta property="og:type" content="article">
 <meta property="og:title" content="基于 hexo&#x2F;gh-pages 搭建项目博客">
 <meta property="og:url" content="http://rcore-os.github.io/rCore_tutorial/2020/07/10/%E5%9F%BA%E4%BA%8E-hexo-gh-pages-%E6%90%AD%E5%BB%BA%E9%A1%B9%E7%9B%AE%E5%8D%9A%E5%AE%A2/index.html">
-<meta property="og:site_name" content="Hexo">
+<meta property="og:site_name" content="rCore_tutorial Developer Blog">
 <meta property="og:description" content="这里简单记录一下基于 hexo&#x2F;gh-pages 搭建 Github 项目博客的一个过程，希望大家能基于这个平台进行更方便的交流，并为后来者留下更多的启示。">
 <meta property="og:locale" content="en_US">
 <meta property="og:image" content="http://rcore-os.github.io/rCore_tutorial/2020/07/10/%E5%9F%BA%E4%BA%8E-hexo-gh-pages-%E6%90%AD%E5%BB%BA%E9%A1%B9%E7%9B%AE%E5%8D%9A%E5%AE%A2/gh-pages.png">
 <meta property="article:published_time" content="2020-07-10T13:42:18.000Z">
 <meta property="article:modified_time" content="2020-07-10T17:41:57.111Z">
-<meta property="article:author" content="John Doe">
+<meta property="article:author" content="rcore-os">
 <meta property="article:tag" content="hexo">
 <meta property="article:tag" content="github pages">
 <meta name="twitter:card" content="summary">
 <meta name="twitter:image" content="http://rcore-os.github.io/rCore_tutorial/2020/07/10/%E5%9F%BA%E4%BA%8E-hexo-gh-pages-%E6%90%AD%E5%BB%BA%E9%A1%B9%E7%9B%AE%E5%8D%9A%E5%AE%A2/gh-pages.png">
-  
-    <link rel="alternate" href="/rCore_tutorial/atom.xml" title="Hexo" type="application/atom+xml">
-  
-  
-    <link rel="icon" href="/favicon.png">
-  
-  
-    <link href="//fonts.googleapis.com/css?family=Source+Code+Pro" rel="stylesheet" type="text/css">
-  
-  
-<link rel="stylesheet" href="/rCore_tutorial/css/style.css">
 
-<meta name="generator" content="Hexo 4.2.1"></head>
+<link rel="canonical" href="http://rcore-os.github.io/rCore_tutorial/2020/07/10/%E5%9F%BA%E4%BA%8E-hexo-gh-pages-%E6%90%AD%E5%BB%BA%E9%A1%B9%E7%9B%AE%E5%8D%9A%E5%AE%A2/">
 
-<body>
-  <div id="container">
-    <div id="wrap">
-      <header id="header">
-  <div id="banner"></div>
-  <div id="header-outer" class="outer">
-    <div id="header-title" class="inner">
-      <h1 id="logo-wrap">
-        <a href="/rCore_tutorial/" id="logo">Hexo</a>
-      </h1>
-      
+
+<script class="page-configurations">
+  // https://hexo.io/docs/variables.html
+  CONFIG.page = {
+    sidebar: "",
+    isHome : false,
+    isPost : true,
+    lang   : 'en'
+  };
+</script>
+
+  <title>基于 hexo/gh-pages 搭建项目博客 | rCore_tutorial Developer Blog</title>
+  
+
+
+
+
+
+
+  <noscript>
+  <style>
+  body { margin-top: 2rem; }
+
+  .use-motion .menu-item,
+  .use-motion .sidebar,
+  .use-motion .post-block,
+  .use-motion .pagination,
+  .use-motion .comments,
+  .use-motion .post-header,
+  .use-motion .post-body,
+  .use-motion .collection-header {
+    visibility: visible;
+  }
+
+  .use-motion .header,
+  .use-motion .site-brand-container .toggle,
+  .use-motion .footer { opacity: initial; }
+
+  .use-motion .site-title,
+  .use-motion .site-subtitle,
+  .use-motion .custom-logo-image {
+    opacity: initial;
+    top: initial;
+  }
+
+  .use-motion .logo-line {
+    transform: scaleX(1);
+  }
+
+  .search-pop-overlay, .sidebar-nav { display: none; }
+  .sidebar-panel { display: block; }
+  </style>
+</noscript>
+
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage">
+  <div class="container use-motion">
+    <div class="headband"></div>
+
+    <main class="main">
+      <header class="header" itemscope itemtype="http://schema.org/WPHeader">
+        <div class="header-inner"><div class="site-brand-container">
+  <div class="site-nav-toggle">
+    <div class="toggle" aria-label="Toggle navigation bar">
     </div>
-    <div id="header-inner" class="inner">
-      <nav id="main-nav">
-        <a id="main-nav-toggle" class="nav-icon"></a>
-        
-          <a class="main-nav-link" href="/rCore_tutorial/">Home</a>
-        
-          <a class="main-nav-link" href="/rCore_tutorial/archives">Archives</a>
-        
-      </nav>
-      <nav id="sub-nav">
-        
-          <a id="nav-rss-link" class="nav-icon" href="/rCore_tutorial/atom.xml" title="RSS Feed"></a>
-        
-        <a id="nav-search-btn" class="nav-icon" title="Search"></a>
-      </nav>
-      <div id="search-form-wrap">
-        <form action="//google.com/search" method="get" accept-charset="UTF-8" class="search-form"><input type="search" name="q" class="search-form-input" placeholder="Search"><button type="submit" class="search-form-submit">&#xF002;</button><input type="hidden" name="sitesearch" value="http://rcore-os.github.io/rCore_tutorial"></form>
+  </div>
+
+  <div class="site-meta">
+
+    <a href="/rCore_tutorial/" class="brand" rel="start">
+      <i class="logo-line"></i>
+      <h1 class="site-title">rCore_tutorial Developer Blog</h1>
+      <i class="logo-line"></i>
+    </a>
+  </div>
+
+  <div class="site-nav-right">
+    <div class="toggle popup-trigger">
+    </div>
+  </div>
+</div>
+
+
+
+
+
+
+
+</div>
+          
+  
+  <div class="toggle sidebar-toggle">
+    <span class="toggle-line toggle-line-first"></span>
+    <span class="toggle-line toggle-line-middle"></span>
+    <span class="toggle-line toggle-line-last"></span>
+  </div>
+
+  <aside class="sidebar">
+
+    <div class="sidebar-inner sidebar-nav-active sidebar-toc-active">
+      <ul class="sidebar-nav">
+        <li class="sidebar-nav-toc">
+          Table of Contents
+        </li>
+        <li class="sidebar-nav-overview">
+          Overview
+        </li>
+      </ul>
+
+      <!--noindex-->
+      <section class="post-toc-wrap sidebar-panel">
+          <div class="post-toc animated"><ol class="nav"><li class="nav-item nav-level-2"><a class="nav-link" href="#初始化"><span class="nav-number">1.</span> <span class="nav-text">初始化</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#博客维护"><span class="nav-number">2.</span> <span class="nav-text">博客维护</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#插入图片"><span class="nav-number">3.</span> <span class="nav-text">插入图片</span></a></li></ol></div>
+      </section>
+      <!--/noindex-->
+
+      <section class="site-overview-wrap sidebar-panel">
+        <div class="site-author animated" itemprop="author" itemscope itemtype="http://schema.org/Person">
+  <p class="site-author-name" itemprop="name">rcore-os</p>
+  <div class="site-description" itemprop="description"></div>
+</div>
+<div class="site-state-wrap animated">
+  <nav class="site-state">
+      <div class="site-state-item site-state-posts">
+          <a href="/rCore_tutorial/archives">
+          <span class="site-state-item-count">2</span>
+          <span class="site-state-item-name">posts</span>
+        </a>
       </div>
-    </div>
-  </div>
-</header>
-      <div class="outer">
-        <section id="main"><article id="post-基于-hexo-gh-pages-搭建项目博客" class="article article-type-post" itemscope itemprop="blogPost">
-  <div class="article-meta">
-    <a href="/rCore_tutorial/2020/07/10/%E5%9F%BA%E4%BA%8E-hexo-gh-pages-%E6%90%AD%E5%BB%BA%E9%A1%B9%E7%9B%AE%E5%8D%9A%E5%AE%A2/" class="article-date">
-  <time datetime="2020-07-10T13:42:18.000Z" itemprop="datePublished">2020-07-10</time>
-</a>
-    
-  <div class="article-category">
-    <a class="article-category-link" href="/rCore_tutorial/categories/%E6%96%87%E6%A1%A3%E7%BB%B4%E6%8A%A4/">文档维护</a>
-  </div>
+      <div class="site-state-item site-state-categories">
+        <span class="site-state-item-count">1</span>
+        <span class="site-state-item-name">categories</span>
+      </div>
+      <div class="site-state-item site-state-tags">
+        <span class="site-state-item-count">2</span>
+        <span class="site-state-item-name">tags</span>
+      </div>
+  </nav>
+</div>
 
-  </div>
-  <div class="article-inner">
-    
-    
-      <header class="article-header">
-        
-  
-    <h1 class="article-title" itemprop="name">
-      基于 hexo/gh-pages 搭建项目博客
-    </h1>
-  
+
+
+      </section>
+    </div>
+  </aside>
+  <div id="sidebar-dimmer"></div>
+
 
       </header>
+
+      
+  <div class="back-to-top">
+    <i class="fa fa-arrow-up"></i>
+    <span>0%</span>
+  </div>
+
+<noscript>
+  <div id="noscript-warning">Theme NexT works best with JavaScript enabled</div>
+</noscript>
+
+
+      <div class="main-inner">
+        
+
+        <div class="content post posts-expand">
+          
+
     
-    <div class="article-entry" itemprop="articleBody">
+  
+  
+  <article itemscope itemtype="http://schema.org/Article" class="post-block" lang="en">
+    <link itemprop="mainEntityOfPage" href="http://rcore-os.github.io/rCore_tutorial/2020/07/10/%E5%9F%BA%E4%BA%8E-hexo-gh-pages-%E6%90%AD%E5%BB%BA%E9%A1%B9%E7%9B%AE%E5%8D%9A%E5%AE%A2/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="/rCore_tutorial/images/avatar.gif">
+      <meta itemprop="name" content="rcore-os">
+      <meta itemprop="description" content="">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="rCore_tutorial Developer Blog">
+    </span>
+      <header class="post-header">
+        <h1 class="post-title" itemprop="name headline">
+          基于 hexo/gh-pages 搭建项目博客
+        </h1>
+
+        <div class="post-meta">
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="far fa-calendar"></i>
+              </span>
+              <span class="post-meta-item-text">Posted on</span>
+
+              <time title="Created: 2020-07-10 21:42:18" itemprop="dateCreated datePublished" datetime="2020-07-10T21:42:18+08:00">2020-07-10</time>
+            </span>
+              <span class="post-meta-item">
+                <span class="post-meta-item-icon">
+                  <i class="far fa-calendar-check"></i>
+                </span>
+                <span class="post-meta-item-text">Edited on</span>
+                <time title="Modified: 2020-07-11 01:41:57" itemprop="dateModified" datetime="2020-07-11T01:41:57+08:00">2020-07-11</time>
+              </span>
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="far fa-folder"></i>
+              </span>
+              <span class="post-meta-item-text">In</span>
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/rCore_tutorial/categories/%E6%96%87%E6%A1%A3%E7%BB%B4%E6%8A%A4/" itemprop="url" rel="index"><span itemprop="name">文档维护</span></a>
+                </span>
+            </span>
+
+          
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
       
         <p>这里简单记录一下基于 hexo/gh-pages 搭建 Github 项目博客的一个过程，希望大家能基于这个平台进行更方便的交流，并为后来者留下更多的启示。</p>
 <a id="more"></a>
@@ -127,132 +295,130 @@
 <h2 id="博客维护"><a href="#博客维护" class="headerlink" title="博客维护"></a>博客维护</h2><p>只要切换到 <code>blog-host</code> 分支，通过 <code>hexo new post</code> 发布新博客，随后 hexo 会为你自动创建一个同名的 Markdown，编辑之后重新 <code>hexo clean &amp;&amp; hexo deploy</code> 部署即可。在这之后也别忘了将 <code>blog-host</code> 分支同样 push 上去。</p>
 <h2 id="插入图片"><a href="#插入图片" class="headerlink" title="插入图片"></a>插入图片</h2><p>参考<a href="https://blog.csdn.net/Fitz1318/article/details/86548129" target="_blank" rel="noopener">这里</a>。<br>注意必须将引用的图片放在 <code>_post</code> 目录下与博客名字相同的文件夹下，然后直接用图片名来插入图片。</p>
 
-      
     </div>
-    <footer class="article-footer">
-      <a data-url="http://rcore-os.github.io/rCore_tutorial/2020/07/10/%E5%9F%BA%E4%BA%8E-hexo-gh-pages-%E6%90%AD%E5%BB%BA%E9%A1%B9%E7%9B%AE%E5%8D%9A%E5%AE%A2/" data-id="ckcgic1s30001y6w230246tee" class="article-share-link">Share</a>
-      
-      
-  <ul class="article-tag-list" itemprop="keywords"><li class="article-tag-list-item"><a class="article-tag-list-link" href="/rCore_tutorial/tags/github-pages/" rel="tag">github pages</a></li><li class="article-tag-list-item"><a class="article-tag-list-link" href="/rCore_tutorial/tags/hexo/" rel="tag">hexo</a></li></ul>
 
+    
+    
+    
+
+      <footer class="post-footer">
+          <div class="post-tags">
+              <a href="/rCore_tutorial/tags/hexo/" rel="tag"># hexo</a>
+              <a href="/rCore_tutorial/tags/github-pages/" rel="tag"># github pages</a>
+          </div>
+
+        
+
+
+        
+    <div class="post-nav">
+      <div class="post-nav-item">
+    <a href="/rCore_tutorial/2020/07/10/hello-world/" rel="prev" title="Hello World">
+      <i class="fa fa-chevron-left"></i> Hello World
+    </a></div>
+      <div class="post-nav-item"></div>
+    </div>
+      </footer>
+    
+  </article>
+  
+  
+  
+
+
+
+        </div>
+        
+
+<script>
+  window.addEventListener('tabs:register', () => {
+    let { activeClass } = CONFIG.comments;
+    if (CONFIG.comments.storage) {
+      activeClass = localStorage.getItem('comments_active') || activeClass;
+    }
+    if (activeClass) {
+      let activeTab = document.querySelector(`a[href="#comment-${activeClass}"]`);
+      if (activeTab) {
+        activeTab.click();
+      }
+    }
+  });
+  if (CONFIG.comments.storage) {
+    window.addEventListener('tabs:click', event => {
+      if (!event.target.matches('.tabs-comment .tab-content .tab-pane')) return;
+      let commentClass = event.target.classList[1];
+      localStorage.setItem('comments_active', commentClass);
+    });
+  }
+</script>
+
+      </div>
+    </main>
+
+    <footer class="footer">
+      <div class="footer-inner">
+        
+
+        
+
+<div class="copyright">
+  
+  &copy; 
+  <span itemprop="copyrightYear">2020</span>
+  <span class="with-love">
+    <i class="fa fa-heart"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">rcore-os</span>
+</div>
+  <div class="powered-by">Powered by <a href="https://hexo.io/" class="theme-link" rel="noopener" target="_blank">Hexo</a> & <a href="https://theme-next.js.org/muse/" class="theme-link" rel="noopener" target="_blank">NexT.Muse</a>
+  </div>
+
+        
+
+
+
+
+
+
+
+
+      </div>
     </footer>
   </div>
-  
-    
-<nav id="article-nav">
-  
-  
-    <a href="/rCore_tutorial/2020/07/10/hello-world/" id="article-nav-older" class="article-nav-link-wrap">
-      <strong class="article-nav-caption">Older</strong>
-      <div class="article-nav-title">Hello World</div>
-    </a>
-  
-</nav>
 
   
-</article>
+  <script src="/rCore_tutorial/lib/anime.min.js"></script>
 
-</section>
-        
-          <aside id="sidebar">
-  
-    
-  <div class="widget-wrap">
-    <h3 class="widget-title">Categories</h3>
-    <div class="widget">
-      <ul class="category-list"><li class="category-list-item"><a class="category-list-link" href="/rCore_tutorial/categories/%E6%96%87%E6%A1%A3%E7%BB%B4%E6%8A%A4/">文档维护</a></li></ul>
-    </div>
-  </div>
+<script src="/rCore_tutorial/js/utils.js"></script>
+
+<script src="/rCore_tutorial/js/motion.js"></script>
+
+
+<script src="/rCore_tutorial/js/schemes/muse.js"></script>
+
+
+<script src="/rCore_tutorial/js/next-boot.js"></script>
 
 
   
-    
-  <div class="widget-wrap">
-    <h3 class="widget-title">Tags</h3>
-    <div class="widget">
-      <ul class="tag-list" itemprop="keywords"><li class="tag-list-item"><a class="tag-list-link" href="/rCore_tutorial/tags/github-pages/" rel="tag">github pages</a></li><li class="tag-list-item"><a class="tag-list-link" href="/rCore_tutorial/tags/hexo/" rel="tag">hexo</a></li></ul>
-    </div>
-  </div>
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
   
-    
-  <div class="widget-wrap">
-    <h3 class="widget-title">Tag Cloud</h3>
-    <div class="widget tagcloud">
-      <a href="/rCore_tutorial/tags/github-pages/" style="font-size: 10px;">github pages</a> <a href="/rCore_tutorial/tags/hexo/" style="font-size: 10px;">hexo</a>
-    </div>
-  </div>
 
   
-    
-  <div class="widget-wrap">
-    <h3 class="widget-title">Archives</h3>
-    <div class="widget">
-      <ul class="archive-list"><li class="archive-list-item"><a class="archive-list-link" href="/rCore_tutorial/archives/2020/07/">July 2020</a></li></ul>
-    </div>
-  </div>
 
-
-  
-    
-  <div class="widget-wrap">
-    <h3 class="widget-title">Recent Posts</h3>
-    <div class="widget">
-      <ul>
-        
-          <li>
-            <a href="/rCore_tutorial/2020/07/10/%E5%9F%BA%E4%BA%8E-hexo-gh-pages-%E6%90%AD%E5%BB%BA%E9%A1%B9%E7%9B%AE%E5%8D%9A%E5%AE%A2/">基于 hexo/gh-pages 搭建项目博客</a>
-          </li>
-        
-          <li>
-            <a href="/rCore_tutorial/2020/07/10/hello-world/">Hello World</a>
-          </li>
-        
-      </ul>
-    </div>
-  </div>
-
-  
-</aside>
-        
-      </div>
-      <footer id="footer">
-  
-  <div class="outer">
-    <div id="footer-info" class="inner">
-      &copy; 2020 John Doe<br>
-      Powered by <a href="http://hexo.io/" target="_blank">Hexo</a>
-    </div>
-  </div>
-</footer>
-    </div>
-    <nav id="mobile-nav">
-  
-    <a href="/rCore_tutorial/" class="mobile-nav-link">Home</a>
-  
-    <a href="/rCore_tutorial/archives" class="mobile-nav-link">Archives</a>
-  
-</nav>
-    
-
-<script src="//ajax.googleapis.com/ajax/libs/jquery/2.0.3/jquery.min.js"></script>
-
-
-  
-<link rel="stylesheet" href="/rCore_tutorial/fancybox/jquery.fancybox.css">
-
-  
-<script src="/rCore_tutorial/fancybox/jquery.fancybox.pack.js"></script>
-
-
-
-
-<script src="/rCore_tutorial/js/script.js"></script>
-
-
-
-
-  </div>
 </body>
 </html>
