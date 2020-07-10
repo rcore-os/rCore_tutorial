@@ -20,7 +20,7 @@ impl Context {
     #[naked]
     #[inline(never)]
     pub unsafe extern "C" fn switch(&mut self, target: &mut Context) {
-        llvm_asm!(include_str!("process/switch.asm") :::: "volatile");
+        asm!(include_str!("process/switch.asm") :::: "volatile");
     }
 
     pub fn null() -> Context {

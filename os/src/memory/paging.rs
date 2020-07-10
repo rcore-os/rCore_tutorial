@@ -135,7 +135,7 @@ impl PageTableImpl {
     }
 
     unsafe fn set_token(token: usize) {
-        llvm_asm!("csrw satp, $0" :: "r"(token) :: "volatile");
+        asm!("csrw satp, $0" :: "r"(token) :: "volatile");
     }
 
     fn active_token() -> usize {

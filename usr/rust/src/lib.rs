@@ -1,6 +1,6 @@
 #![no_std]
-//#![feature(asm)]
-#![feature(llvm_asm)]
+#![feature(asm)]
+//#![feature(llvm_asm)]
 #![feature(lang_items)]
 #![feature(panic_info_message)]
 #![feature(linkage)]

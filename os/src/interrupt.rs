@@ -109,7 +109,7 @@ fn try_serial() -> bool {
 pub fn disable_and_store() -> usize {
     let sstatus: usize;
     unsafe {
-        llvm_asm!("csrci sstatus, 1 << 1" : "=r"(sstatus) ::: "volatile");
+        asm!("csrci sstatus, 1 << 1" : "=r"(sstatus) ::: "volatile");
     }
     sstatus
 }
@@ -117,14 +117,14 @@ pub fn disable_and_store() -> usize {
 #[inline(always)]
 pub fn restore(flags: usize) {
     unsafe {
-        llvm_asm!("csrs sstatus, $0" :: "r"(flags) :: "volatile");
+        asm!("csrs sstatus, $0" :: "r"(flags) :: "volatile");
     }
 }
 
 #[inline(always)]
 pub fn enable_and_wfi() {
     unsafe {
-        llvm_asm!("csrsi sstatus, 1 << 1; wfi" :::: "volatile");
+        asm!("csrsi sstatus, 1 << 1; wfi" :::: "volatile");
     }
 }
 
@@ -133,7 +133,7 @@ pub fn cpuid() -> usize {
     let cpuid: usize;
     unsafe {
         //asm!("" : "={x3}"(cpuid));
-        llvm_asm!("mv $0, gp" : "=r"(cpuid));
+        asm!("mv $0, gp" : "=r"(cpuid));
     }
     cpuid
 }
