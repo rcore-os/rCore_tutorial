@@ -31,7 +31,7 @@
 <meta property="og:locale" content="en_US">
 <meta property="og:image" content="http://rcore-os.github.io/rCore_tutorial/2020/07/10/%E5%9F%BA%E4%BA%8E-hexo-gh-pages-%E6%90%AD%E5%BB%BA%E9%A1%B9%E7%9B%AE%E5%8D%9A%E5%AE%A2/gh-pages.png">
 <meta property="article:published_time" content="2020-07-10T13:42:18.000Z">
-<meta property="article:modified_time" content="2020-07-10T17:41:57.111Z">
+<meta property="article:modified_time" content="2020-07-11T02:07:41.830Z">
 <meta property="article:author" content="rcore-os">
 <meta property="article:tag" content="hexo">
 <meta property="article:tag" content="github pages">
@@ -179,7 +179,7 @@
 
       <!--noindex-->
       <section class="post-toc-wrap sidebar-panel">
-          <div class="post-toc animated"><ol class="nav"><li class="nav-item nav-level-2"><a class="nav-link" href="#初始化"><span class="nav-number">1.</span> <span class="nav-text">初始化</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#博客维护"><span class="nav-number">2.</span> <span class="nav-text">博客维护</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#插入图片"><span class="nav-number">3.</span> <span class="nav-text">插入图片</span></a></li></ol></div>
+          <div class="post-toc animated"><ol class="nav"><li class="nav-item nav-level-2"><a class="nav-link" href="#初始化"><span class="nav-number">1.</span> <span class="nav-text">初始化</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#博客维护"><span class="nav-number">2.</span> <span class="nav-text">博客维护</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#插入图片"><span class="nav-number">3.</span> <span class="nav-text">插入图片</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#更换-Next-主题"><span class="nav-number">4.</span> <span class="nav-text">更换 Next 主题</span></a></li></ol></div>
       </section>
       <!--/noindex-->
 
@@ -273,7 +273,7 @@
                   <i class="far fa-calendar-check"></i>
                 </span>
                 <span class="post-meta-item-text">Edited on</span>
-                <time title="Modified: 2020-07-11 01:41:57" itemprop="dateModified" datetime="2020-07-11T01:41:57+08:00">2020-07-11</time>
+                <time title="Modified: 2020-07-11 10:07:41" itemprop="dateModified" datetime="2020-07-11T10:07:41+08:00">2020-07-11</time>
               </span>
             <span class="post-meta-item">
               <span class="post-meta-item-icon">
@@ -306,7 +306,7 @@
 </li>
 <li><p>安装 hexo 部署插件： <code>npm install hexo-deployer-git --save</code></p>
 </li>
-<li><p>修改 <code>blog</code> 目录下的 <code>_config.yml</code> 文件，假设当前的项目地址为 <code>https://github.com/&lt;username&gt;/&lt;repo&gt;</code>，例如 rCore tutorial 第二版的地址为 <code>https://github.com/rcore-os/rCore_tutorial</code>，则 <code>&lt;username&gt;</code> 为 rcore-os，<code>&lt;repo&gt;</code> 为 rCore_tutorial。<br>首先，修改 <code>url</code> 和 <code>root</code> 项如下：</p>
+<li><p>修改 <code>blog</code> 目录下的 <code>_config.yml</code> 文件，假设当前的项目地址为 <code>https://github.com/&lt;username&gt;/&lt;repo&gt;</code>，例如 rCore tutorial 第二版的地址为 <code>https://github.com/rcore-os/rCore_tutorial</code>，则 <code>&lt;username&gt;</code> 为 rcore-os，<code>&lt;repo&gt;</code> 为 rCore_tutorial。<br> 首先，修改 <code>url</code> 和 <code>root</code> 项如下：</p>
 <figure class="highlight yml"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line"><span class="attr">url:</span> <span class="string">http://rcore-os.github.io/rCore_tutorial</span></span><br><span class="line"><span class="attr">root:</span> <span class="string">/rCore_tutorial/</span></span><br></pre></td></tr></table></figure>
 
 <p>注意，格式要严格与上面一致。</p>
@@ -326,6 +326,23 @@
 </ol>
 <h2 id="博客维护"><a href="#博客维护" class="headerlink" title="博客维护"></a>博客维护</h2><p>只要切换到 <code>blog-host</code> 分支，通过 <code>hexo new post</code> 发布新博客，随后 hexo 会为你自动创建一个同名的 Markdown，编辑之后重新 <code>hexo clean &amp;&amp; hexo deploy</code> 部署即可。在这之后也别忘了将 <code>blog-host</code> 分支同样 push 上去。</p>
 <h2 id="插入图片"><a href="#插入图片" class="headerlink" title="插入图片"></a>插入图片</h2><p>参考<a href="https://blog.csdn.net/Fitz1318/article/details/86548129" target="_blank" rel="noopener">这里</a>。<br>注意必须将引用的图片放在 <code>_post</code> 目录下与博客名字相同的文件夹下，然后直接用图片名来插入图片。</p>
+<h2 id="更换-Next-主题"><a href="#更换-Next-主题" class="headerlink" title="更换 Next 主题"></a>更换 Next 主题</h2><ol>
+<li><p>进入 <code>blog</code> 目录，将 Next 主题 Clone 到本地 <code>git clone https://github.com/next-theme/hexo-theme-next themes/next</code> 并删除 <code>.git</code> 文件夹防止被视作 submodule；</p>
+</li>
+<li><p>修改 <code>blog</code> 目录下的 <code>_config.yml</code>:</p>
+<figure class="highlight diff"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line"><span class="deletion">-theme: landscape</span></span><br><span class="line"><span class="addition">+theme: next</span></span><br></pre></td></tr></table></figure>
+</li>
+<li><p>修改 <code>theme/next</code> 目录下的 <code>_config.yml</code>，打开标签页和分类页：</p>
+<figure class="highlight yml"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line"><span class="attr">menu:</span></span><br><span class="line">  <span class="attr">home:</span> <span class="string">/</span> <span class="string">||</span> <span class="string">fa</span> <span class="string">fa-home</span></span><br><span class="line">  <span class="attr">tags:</span> <span class="string">tags/</span> <span class="string">||</span> <span class="string">fa</span> <span class="string">fa-tags</span></span><br><span class="line">  <span class="attr">categories:</span> <span class="string">categories/</span> <span class="string">||</span> <span class="string">fa</span> <span class="string">fa-th</span></span><br><span class="line">  <span class="attr">archives:</span> <span class="string">archives/</span> <span class="string">||</span> <span class="string">fa</span> <span class="string">fa-archive</span></span><br></pre></td></tr></table></figure>
+</li>
+<li><p>通过 <code>hexo new page tags</code> 创建标签云页面，并修改 <code>source/tags/index.md</code>，改成：</p>
+<figure class="highlight diff"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">---</span></span><br><span class="line">title: tags</span><br><span class="line">date: 2020-07-11 02:02:40</span><br><span class="line"><span class="addition">+type: tags</span></span><br><span class="line"><span class="comment">---</span></span><br></pre></td></tr></table></figure>
+</li>
+<li><p>与上一步同理，对于分类页面 categories 也这样操作一下。</p>
+</li>
+<li><p>重新部署。</p>
+</li>
+</ol>
 
     </div>
 
