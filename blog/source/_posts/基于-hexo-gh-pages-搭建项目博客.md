@@ -19,7 +19,7 @@ tags:
 3. 安装 hexo 部署插件： `npm install hexo-deployer-git --save`
 
 4. 修改 `blog` 目录下的 `_config.yml` 文件，假设当前的项目地址为 `https://github.com/<username>/<repo>`，例如 rCore tutorial 第二版的地址为 `https://github.com/rcore-os/rCore_tutorial`，则 `<username>` 为 rcore-os，`<repo>` 为 rCore_tutorial。
-  首先，修改 `url` 和 `root` 项如下：
+    首先，修改 `url` 和 `root` 项如下：
 
   ```yml
   url: http://rcore-os.github.io/rCore_tutorial
@@ -57,3 +57,38 @@ tags:
 
 参考[这里](https://blog.csdn.net/Fitz1318/article/details/86548129)。
 注意必须将引用的图片放在 `_post` 目录下与博客名字相同的文件夹下，然后直接用图片名来插入图片。
+
+## 更换 Next 主题
+
+1. 进入 `blog` 目录，将 Next 主题 Clone 到本地 `git clone https://github.com/next-theme/hexo-theme-next themes/next` 并删除 `.git` 文件夹防止被视作 submodule；
+
+2. 修改 `blog` 目录下的 `_config.yml`:
+
+   ```diff
+   -theme: landscape
+   +theme: next
+   ```
+
+3. 修改 `theme/next` 目录下的 `_config.yml`，打开标签页和分类页：
+
+   ```yml
+   menu:
+     home: / || fa fa-home
+     tags: tags/ || fa fa-tags
+     categories: categories/ || fa fa-th
+     archives: archives/ || fa fa-archive
+   ```
+
+4. 通过 `hexo new page tags` 创建标签云页面，并修改 `source/tags/index.md`，改成：
+
+   ```diff
+   ---
+   title: tags
+   date: 2020-07-11 02:02:40
+   +type: tags
+   ---
+   ```
+
+5. 与上一步同理，对于分类页面 categories 也这样操作一下。
+
+6. 重新部署。
