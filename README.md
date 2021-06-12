@@ -2,6 +2,12 @@
 
 [![Actions Status](https://github.com/rcore-os/rCore_tutorial/workflows/CI/badge.svg)](https://github.com/rcore-os/rCore_tutorial/actions)
 
+## WARNING
+
+This project is *no longer maintained*, please try [Tutorial v3.5](https://github.com/rcore-os/rCore-Tutorial-v3).
+
+## Documentations
+
 Please read
 - https://rcore-os.github.io/rCore_tutorial_doc/
     - [Docs Repository](https://github.com/rcore-os/rCore_tutorial_doc)
