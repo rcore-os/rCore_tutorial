@@ -7,7 +7,7 @@ edition = "2018"
 # See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
 
 [dependencies]
-riscv = { git = "https://github.com/rcore-os/riscv", features = ["inline-asm"] }
+riscv = { git = "https://github.com/rcore-os/riscv", rev = "21e32ee" }
 spin = "0.5.2"
 buddy_system_allocator = "0.3"
 xmas-elf = "0.6"

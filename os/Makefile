@@ -34,6 +34,6 @@ qemu: build
 		-machine virt \
 		-nographic \
 		-bios default \
-		-device loader,file=$(bin),addr=0x80200000
+		-kernel $(bin)
 
 run: build qemu

@@ -32,9 +32,14 @@ pub fn init() {
 }
 
 pub unsafe fn init_external_interrupt() {
+    let hart0_s_mode_interrupt_mth: *mut u32 = access_pa_via_va(0x0c20_1000) as *mut u32;
+    hart0_s_mode_interrupt_mth.write_volatile(0);
+
+    let hart0_s_mode_interrupt_priority_serial_irq: *mut u32 = access_pa_via_va(0x0c00_0000+4*0xa) as *mut u32;
+    hart0_s_mode_interrupt_priority_serial_irq.write_volatile(1);
+
     let hart0_s_mode_interrupt_enables: *mut u32 = access_pa_via_va(0x0c00_2080) as *mut u32;
-    const SERIAL: u32 = 0xa;
-    hart0_s_mode_interrupt_enables.write_volatile(1 << SERIAL);
+    hart0_s_mode_interrupt_enables.write_volatile(1 << 0xa);
 }
 
 pub unsafe fn enable_serial_interrupt() {

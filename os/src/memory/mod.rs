@@ -55,8 +55,8 @@ pub fn kernel_remap() {
         None,
     );
     memory_set.push(
-        access_pa_via_va(0x0c00_2000),
-        access_pa_via_va(0x0c00_3000),
+        access_pa_via_va(0x0c00_0000),
+        access_pa_via_va(0x0c20_2000),
         MemoryAttr::default(),
         Linear::new(PHYSICAL_MEMORY_OFFSET),
         None,
